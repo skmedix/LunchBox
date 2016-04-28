@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 @Mod(name = "LunchBox", modid = "lunchbox", serverSideOnly = true, version = "0.0.1")
 public class LunchBox {
-    public Logger logger = Logger.getLogger("lucnhbox");
+    public Logger logger = Logger.getLogger("lunchbox");
     private CraftServer server;
 
     @Mod.EventHandler
