@@ -1,250 +1,354 @@
 package org.bukkit.material;
 
-import org.bukkit.block.BlockFace;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 
-/**
- * MaterialData for signs
- */
 public class Sign extends MaterialData implements Attachable {
+
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
+
     public Sign() {
         super(Material.SIGN_POST);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Sign(final int type) {
+    public Sign(int type) {
         super(type);
     }
 
-    public Sign(final Material type) {
+    public Sign(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Sign(final int type, final byte data) {
+    public Sign(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Sign(final Material type, final byte data) {
+    public Sign(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Check if this sign is attached to a wall
-     *
-     * @return true if this sign is attached to a wall, false if set on top of
-     *     a block
-     */
     public boolean isWallSign() {
-        return getItemType() == Material.WALL_SIGN;
+        return this.getItemType() == Material.WALL_SIGN;
     }
 
-    /**
-     * Gets the face that this block is attached on
-     *
-     * @return BlockFace attached to
-     */
     public BlockFace getAttachedFace() {
-        if (isWallSign()) {
-            byte data = getData();
+        if (this.isWallSign()) {
+            byte data = this.getData();
 
             switch (data) {
-            case 0x2:
+            case 2:
                 return BlockFace.SOUTH;
 
-            case 0x3:
+            case 3:
                 return BlockFace.NORTH;
 
-            case 0x4:
+            case 4:
                 return BlockFace.EAST;
 
-            case 0x5:
+            case 5:
                 return BlockFace.WEST;
-            }
 
-            return null;
+            default:
+                return null;
+            }
         } else {
             return BlockFace.DOWN;
         }
     }
 
-    /**
-     * Gets the direction that this sign is currently facing
-     *
-     * @return BlockFace indicating where this sign is facing
-     */
     public BlockFace getFacing() {
-        byte data = getData();
+        byte data = this.getData();
 
-        if (!isWallSign()) {
+        if (!this.isWallSign()) {
             switch (data) {
-            case 0x0:
+            case 0:
                 return BlockFace.SOUTH;
 
-            case 0x1:
+            case 1:
                 return BlockFace.SOUTH_SOUTH_WEST;
 
-            case 0x2:
+            case 2:
                 return BlockFace.SOUTH_WEST;
 
-            case 0x3:
+            case 3:
                 return BlockFace.WEST_SOUTH_WEST;
 
-            case 0x4:
+            case 4:
                 return BlockFace.WEST;
 
-            case 0x5:
+            case 5:
                 return BlockFace.WEST_NORTH_WEST;
 
-            case 0x6:
+            case 6:
                 return BlockFace.NORTH_WEST;
 
-            case 0x7:
+            case 7:
                 return BlockFace.NORTH_NORTH_WEST;
 
-            case 0x8:
+            case 8:
                 return BlockFace.NORTH;
 
-            case 0x9:
+            case 9:
                 return BlockFace.NORTH_NORTH_EAST;
 
-            case 0xA:
+            case 10:
                 return BlockFace.NORTH_EAST;
 
-            case 0xB:
+            case 11:
                 return BlockFace.EAST_NORTH_EAST;
 
-            case 0xC:
+            case 12:
                 return BlockFace.EAST;
 
-            case 0xD:
+            case 13:
                 return BlockFace.EAST_SOUTH_EAST;
 
-            case 0xE:
+            case 14:
                 return BlockFace.SOUTH_EAST;
 
-            case 0xF:
+            case 15:
                 return BlockFace.SOUTH_SOUTH_EAST;
-            }
 
-            return null;
+            default:
+                return null;
+            }
         } else {
-            return getAttachedFace().getOppositeFace();
+            return this.getAttachedFace().getOppositeFace();
         }
     }
 
     public void setFacingDirection(BlockFace face) {
         byte data;
 
-        if (isWallSign()) {
-            switch (face) {
-            case NORTH:
-                data = 0x2;
+        if (this.isWallSign()) {
+            switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+            case 1:
+                data = 2;
                 break;
 
-            case SOUTH:
-                data = 0x3;
-                break;
-
-            case WEST:
-                data = 0x4;
-                break;
-
-            case EAST:
+            case 2:
             default:
-                data = 0x5;
+                data = 5;
+                break;
+
+            case 3:
+                data = 3;
+                break;
+
+            case 4:
+                data = 4;
             }
         } else {
-            switch (face) {
-            case SOUTH:
-                data = 0x0;
+            switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+            case 1:
+                data = 8;
                 break;
 
-            case SOUTH_SOUTH_WEST:
-                data = 0x1;
+            case 2:
+                data = 12;
                 break;
 
-            case SOUTH_WEST:
-                data = 0x2;
+            case 3:
+                data = 0;
                 break;
 
-            case WEST_SOUTH_WEST:
-                data = 0x3;
+            case 4:
+                data = 4;
                 break;
 
-            case WEST:
-                data = 0x4;
-                break;
-
-            case WEST_NORTH_WEST:
-                data = 0x5;
-                break;
-
-            case NORTH_WEST:
-                data = 0x6;
-                break;
-
-            case NORTH_NORTH_WEST:
-                data = 0x7;
-                break;
-
-            case NORTH:
-                data = 0x8;
-                break;
-
-            case NORTH_NORTH_EAST:
-                data = 0x9;
-                break;
-
-            case NORTH_EAST:
-                data = 0xA;
-                break;
-
-            case EAST_NORTH_EAST:
-                data = 0xB;
-                break;
-
-            case EAST:
-                data = 0xC;
-                break;
-
-            case EAST_SOUTH_EAST:
-                data = 0xD;
-                break;
-
-            case SOUTH_SOUTH_EAST:
-                data = 0xF;
-                break;
-
-            case SOUTH_EAST:
+            case 5:
+            case 6:
+            case 9:
             default:
-                data = 0xE;
+                data = 14;
+                break;
+
+            case 7:
+                data = 10;
+                break;
+
+            case 8:
+                data = 6;
+                break;
+
+            case 10:
+                data = 2;
+                break;
+
+            case 11:
+                data = 5;
+                break;
+
+            case 12:
+                data = 7;
+                break;
+
+            case 13:
+                data = 9;
+                break;
+
+            case 14:
+                data = 11;
+                break;
+
+            case 15:
+                data = 13;
+                break;
+
+            case 16:
+                data = 15;
+                break;
+
+            case 17:
+                data = 1;
+                break;
+
+            case 18:
+                data = 3;
             }
         }
 
-        setData(data);
+        this.setData(data);
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " facing " + getFacing();
+        return super.toString() + " facing " + this.getFacing();
     }
 
-    @Override
     public Sign clone() {
         return (Sign) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = Sign.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (Sign.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            Sign.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

@@ -8,11 +8,8 @@ import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
-/**
- * Called when an ItemStack is inserted in an enchantment table - can be
- * called multiple times
- */
 public class PrepareItemEnchantEvent extends InventoryEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private final Block table;
     private final ItemStack item;
@@ -21,7 +18,7 @@ public class PrepareItemEnchantEvent extends InventoryEvent implements Cancellab
     private boolean cancelled;
     private final Player enchanter;
 
-    public PrepareItemEnchantEvent(final Player enchanter, InventoryView view, final Block table, final ItemStack item, final int[] levelsOffered, final int bonus) {
+    public PrepareItemEnchantEvent(Player enchanter, InventoryView view, Block table, ItemStack item, int[] levelsOffered, int bonus) {
         super(view);
         this.enchanter = enchanter;
         this.table = table;
@@ -31,66 +28,39 @@ public class PrepareItemEnchantEvent extends InventoryEvent implements Cancellab
         this.cancelled = false;
     }
 
-    /**
-     * Gets the player enchanting the item
-     *
-     * @return enchanting player
-     */
     public Player getEnchanter() {
-        return enchanter;
+        return this.enchanter;
     }
 
-    /**
-     * Gets the block being used to enchant the item
-     *
-     * @return the block used for enchanting
-     */
     public Block getEnchantBlock() {
-        return table;
+        return this.table;
     }
 
-    /**
-     * Gets the item to be enchanted (can be modified)
-     *
-     * @return ItemStack of item
-     */
     public ItemStack getItem() {
-        return item;
+        return this.item;
     }
 
-    /**
-     * Get list of offered exp level costs of the enchantment (modify values
-     * to change offer)
-     *
-     * @return experience level costs offered
-     */
     public int[] getExpLevelCostsOffered() {
-        return levelsOffered;
+        return this.levelsOffered;
     }
 
-    /**
-     * Get enchantment bonus in effect - corresponds to number of bookshelves
-     *
-     * @return enchantment bonus
-     */
     public int getEnchantmentBonus() {
-        return bonus;
+        return this.bonus;
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PrepareItemEnchantEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PrepareItemEnchantEvent.handlers;
     }
 }

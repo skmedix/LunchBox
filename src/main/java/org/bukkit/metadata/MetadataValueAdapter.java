@@ -1,78 +1,56 @@
 package org.bukkit.metadata;
 
 import java.lang.ref.WeakReference;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.NumberConversions;
 
-/**
- * Optional base class for facilitating MetadataValue implementations.
- * <p>
- * This provides all the conversion functions for MetadataValue so that
- * writing an implementation of MetadataValue is as simple as implementing
- * value() and invalidate().
- */
 public abstract class MetadataValueAdapter implements MetadataValue {
-    protected final WeakReference<Plugin> owningPlugin;
+
+    protected final WeakReference owningPlugin;
 
     protected MetadataValueAdapter(Plugin owningPlugin) {
         Validate.notNull(owningPlugin, "owningPlugin cannot be null");
-        this.owningPlugin = new WeakReference<Plugin>(owningPlugin);
+        this.owningPlugin = new WeakReference(owningPlugin);
     }
 
     public Plugin getOwningPlugin() {
-        return owningPlugin.get();
+        return (Plugin) this.owningPlugin.get();
     }
 
     public int asInt() {
-        return NumberConversions.toInt(value());
+        return NumberConversions.toInt(this.value());
     }
 
     public float asFloat() {
-        return NumberConversions.toFloat(value());
+        return NumberConversions.toFloat(this.value());
     }
 
     public double asDouble() {
-        return NumberConversions.toDouble(value());
+        return NumberConversions.toDouble(this.value());
     }
 
     public long asLong() {
-        return NumberConversions.toLong(value());
+        return NumberConversions.toLong(this.value());
     }
 
     public short asShort() {
-        return NumberConversions.toShort(value());
+        return NumberConversions.toShort(this.value());
     }
 
     public byte asByte() {
-        return NumberConversions.toByte(value());
+        return NumberConversions.toByte(this.value());
     }
 
     public boolean asBoolean() {
-        Object value = value();
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
+        Object value = this.value();
 
-        if (value instanceof Number) {
-            return ((Number) value).intValue() != 0;
-        }
-
-        if (value instanceof String) {
-            return Boolean.parseBoolean((String) value);
-        }
-
-        return value != null;
+        return value instanceof Boolean ? ((Boolean) value).booleanValue() : (value instanceof Number ? ((Number) value).intValue() != 0 : (value instanceof String ? Boolean.parseBoolean((String) value) : value != null));
     }
 
     public String asString() {
-        Object value = value();
+        Object value = this.value();
 
-        if (value == null) {
-            return "";
-        }
-        return value.toString();
+        return value == null ? "" : value.toString();
     }
-
 }

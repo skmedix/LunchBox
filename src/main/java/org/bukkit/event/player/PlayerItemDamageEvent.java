@@ -19,16 +19,11 @@ public class PlayerItemDamageEvent extends PlayerEvent implements Cancellable {
     }
 
     public ItemStack getItem() {
-        return item;
+        return this.item;
     }
 
-    /**
-     * Gets the amount of durability damage this item will be taking.
-     *
-     * @return durability change
-     */
     public int getDamage() {
-        return damage;
+        return this.damage;
     }
 
     public void setDamage(int damage) {
@@ -36,19 +31,18 @@ public class PlayerItemDamageEvent extends PlayerEvent implements Cancellable {
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PlayerItemDamageEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PlayerItemDamageEvent.handlers;
     }
 }

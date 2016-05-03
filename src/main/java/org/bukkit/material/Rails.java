@@ -3,174 +3,263 @@ package org.bukkit.material;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 
-/**
- * Represents minecart rails.
- */
 public class Rails extends MaterialData {
+
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
 
     public Rails() {
         super(Material.RAILS);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Rails(final int type) {
+    public Rails(int type) {
         super(type);
     }
 
-    public Rails(final Material type) {
+    public Rails(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Rails(final int type, final byte data) {
+    public Rails(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Rails(final Material type, final byte data) {
+    public Rails(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * @return the whether this track is set on a slope
-     */
     public boolean isOnSlope() {
-        byte d = getConvertedData();
+        byte d = this.getConvertedData();
 
-        return (d == 0x2 || d == 0x3 || d == 0x4 || d == 0x5);
+        return d == 2 || d == 3 || d == 4 || d == 5;
     }
 
-    /**
-     * @return the whether this track is set as a curve
-     */
     public boolean isCurve() {
-        byte d = getConvertedData();
+        byte d = this.getConvertedData();
 
-        return (d == 0x6 || d == 0x7 || d == 0x8 || d == 0x9);
+        return d == 6 || d == 7 || d == 8 || d == 9;
     }
 
-    /**
-     * @return the direction these tracks are set
-     *     <p>
-     *     Note that tracks are bidirectional and that the direction returned
-     *     is the ascending direction if the track is set on a slope. If it is
-     *     set as a curve, the corner of the track is returned.
-     */
     public BlockFace getDirection() {
-        byte d = getConvertedData();
+        byte d = this.getConvertedData();
 
         switch (d) {
-        case 0x0:
+        case 0:
         default:
             return BlockFace.SOUTH;
 
-        case 0x1:
+        case 1:
             return BlockFace.EAST;
 
-        case 0x2:
+        case 2:
             return BlockFace.EAST;
 
-        case 0x3:
+        case 3:
             return BlockFace.WEST;
 
-        case 0x4:
+        case 4:
             return BlockFace.NORTH;
 
-        case 0x5:
+        case 5:
             return BlockFace.SOUTH;
 
-        case 0x6:
+        case 6:
             return BlockFace.NORTH_WEST;
 
-        case 0x7:
+        case 7:
             return BlockFace.NORTH_EAST;
 
-        case 0x8:
+        case 8:
             return BlockFace.SOUTH_EAST;
 
-        case 0x9:
+        case 9:
             return BlockFace.SOUTH_WEST;
         }
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " facing " + getDirection() + (isCurve() ? " on a curve" : (isOnSlope() ? " on a slope" : ""));
+        return super.toString() + " facing " + this.getDirection() + (this.isCurve() ? " on a curve" : (this.isOnSlope() ? " on a slope" : ""));
     }
 
-    /**
-     * Return the data without the extended properties used by {@link
-     * PoweredRail} and {@link DetectorRail}. Overridden in {@link
-     * ExtendedRails}
-     *
-     * @return the data without the extended part
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     protected byte getConvertedData() {
-        return getData();
+        return this.getData();
     }
 
-    /**
-     * Set the direction of these tracks
-     * <p>
-     * Note that tracks are bidirectional and that the direction returned is
-     * the ascending direction if the track is set on a slope. If it is set as
-     * a curve, the corner of the track should be supplied.
-     *
-     * @param face the direction the track should be facing
-     * @param isOnSlope whether or not the track should be on a slope
-     */
     public void setDirection(BlockFace face, boolean isOnSlope) {
-        switch (face) {
-        case EAST:
-            setData((byte) (isOnSlope ? 0x2 : 0x1));
+        switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+        case 1:
+            this.setData((byte) (isOnSlope ? 4 : 0));
             break;
 
-        case WEST:
-            setData((byte) (isOnSlope ? 0x3 : 0x1));
+        case 2:
+            this.setData((byte) (isOnSlope ? 2 : 1));
             break;
 
-        case NORTH:
-            setData((byte) (isOnSlope ? 0x4 : 0x0));
+        case 3:
+            this.setData((byte) (isOnSlope ? 5 : 0));
             break;
 
-        case SOUTH:
-            setData((byte) (isOnSlope ? 0x5 : 0x0));
+        case 4:
+            this.setData((byte) (isOnSlope ? 3 : 1));
+
+        case 5:
+        case 6:
+        default:
             break;
 
-        case NORTH_WEST:
-            setData((byte) 0x6);
+        case 7:
+            this.setData((byte) 7);
             break;
 
-        case NORTH_EAST:
-            setData((byte) 0x7);
+        case 8:
+            this.setData((byte) 6);
             break;
 
-        case SOUTH_EAST:
-            setData((byte) 0x8);
+        case 9:
+            this.setData((byte) 8);
             break;
 
-        case SOUTH_WEST:
-            setData((byte) 0x9);
-            break;
+        case 10:
+            this.setData((byte) 9);
         }
+
     }
 
-    @Override
     public Rails clone() {
         return (Rails) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = Rails.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (Rails.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            Rails.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

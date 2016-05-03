@@ -1,15 +1,5 @@
 package org.bukkit.plugin.java;
 
-// Cauldron start
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import net.md_5.specialsource.InheritanceMap;
-import net.md_5.specialsource.JarMapping;
-import net.md_5.specialsource.transformer.MavenShade;
-// Cauldron end
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,19 +9,18 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Server;
 import org.bukkit.Warning;
-import org.bukkit.Warning.WarningState;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.Event;
@@ -48,402 +37,361 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.RegisteredListener;
-import org.bukkit.plugin.TimedRegisteredListener;
 import org.bukkit.plugin.UnknownDependencyException;
-import org.spigotmc.CustomTimingsHandler; // Spigot
+import org.spigotmc.CustomTimingsHandler;
 import org.yaml.snakeyaml.error.YAMLException;
 
-import com.google.common.collect.ImmutableList;
-
-/**
- * Represents a Java plugin loader, allowing plugins in the form of .jar
- */
 public final class JavaPluginLoader implements PluginLoader {
-    final Server server;
-    private final Pattern[] fileFilters = new Pattern[] { Pattern.compile("\\.jar$"), };
-    private final Map<String, Class<?>> classes = new HashMap<String, Class<?>>();
-    private final Map<String, PluginClassLoader> loaders = new LinkedHashMap<String, PluginClassLoader>();
-    public static final CustomTimingsHandler pluginParentTimer = new CustomTimingsHandler("** Plugins"); // Spigot
 
-    /**
-     * This class was not meant to be constructed explicitly
-     */
+    final Server server;
+    private final Pattern[] fileFilters = new Pattern[] { Pattern.compile("\\.jar$")};
+    private final Map classes = new ConcurrentHashMap();
+    private final Map loaders = new LinkedHashMap();
+    public static final CustomTimingsHandler pluginParentTimer = new CustomTimingsHandler("** Plugins");
+
+    /** @deprecated */
     @Deprecated
     public JavaPluginLoader(Server instance) {
         Validate.notNull(instance, "Server cannot be null");
-        server = instance;
+        this.server = instance;
     }
 
     public Plugin loadPlugin(File file) throws InvalidPluginException {
         Validate.notNull(file, "File cannot be null");
-
         if (!file.exists()) {
             throw new InvalidPluginException(new FileNotFoundException(file.getPath() + " does not exist"));
-        }
-
-        PluginDescriptionFile description;
-        try {
-            description = getPluginDescription(file);
-        } catch (InvalidDescriptionException ex) {
-            throw new InvalidPluginException(ex);
-        }
-
-        File dataFolder = new File(file.getParentFile(), description.getName());
-        File oldDataFolder = getDataFolder(file);
-
-        // Found old data folder
-        if (dataFolder.equals(oldDataFolder)) {
-            // They are equal -- nothing needs to be done!
-        } else if (dataFolder.isDirectory() && oldDataFolder.isDirectory()) {
-            server.getLogger().log(Level.INFO, String.format(
-                "While loading %s (%s) found old-data folder: %s next to the new one: %s",
-                description.getName(),
-                file,
-                oldDataFolder,
-                dataFolder
-            ));
-        } else if (oldDataFolder.isDirectory() && !dataFolder.exists()) {
-            if (!oldDataFolder.renameTo(dataFolder)) {
-                throw new InvalidPluginException("Unable to rename old data folder: '" + oldDataFolder + "' to: '" + dataFolder + "'");
-            }
-            server.getLogger().log(Level.INFO, String.format(
-                "While loading %s (%s) renamed data folder: '%s' to '%s'",
-                description.getName(),
-                file,
-                oldDataFolder,
-                dataFolder
-            ));
-        }
-
-        if (dataFolder.exists() && !dataFolder.isDirectory()) {
-            throw new InvalidPluginException(String.format(
-                "Projected datafolder: '%s' for %s (%s) exists and is not a directory",
-                dataFolder,
-                description.getName(),
-                file
-            ));
-        }
-
-        List<String> depend = description.getDepend();
-        if (depend == null) {
-            depend = ImmutableList.<String>of();
-        }
-
-        for (String pluginName : depend) {
-            if (loaders == null) {
-                throw new UnknownDependencyException(pluginName);
-            }
-            PluginClassLoader current = loaders.get(pluginName);
-
-            if (current == null) {
-                throw new UnknownDependencyException(pluginName);
-            }
-        }
-
-        PluginClassLoader loader;
-        try {
-            loader = new PluginClassLoader(this, getClass().getClassLoader(), description, dataFolder, file);
-        } catch (InvalidPluginException ex) {
-            throw ex;
-        } catch (Throwable ex) {
-            throw new InvalidPluginException(ex);
-        }
-
-        loaders.put(description.getName(), loader);
-
-        return loader.plugin;
-    }
-
-    private File getDataFolder(File file) {
-        File dataFolder = null;
-
-        String filename = file.getName();
-        int index = file.getName().lastIndexOf(".");
-
-        if (index != -1) {
-            String name = filename.substring(0, index);
-
-            dataFolder = new File(file.getParentFile(), name);
         } else {
-            // This is if there is no extension, which should not happen
-            // Using _ to prevent name collision
+            PluginDescriptionFile description;
 
-            dataFolder = new File(file.getParentFile(), filename + "_");
+            try {
+                description = this.getPluginDescription(file);
+            } catch (InvalidDescriptionException invaliddescriptionexception) {
+                throw new InvalidPluginException(invaliddescriptionexception);
+            }
+
+            File parentFile = file.getParentFile();
+            File dataFolder = new File(parentFile, description.getName());
+            File oldDataFolder = new File(parentFile, description.getRawName());
+
+            if (!dataFolder.equals(oldDataFolder)) {
+                if (dataFolder.isDirectory() && oldDataFolder.isDirectory()) {
+                    this.server.getLogger().warning(String.format("While loading %s (%s) found old-data folder: `%s\' next to the new one `%s\'", new Object[] { description.getFullName(), file, oldDataFolder, dataFolder}));
+                } else if (oldDataFolder.isDirectory() && !dataFolder.exists()) {
+                    if (!oldDataFolder.renameTo(dataFolder)) {
+                        throw new InvalidPluginException("Unable to rename old data folder: `" + oldDataFolder + "\' to: `" + dataFolder + "\'");
+                    }
+
+                    this.server.getLogger().log(Level.INFO, String.format("While loading %s (%s) renamed data folder: `%s\' to `%s\'", new Object[] { description.getFullName(), file, oldDataFolder, dataFolder}));
+                }
+            }
+
+            if (dataFolder.exists() && !dataFolder.isDirectory()) {
+                throw new InvalidPluginException(String.format("Projected datafolder: `%s\' for %s (%s) exists and is not a directory", new Object[] { dataFolder, description.getFullName(), file}));
+            } else {
+                Iterator ex = description.getDepend().iterator();
+
+                while (ex.hasNext()) {
+                    String loader = (String) ex.next();
+
+                    if (this.loaders == null) {
+                        throw new UnknownDependencyException(loader);
+                    }
+
+                    PluginClassLoader current = (PluginClassLoader) this.loaders.get(loader);
+
+                    if (current == null) {
+                        throw new UnknownDependencyException(loader);
+                    }
+                }
+
+                PluginClassLoader loader1;
+
+                try {
+                    loader1 = new PluginClassLoader(this, this.getClass().getClassLoader(), description, dataFolder, file);
+                } catch (InvalidPluginException invalidpluginexception) {
+                    throw invalidpluginexception;
+                } catch (Throwable throwable) {
+                    throw new InvalidPluginException(throwable);
+                }
+
+                this.loaders.put(description.getName(), loader1);
+                return loader1.plugin;
+            }
         }
-
-        return dataFolder;
     }
 
     public PluginDescriptionFile getPluginDescription(File file) throws InvalidDescriptionException {
         Validate.notNull(file, "File cannot be null");
-
         JarFile jar = null;
         InputStream stream = null;
 
+        PluginDescriptionFile plugindescriptionfile;
+
         try {
             jar = new JarFile(file);
-            JarEntry entry = jar.getJarEntry("plugin.yml");
+            JarEntry ex = jar.getJarEntry("plugin.yml");
 
-            if (entry == null) {
+            if (ex == null) {
                 throw new InvalidDescriptionException(new FileNotFoundException("Jar does not contain plugin.yml"));
             }
 
-            stream = jar.getInputStream(entry);
-
-            return new PluginDescriptionFile(stream);
-
-        } catch (IOException ex) {
-            throw new InvalidDescriptionException(ex);
-        } catch (YAMLException ex) {
-            throw new InvalidDescriptionException(ex);
+            stream = jar.getInputStream(ex);
+            plugindescriptionfile = new PluginDescriptionFile(stream);
+        } catch (IOException ioexception) {
+            throw new InvalidDescriptionException(ioexception);
+        } catch (YAMLException yamlexception) {
+            throw new InvalidDescriptionException(yamlexception);
         } finally {
             if (jar != null) {
                 try {
                     jar.close();
-                } catch (IOException e) {
+                } catch (IOException ioexception1) {
+                    ;
                 }
             }
+
             if (stream != null) {
                 try {
                     stream.close();
-                } catch (IOException e) {
+                } catch (IOException ioexception2) {
+                    ;
                 }
             }
+
         }
+
+        return plugindescriptionfile;
     }
 
     public Pattern[] getPluginFileFilters() {
-        return fileFilters.clone();
+        return (Pattern[]) this.fileFilters.clone();
     }
 
-    Class<?> getClassByName(final String name) {
-        Class<?> cachedClass = classes.get(name);
+    Class getClassByName(String name) {
+        Class cachedClass = (Class) this.classes.get(name);
 
         if (cachedClass != null) {
             return cachedClass;
         } else {
-            for (String current : loaders.keySet()) {
-                PluginClassLoader loader = loaders.get(current);
+            Iterator iterator = this.loaders.keySet().iterator();
+
+            while (iterator.hasNext()) {
+                String current = (String) iterator.next();
+                PluginClassLoader loader = (PluginClassLoader) this.loaders.get(current);
 
                 try {
                     cachedClass = loader.findClass(name, false);
-                } catch (ClassNotFoundException cnfe) {}
+                } catch (ClassNotFoundException classnotfoundexception) {
+                    ;
+                }
+
                 if (cachedClass != null) {
                     return cachedClass;
                 }
             }
+
+            return null;
         }
-        return null;
     }
 
-    void setClass(final String name, final Class<?> clazz) {
-        if (!classes.containsKey(name)) {
-            classes.put(name, clazz);
-
+    void setClass(String name, Class clazz) {
+        if (!this.classes.containsKey(name)) {
+            this.classes.put(name, clazz);
             if (ConfigurationSerializable.class.isAssignableFrom(clazz)) {
-                Class<? extends ConfigurationSerializable> serializable = clazz.asSubclass(ConfigurationSerializable.class);
+                Class serializable = clazz.asSubclass(ConfigurationSerializable.class);
+
                 ConfigurationSerialization.registerClass(serializable);
             }
         }
+
     }
 
     private void removeClass(String name) {
-        Class<?> clazz = classes.remove(name);
+        Class clazz = (Class) this.classes.remove(name);
 
         try {
-            if ((clazz != null) && (ConfigurationSerializable.class.isAssignableFrom(clazz))) {
-                Class<? extends ConfigurationSerializable> serializable = clazz.asSubclass(ConfigurationSerializable.class);
+            if (clazz != null && ConfigurationSerializable.class.isAssignableFrom(clazz)) {
+                Class serializable = clazz.asSubclass(ConfigurationSerializable.class);
+
                 ConfigurationSerialization.unregisterClass(serializable);
             }
-        } catch (NullPointerException ex) {
-            // Boggle!
-            // (Native methods throwing NPEs is not fun when you can't stop it before-hand)
+        } catch (NullPointerException nullpointerexception) {
+            ;
         }
+
     }
 
-    public Map<Class<? extends Event>, Set<RegisteredListener>> createRegisteredListeners(Listener listener, final Plugin plugin) {
+    public Map createRegisteredListeners(Listener listener, Plugin plugin) {
         Validate.notNull(plugin, "Plugin can not be null");
         Validate.notNull(listener, "Listener can not be null");
+        this.server.getPluginManager().useTimings();
+        HashMap ret = new HashMap();
 
-        boolean useTimings = server.getPluginManager().useTimings();
-        Map<Class<? extends Event>, Set<RegisteredListener>> ret = new HashMap<Class<? extends Event>, Set<RegisteredListener>>();
-        Set<Method> methods;
+        HashSet methods;
+
         try {
-            Method[] publicMethods = listener.getClass().getMethods();
-            methods = new HashSet<Method>(publicMethods.length, Float.MAX_VALUE);
-            for (Method method : publicMethods) {
-                methods.add(method);
+            Method[] method = listener.getClass().getMethods();
+            Method[] privateMethods = listener.getClass().getDeclaredMethods();
+
+            methods = new HashSet(method.length + privateMethods.length, 1.0F);
+            Method[] eventSet = method;
+            int eventClass = method.length;
+            int checkClass = 0;
+
+            label79:
+            while (true) {
+                Method eh;
+
+                if (checkClass >= eventClass) {
+                    eventSet = privateMethods;
+                    eventClass = privateMethods.length;
+                    checkClass = 0;
+
+                    while (true) {
+                        if (checkClass >= eventClass) {
+                            break label79;
+                        }
+
+                        eh = eventSet[checkClass];
+                        methods.add(eh);
+                        ++checkClass;
+                    }
+                }
+
+                eh = eventSet[checkClass];
+                methods.add(eh);
+                ++checkClass;
             }
-            for (Method method : listener.getClass().getDeclaredMethods()) {
-                methods.add(method);
-            }
-        } catch (NoClassDefFoundError e) {
-            plugin.getLogger().severe("Plugin " + plugin.getDescription().getFullName() + " has failed to register events for " + listener.getClass() + " because " + e.getMessage() + " does not exist.");
+        } catch (NoClassDefFoundError noclassdeffounderror) {
+            plugin.getLogger().severe("Plugin " + plugin.getDescription().getFullName() + " has failed to register events for " + listener.getClass() + " because " + noclassdeffounderror.getMessage() + " does not exist.");
             return ret;
         }
 
-        for (final Method method : methods) {
-            final EventHandler eh = method.getAnnotation(EventHandler.class);
-            if (eh == null) continue;
-            final Class<?> checkClass;
-            if (method.getParameterTypes().length != 1 || !Event.class.isAssignableFrom(checkClass = method.getParameterTypes()[0])) {
-                plugin.getLogger().severe(plugin.getDescription().getFullName() + " attempted to register an invalid EventHandler method signature \"" + method.toGenericString() + "\" in " + listener.getClass());
-                continue;
-            }
-            final Class<? extends Event> eventClass = checkClass.asSubclass(Event.class);
-            method.setAccessible(true);
-            Set<RegisteredListener> eventSet = ret.get(eventClass);
-            if (eventSet == null) {
-                eventSet = new HashSet<RegisteredListener>();
-                ret.put(eventClass, eventSet);
-            }
+        Iterator iterator = methods.iterator();
 
-            for (Class<?> clazz = eventClass; Event.class.isAssignableFrom(clazz); clazz = clazz.getSuperclass()) {
-                // This loop checks for extending deprecated events
-                if (clazz.getAnnotation(Deprecated.class) != null) {
-                    Warning warning = clazz.getAnnotation(Warning.class);
-                    WarningState warningState = server.getWarningState();
-                    if (!warningState.printFor(warning)) {
+        while (iterator.hasNext()) {
+            final Method method = (Method) iterator.next();
+            EventHandler eventhandler = (EventHandler) method.getAnnotation(EventHandler.class);
+
+            if (eventhandler != null && !method.isBridge() && !method.isSynthetic()) {
+                Class oclass;
+
+                if (method.getParameterTypes().length == 1 && Event.class.isAssignableFrom(oclass = method.getParameterTypes()[0])) {
+                    final Class oclass1 = oclass.asSubclass(Event.class);
+
+                    method.setAccessible(true);
+                    Object object = (Set) ret.get(oclass1);
+
+                    if (object == null) {
+                        object = new HashSet();
+                        ret.put(oclass1, object);
+                    }
+
+                    Class timings = oclass1;
+
+                    while (true) {
+                        if (Event.class.isAssignableFrom(timings)) {
+                            if (timings.getAnnotation(Deprecated.class) == null) {
+                                timings = timings.getSuperclass();
+                                continue;
+                            }
+
+                            Warning executor = (Warning) timings.getAnnotation(Warning.class);
+                            Warning.WarningState warningState = this.server.getWarningState();
+
+                            if (warningState.printFor(executor)) {
+                                plugin.getLogger().log(Level.WARNING, String.format("\"%s\" has registered a listener for %s on method \"%s\", but the event is Deprecated. \"%s\"; please notify the authors %s.", new Object[] { plugin.getDescription().getFullName(), timings.getName(), method.toGenericString(), executor != null && executor.reason().length() != 0 ? executor.reason() : "Server performance will be affected", Arrays.toString(plugin.getDescription().getAuthors().toArray())}), warningState == Warning.WarningState.ON ? new AuthorNagException((String) null) : null);
+                            }
+                        }
+
+                        final CustomTimingsHandler customtimingshandler = new CustomTimingsHandler("Plugin: " + plugin.getDescription().getFullName() + " Event: " + listener.getClass().getName() + "::" + method.getName() + "(" + oclass1.getSimpleName() + ")", JavaPluginLoader.pluginParentTimer);
+                        EventExecutor eventexecutor = new EventExecutor() {
+                            public void execute(Listener listener, Event event) throws EventException {
+                                try {
+                                    if (oclass.isAssignableFrom(event.getClass())) {
+                                        boolean t = event.isAsynchronous();
+
+                                        if (!t) {
+                                            customtimingshandler.startTiming();
+                                        }
+
+                                        method.invoke(listener, new Object[] { event});
+                                        if (!t) {
+                                            customtimingshandler.stopTiming();
+                                        }
+
+                                    }
+                                } catch (InvocationTargetException invocationtargetexception) {
+                                    throw new EventException(invocationtargetexception.getCause());
+                                } catch (Throwable throwable) {
+                                    throw new EventException(throwable);
+                                }
+                            }
+                        };
+
+                        ((Set) object).add(new RegisteredListener(listener, eventexecutor, eventhandler.priority(), plugin, eventhandler.ignoreCancelled()));
                         break;
                     }
-                    plugin.getLogger().log(
-                            Level.WARNING,
-                            String.format(
-                                    "\"%s\" has registered a listener for %s on method \"%s\", but the event is Deprecated." +
-                                    " \"%s\"; please notify the authors %s.",
-                                    plugin.getDescription().getFullName(),
-                                    clazz.getName(),
-                                    method.toGenericString(),
-                                    (warning != null && warning.reason().length() != 0) ? warning.reason() : "Server performance will be affected",
-                                    Arrays.toString(plugin.getDescription().getAuthors().toArray())),
-                            warningState == WarningState.ON ? new AuthorNagException(null) : null);
-                    break;
+                } else {
+                    plugin.getLogger().severe(plugin.getDescription().getFullName() + " attempted to register an invalid EventHandler method signature \"" + method.toGenericString() + "\" in " + listener.getClass());
                 }
-            }
-
-            final CustomTimingsHandler timings = new CustomTimingsHandler("Plugin: " + plugin.getDescription().getFullName() + " Event: " + listener.getClass().getName() + "::" + method.getName()+"("+eventClass.getSimpleName()+")", pluginParentTimer); // Spigot
-            EventExecutor executor = new EventExecutor() {
-                public void execute(Listener listener, Event event) throws EventException {
-                    try {
-                        if (!eventClass.isAssignableFrom(event.getClass())) {
-                            return;
-                        }
-                        // Spigot start
-                        boolean isAsync = event.isAsynchronous();
-                        if (!isAsync) timings.startTiming();
-                        method.invoke(listener, event);
-                        if (!isAsync) timings.stopTiming();
-                        // Spigot end
-                    } catch (InvocationTargetException ex) {
-                        throw new EventException(ex.getCause());
-                    } catch (Throwable t) {
-                        throw new EventException(t);
-                    }
-                }
-            };
-            if (false) { // Spigot - RL handles useTimings check now
-                eventSet.add(new TimedRegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
-            } else {
-                eventSet.add(new RegisteredListener(listener, executor, eh.priority(), plugin, eh.ignoreCancelled()));
             }
         }
+
         return ret;
     }
 
-    public void enablePlugin(final Plugin plugin) {
+    public void enablePlugin(Plugin plugin) {
         Validate.isTrue(plugin instanceof JavaPlugin, "Plugin is not associated with this PluginLoader");
-
         if (!plugin.isEnabled()) {
             plugin.getLogger().info("Enabling " + plugin.getDescription().getFullName());
-
             JavaPlugin jPlugin = (JavaPlugin) plugin;
-
             String pluginName = jPlugin.getDescription().getName();
 
-            if (!loaders.containsKey(pluginName)) {
-                loaders.put(pluginName, (PluginClassLoader) jPlugin.getClassLoader());
+            if (!this.loaders.containsKey(pluginName)) {
+                this.loaders.put(pluginName, (PluginClassLoader) jPlugin.getClassLoader());
             }
 
             try {
                 jPlugin.setEnabled(true);
-            } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            } catch (Throwable throwable) {
+                this.server.getLogger().log(Level.SEVERE, "Error occurred while enabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", throwable);
             }
 
-            // Perhaps abort here, rather than continue going, but as it stands,
-            // an abort is not possible the way it's currently written
-            server.getPluginManager().callEvent(new PluginEnableEvent(plugin));
+            this.server.getPluginManager().callEvent(new PluginEnableEvent(plugin));
         }
+
     }
 
     public void disablePlugin(Plugin plugin) {
         Validate.isTrue(plugin instanceof JavaPlugin, "Plugin is not associated with this PluginLoader");
-
         if (plugin.isEnabled()) {
-            String message = String.format("Disabling %s", plugin.getDescription().getFullName());
+            String message = String.format("Disabling %s", new Object[] { plugin.getDescription().getFullName()});
+
             plugin.getLogger().info(message);
-
-            server.getPluginManager().callEvent(new PluginDisableEvent(plugin));
-
+            this.server.getPluginManager().callEvent(new PluginDisableEvent(plugin));
             JavaPlugin jPlugin = (JavaPlugin) plugin;
             ClassLoader cloader = jPlugin.getClassLoader();
 
             try {
                 jPlugin.setEnabled(false);
-            } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, "Error occurred while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            } catch (Throwable throwable) {
+                this.server.getLogger().log(Level.SEVERE, "Error occurred while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", throwable);
             }
 
-            loaders.remove(jPlugin.getDescription().getName());
-
+            this.loaders.remove(jPlugin.getDescription().getName());
             if (cloader instanceof PluginClassLoader) {
                 PluginClassLoader loader = (PluginClassLoader) cloader;
-                Set<String> names = loader.getClasses();
+                Set names = loader.getClasses();
+                Iterator iterator = names.iterator();
 
-                for (String name : names) {
-                    removeClass(name);
+                while (iterator.hasNext()) {
+                    String name = (String) iterator.next();
+
+                    this.removeClass(name);
                 }
             }
         }
+
     }
-
-    // Cauldron start
-    private InheritanceMap globalInheritanceMap = null;
-
-    /**
-     * Get the inheritance map for remapping all plugins
-     */
-    public InheritanceMap getGlobalInheritanceMap() {
-        if (globalInheritanceMap == null) {
-            Map<String, String> relocationsCurrent = new HashMap<String, String>();
-            relocationsCurrent.put("net.minecraft.server", "net.minecraft.server."+PluginClassLoader.getNativeVersion());
-            JarMapping currentMappings = new JarMapping();
-
-            try {
-                currentMappings.loadMappings(
-                        new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("mappings/"+PluginClassLoader.getNativeVersion()+"/cb2numpkg.srg"))),
-                        new MavenShade(relocationsCurrent),
-                        null, false);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                throw new RuntimeException(ex);
-            }
-
-            BiMap<String, String> inverseClassMap = HashBiMap.create(currentMappings.classes).inverse();
-            globalInheritanceMap = new InheritanceMap();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("mappings/"+PluginClassLoader.getNativeVersion()+"/nms.inheritmap")));
-
-            try {
-                globalInheritanceMap.load(reader, inverseClassMap);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                throw new RuntimeException(ex);
-            }
-            System.out.println("Loaded inheritance map of "+globalInheritanceMap.size()+" classes");
-        }
-
-        return globalInheritanceMap;
-    }
-    // Cauldron end
 }

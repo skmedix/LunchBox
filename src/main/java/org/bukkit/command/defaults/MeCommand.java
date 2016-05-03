@@ -4,7 +4,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+/** @deprecated */
+@Deprecated
 public class MeCommand extends VanillaCommand {
+
     public MeCommand() {
         super("me");
         this.description = "Performs the specified action in chat";
@@ -12,24 +15,28 @@ public class MeCommand extends VanillaCommand {
         this.setPermission("bukkit.command.me");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length < 1)  {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
             return false;
+        } else {
+            StringBuilder message = new StringBuilder();
+
+            message.append(sender.getName());
+            String[] astring = args;
+            int i = args.length;
+
+            for (int j = 0; j < i; ++j) {
+                String arg = astring[j];
+
+                message.append(" ");
+                message.append(arg);
+            }
+
+            Bukkit.broadcastMessage("* " + message.toString());
+            return true;
         }
-
-        StringBuilder message = new StringBuilder();
-        message.append(sender.getName());
-
-        for (String arg : args) {
-            message.append(" ");
-            message.append(arg);
-        }
-
-        Bukkit.broadcastMessage("* " + message.toString());
-
-        return true;
     }
 }

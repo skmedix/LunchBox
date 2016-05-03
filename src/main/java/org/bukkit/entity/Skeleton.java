@@ -1,65 +1,44 @@
 package org.bukkit.entity;
 
-/**
- * Represents a Skeleton.
- */
 public interface Skeleton extends Monster {
 
-    /**
-     * Gets the current type of this skeleton.
-     *
-     * @return Current type
-     */
-    public SkeletonType getSkeletonType();
+    Skeleton.SkeletonType getSkeletonType();
 
-    /**
-     * Sets the new type of this skeleton.
-     *
-     * @param type New type
-     */
-    public void setSkeletonType(SkeletonType type);
+    void setSkeletonType(Skeleton.SkeletonType skeleton_skeletontype);
 
-    /*
-     * Represents the various different Skeleton types.
-     */
-    public enum SkeletonType {
-        NORMAL(0),
-        WITHER(1);
+    public static enum SkeletonType {
 
-        private static final SkeletonType[] types = new SkeletonType[SkeletonType.values().length];
+        NORMAL(0), WITHER(1);
+
+        private static final Skeleton.SkeletonType[] types = new Skeleton.SkeletonType[values().length];
         private final int id;
 
         static {
-            for (SkeletonType type : values()) {
-                types[type.getId()] = type;
+            Skeleton.SkeletonType[] askeleton_skeletontype;
+            int i = (askeleton_skeletontype = values()).length;
+
+            for (int j = 0; j < i; ++j) {
+                Skeleton.SkeletonType type = askeleton_skeletontype[j];
+
+                Skeleton.SkeletonType.types[type.getId()] = type;
             }
+
         }
 
         private SkeletonType(int id) {
             this.id = id;
         }
 
-        /**
-         * Gets the ID of this skeleton type.
-         *
-         * @return Skeleton type ID
-         * @deprecated Magic value
-         */
+        /** @deprecated */
         @Deprecated
         public int getId() {
-            return id;
+            return this.id;
         }
 
-        /**
-         * Gets a skeleton type by its ID.
-         *
-         * @param id ID of the skeleton type to get.
-         * @return Resulting skeleton type, or null if not found.
-         * @deprecated Magic value
-         */
+        /** @deprecated */
         @Deprecated
-        public static SkeletonType getType(int id) {
-            return (id >= types.length) ? null : types[id];
+        public static Skeleton.SkeletonType getType(int id) {
+            return id >= Skeleton.SkeletonType.types.length ? null : Skeleton.SkeletonType.types[id];
         }
     }
 }

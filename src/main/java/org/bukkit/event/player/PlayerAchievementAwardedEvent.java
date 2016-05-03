@@ -5,10 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when a player earns an achievement.
- */
 public class PlayerAchievementAwardedEvent extends PlayerEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private final Achievement achievement;
     private boolean isCancelled = false;
@@ -18,29 +16,23 @@ public class PlayerAchievementAwardedEvent extends PlayerEvent implements Cancel
         this.achievement = achievement;
     }
 
-    /**
-     * Gets the Achievement being awarded.
-     *
-     * @return the achievement being awarded
-     */
     public Achievement getAchievement() {
-        return achievement;
+        return this.achievement;
     }
 
     public boolean isCancelled() {
-        return isCancelled;
+        return this.isCancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.isCancelled = cancel;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PlayerAchievementAwardedEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PlayerAchievementAwardedEvent.handlers;
     }
 }

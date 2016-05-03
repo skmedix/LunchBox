@@ -1,356 +1,384 @@
 package org.bukkit.plugin.messaging;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-/**
- * Standard implementation to {@link Messenger}
- */
 public class StandardMessenger implements Messenger {
-    private final Map<String, Set<PluginMessageListenerRegistration>> incomingByChannel = new HashMap<String, Set<PluginMessageListenerRegistration>>();
-    private final Map<Plugin, Set<PluginMessageListenerRegistration>> incomingByPlugin = new HashMap<Plugin, Set<PluginMessageListenerRegistration>>();
-    private final Map<String, Set<Plugin>> outgoingByChannel = new HashMap<String, Set<Plugin>>();
-    private final Map<Plugin, Set<String>> outgoingByPlugin = new HashMap<Plugin, Set<String>>();
+
+    private final Map incomingByChannel = new HashMap();
+    private final Map incomingByPlugin = new HashMap();
+    private final Map outgoingByChannel = new HashMap();
+    private final Map outgoingByPlugin = new HashMap();
     private final Object incomingLock = new Object();
     private final Object outgoingLock = new Object();
 
     private void addToOutgoing(Plugin plugin, String channel) {
-        synchronized (outgoingLock) {
-            Set<Plugin> plugins = outgoingByChannel.get(channel);
-            Set<String> channels = outgoingByPlugin.get(plugin);
+        Object object = this.outgoingLock;
+
+        synchronized (this.outgoingLock) {
+            Object plugins = (Set) this.outgoingByChannel.get(channel);
+            Object channels = (Set) this.outgoingByPlugin.get(plugin);
 
             if (plugins == null) {
-                plugins = new HashSet<Plugin>();
-                outgoingByChannel.put(channel, plugins);
+                plugins = new HashSet();
+                this.outgoingByChannel.put(channel, plugins);
             }
 
             if (channels == null) {
-                channels = new HashSet<String>();
-                outgoingByPlugin.put(plugin, channels);
+                channels = new HashSet();
+                this.outgoingByPlugin.put(plugin, channels);
             }
 
-            plugins.add(plugin);
-            channels.add(channel);
+            ((Set) plugins).add(plugin);
+            ((Set) channels).add(channel);
         }
     }
 
     private void removeFromOutgoing(Plugin plugin, String channel) {
-        synchronized (outgoingLock) {
-            Set<Plugin> plugins = outgoingByChannel.get(channel);
-            Set<String> channels = outgoingByPlugin.get(plugin);
+        Object object = this.outgoingLock;
+
+        synchronized (this.outgoingLock) {
+            Set plugins = (Set) this.outgoingByChannel.get(channel);
+            Set channels = (Set) this.outgoingByPlugin.get(plugin);
 
             if (plugins != null) {
                 plugins.remove(plugin);
-
                 if (plugins.isEmpty()) {
-                    outgoingByChannel.remove(channel);
+                    this.outgoingByChannel.remove(channel);
                 }
             }
 
             if (channels != null) {
                 channels.remove(channel);
-
                 if (channels.isEmpty()) {
-                    outgoingByChannel.remove(channel);
+                    this.outgoingByChannel.remove(channel);
                 }
             }
+
         }
     }
 
     private void removeFromOutgoing(Plugin plugin) {
-        synchronized (outgoingLock) {
-            Set<String> channels = outgoingByPlugin.get(plugin);
+        Object object = this.outgoingLock;
+
+        synchronized (this.outgoingLock) {
+            Set channels = (Set) this.outgoingByPlugin.get(plugin);
 
             if (channels != null) {
-                String[] toRemove = channels.toArray(new String[0]);
+                String[] toRemove = (String[]) channels.toArray(new String[0]);
 
-                outgoingByPlugin.remove(plugin);
+                this.outgoingByPlugin.remove(plugin);
+                String[] astring = toRemove;
+                int i = toRemove.length;
 
-                for (String channel : toRemove) {
-                    removeFromOutgoing(plugin, channel);
+                for (int j = 0; j < i; ++j) {
+                    String channel = astring[j];
+
+                    this.removeFromOutgoing(plugin, channel);
                 }
             }
+
         }
     }
 
     private void addToIncoming(PluginMessageListenerRegistration registration) {
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByChannel.get(registration.getChannel());
+        Object object = this.incomingLock;
+
+        synchronized (this.incomingLock) {
+            Object registrations = (Set) this.incomingByChannel.get(registration.getChannel());
 
             if (registrations == null) {
-                registrations = new HashSet<PluginMessageListenerRegistration>();
-                incomingByChannel.put(registration.getChannel(), registrations);
-            } else {
-                if (registrations.contains(registration)) {
-                    throw new IllegalArgumentException("This registration already exists");
-                }
+                registrations = new HashSet();
+                this.incomingByChannel.put(registration.getChannel(), registrations);
+            } else if (((Set) registrations).contains(registration)) {
+                throw new IllegalArgumentException("This registration already exists");
             }
 
-            registrations.add(registration);
-
-            registrations = incomingByPlugin.get(registration.getPlugin());
-
+            ((Set) registrations).add(registration);
+            registrations = (Set) this.incomingByPlugin.get(registration.getPlugin());
             if (registrations == null) {
-                registrations = new HashSet<PluginMessageListenerRegistration>();
-                incomingByPlugin.put(registration.getPlugin(), registrations);
-            } else {
-                if (registrations.contains(registration)) {
-                    throw new IllegalArgumentException("This registration already exists");
-                }
+                registrations = new HashSet();
+                this.incomingByPlugin.put(registration.getPlugin(), registrations);
+            } else if (((Set) registrations).contains(registration)) {
+                throw new IllegalArgumentException("This registration already exists");
             }
 
-            registrations.add(registration);
+            ((Set) registrations).add(registration);
         }
     }
 
     private void removeFromIncoming(PluginMessageListenerRegistration registration) {
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByChannel.get(registration.getChannel());
+        Object object = this.incomingLock;
+
+        synchronized (this.incomingLock) {
+            Set registrations = (Set) this.incomingByChannel.get(registration.getChannel());
 
             if (registrations != null) {
                 registrations.remove(registration);
-
                 if (registrations.isEmpty()) {
-                    incomingByChannel.remove(registration.getChannel());
+                    this.incomingByChannel.remove(registration.getChannel());
                 }
             }
 
-            registrations = incomingByPlugin.get(registration.getPlugin());
-
+            registrations = (Set) this.incomingByPlugin.get(registration.getPlugin());
             if (registrations != null) {
                 registrations.remove(registration);
-
                 if (registrations.isEmpty()) {
-                    incomingByPlugin.remove(registration.getPlugin());
+                    this.incomingByPlugin.remove(registration.getPlugin());
                 }
             }
+
         }
     }
 
     private void removeFromIncoming(Plugin plugin, String channel) {
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(plugin);
+        Object object = this.incomingLock;
+
+        synchronized (this.incomingLock) {
+            Set registrations = (Set) this.incomingByPlugin.get(plugin);
 
             if (registrations != null) {
-                PluginMessageListenerRegistration[] toRemove = registrations.toArray(new PluginMessageListenerRegistration[0]);
+                PluginMessageListenerRegistration[] toRemove = (PluginMessageListenerRegistration[]) registrations.toArray(new PluginMessageListenerRegistration[0]);
+                PluginMessageListenerRegistration[] apluginmessagelistenerregistration = toRemove;
+                int i = toRemove.length;
 
-                for (PluginMessageListenerRegistration registration : toRemove) {
+                for (int j = 0; j < i; ++j) {
+                    PluginMessageListenerRegistration registration = apluginmessagelistenerregistration[j];
+
                     if (registration.getChannel().equals(channel)) {
-                        removeFromIncoming(registration);
+                        this.removeFromIncoming(registration);
                     }
                 }
             }
+
         }
     }
 
     private void removeFromIncoming(Plugin plugin) {
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(plugin);
+        Object object = this.incomingLock;
+
+        synchronized (this.incomingLock) {
+            Set registrations = (Set) this.incomingByPlugin.get(plugin);
 
             if (registrations != null) {
-                PluginMessageListenerRegistration[] toRemove = registrations.toArray(new PluginMessageListenerRegistration[0]);
+                PluginMessageListenerRegistration[] toRemove = (PluginMessageListenerRegistration[]) registrations.toArray(new PluginMessageListenerRegistration[0]);
 
-                incomingByPlugin.remove(plugin);
+                this.incomingByPlugin.remove(plugin);
+                PluginMessageListenerRegistration[] apluginmessagelistenerregistration = toRemove;
+                int i = toRemove.length;
 
-                for (PluginMessageListenerRegistration registration : toRemove) {
-                    removeFromIncoming(registration);
+                for (int j = 0; j < i; ++j) {
+                    PluginMessageListenerRegistration registration = apluginmessagelistenerregistration[j];
+
+                    this.removeFromIncoming(registration);
                 }
             }
+
         }
     }
 
     public boolean isReservedChannel(String channel) {
         validateChannel(channel);
-
         return channel.equals("REGISTER") || channel.equals("UNREGISTER");
     }
 
     public void registerOutgoingPluginChannel(Plugin plugin, String channel) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
+        } else {
+            validateChannel(channel);
+            if (this.isReservedChannel(channel)) {
+                throw new ReservedChannelException(channel);
+            } else {
+                this.addToOutgoing(plugin, channel);
+            }
         }
-        validateChannel(channel);
-        if (isReservedChannel(channel)) {
-            throw new ReservedChannelException(channel);
-        }
-
-        addToOutgoing(plugin, channel);
     }
 
     public void unregisterOutgoingPluginChannel(Plugin plugin, String channel) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
+        } else {
+            validateChannel(channel);
+            this.removeFromOutgoing(plugin, channel);
         }
-        validateChannel(channel);
-
-        removeFromOutgoing(plugin, channel);
     }
 
     public void unregisterOutgoingPluginChannel(Plugin plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
+        } else {
+            this.removeFromOutgoing(plugin);
         }
-
-        removeFromOutgoing(plugin);
     }
 
     public PluginMessageListenerRegistration registerIncomingPluginChannel(Plugin plugin, String channel, PluginMessageListener listener) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
-        validateChannel(channel);
-        if (isReservedChannel(channel)) {
-            throw new ReservedChannelException(channel);
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("Listener cannot be null");
-        }
+        } else {
+            validateChannel(channel);
+            if (this.isReservedChannel(channel)) {
+                throw new ReservedChannelException(channel);
+            } else if (listener == null) {
+                throw new IllegalArgumentException("Listener cannot be null");
+            } else {
+                PluginMessageListenerRegistration result = new PluginMessageListenerRegistration(this, plugin, channel, listener);
 
-        PluginMessageListenerRegistration result = new PluginMessageListenerRegistration(this, plugin, channel, listener);
-
-        addToIncoming(result);
-
-        return result;
+                this.addToIncoming(result);
+                return result;
+            }
+        }
     }
 
     public void unregisterIncomingPluginChannel(Plugin plugin, String channel, PluginMessageListener listener) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
-        if (listener == null) {
+        } else if (listener == null) {
             throw new IllegalArgumentException("Listener cannot be null");
+        } else {
+            validateChannel(channel);
+            this.removeFromIncoming(new PluginMessageListenerRegistration(this, plugin, channel, listener));
         }
-        validateChannel(channel);
-
-        removeFromIncoming(new PluginMessageListenerRegistration(this, plugin, channel, listener));
     }
 
     public void unregisterIncomingPluginChannel(Plugin plugin, String channel) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
+        } else {
+            validateChannel(channel);
+            this.removeFromIncoming(plugin, channel);
         }
-        validateChannel(channel);
-
-        removeFromIncoming(plugin, channel);
     }
 
     public void unregisterIncomingPluginChannel(Plugin plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
-
-        removeFromIncoming(plugin);
-    }
-
-    public Set<String> getOutgoingChannels() {
-        synchronized (outgoingLock) {
-            Set<String> keys = outgoingByChannel.keySet();
-            return ImmutableSet.copyOf(keys);
+        } else {
+            this.removeFromIncoming(plugin);
         }
     }
 
-    public Set<String> getOutgoingChannels(Plugin plugin) {
+    public Set getOutgoingChannels() {
+        Object object = this.outgoingLock;
+
+        synchronized (this.outgoingLock) {
+            Set keys = this.outgoingByChannel.keySet();
+
+            return ImmutableSet.copyOf((Collection) keys);
+        }
+    }
+
+    public Set getOutgoingChannels(Plugin plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
+        } else {
+            Object object = this.outgoingLock;
 
-        synchronized (outgoingLock) {
-            Set<String> channels = outgoingByPlugin.get(plugin);
+            synchronized (this.outgoingLock) {
+                Set channels = (Set) this.outgoingByPlugin.get(plugin);
 
-            if (channels != null) {
-                return ImmutableSet.copyOf(channels);
-            } else {
-                return ImmutableSet.of();
+                return channels != null ? ImmutableSet.copyOf((Collection) channels) : ImmutableSet.of();
             }
         }
     }
 
-    public Set<String> getIncomingChannels() {
-        synchronized (incomingLock) {
-            Set<String> keys = incomingByChannel.keySet();
-            return ImmutableSet.copyOf(keys);
+    public Set getIncomingChannels() {
+        Object object = this.incomingLock;
+
+        synchronized (this.incomingLock) {
+            Set keys = this.incomingByChannel.keySet();
+
+            return ImmutableSet.copyOf((Collection) keys);
         }
     }
 
-    public Set<String> getIncomingChannels(Plugin plugin) {
+    public Set getIncomingChannels(Plugin plugin) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
+        } else {
+            Object object = this.incomingLock;
 
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(plugin);
+            synchronized (this.incomingLock) {
+                Set registrations = (Set) this.incomingByPlugin.get(plugin);
 
-            if (registrations != null) {
-                Builder<String> builder = ImmutableSet.builder();
+                if (registrations == null) {
+                    return ImmutableSet.of();
+                } else {
+                    ImmutableSet.Builder builder = ImmutableSet.builder();
+                    Iterator iterator = registrations.iterator();
 
-                for (PluginMessageListenerRegistration registration : registrations) {
-                    builder.add(registration.getChannel());
-                }
+                    while (iterator.hasNext()) {
+                        PluginMessageListenerRegistration registration = (PluginMessageListenerRegistration) iterator.next();
 
-                return builder.build();
-            } else {
-                return ImmutableSet.of();
-            }
-        }
-    }
-
-    public Set<PluginMessageListenerRegistration> getIncomingChannelRegistrations(Plugin plugin) {
-        if (plugin == null) {
-            throw new IllegalArgumentException("Plugin cannot be null");
-        }
-
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(plugin);
-
-            if (registrations != null) {
-                return ImmutableSet.copyOf(registrations);
-            } else {
-                return ImmutableSet.of();
-            }
-        }
-    }
-
-    public Set<PluginMessageListenerRegistration> getIncomingChannelRegistrations(String channel) {
-        validateChannel(channel);
-
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByChannel.get(channel);
-
-            if (registrations != null) {
-                return ImmutableSet.copyOf(registrations);
-            } else {
-                return ImmutableSet.of();
-            }
-        }
-    }
-
-    public Set<PluginMessageListenerRegistration> getIncomingChannelRegistrations(Plugin plugin, String channel) {
-        if (plugin == null) {
-            throw new IllegalArgumentException("Plugin cannot be null");
-        }
-        validateChannel(channel);
-
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(plugin);
-
-            if (registrations != null) {
-                Builder<PluginMessageListenerRegistration> builder = ImmutableSet.builder();
-
-                for (PluginMessageListenerRegistration registration : registrations) {
-                    if (registration.getChannel().equals(channel)) {
-                        builder.add(registration);
+                        builder.add((Object) registration.getChannel());
                     }
-                }
 
-                return builder.build();
-            } else {
-                return ImmutableSet.of();
+                    return builder.build();
+                }
+            }
+        }
+    }
+
+    public Set getIncomingChannelRegistrations(Plugin plugin) {
+        if (plugin == null) {
+            throw new IllegalArgumentException("Plugin cannot be null");
+        } else {
+            Object object = this.incomingLock;
+
+            synchronized (this.incomingLock) {
+                Set registrations = (Set) this.incomingByPlugin.get(plugin);
+
+                return registrations != null ? ImmutableSet.copyOf((Collection) registrations) : ImmutableSet.of();
+            }
+        }
+    }
+
+    public Set getIncomingChannelRegistrations(String channel) {
+        validateChannel(channel);
+        Object object = this.incomingLock;
+
+        synchronized (this.incomingLock) {
+            Set registrations = (Set) this.incomingByChannel.get(channel);
+
+            return registrations != null ? ImmutableSet.copyOf((Collection) registrations) : ImmutableSet.of();
+        }
+    }
+
+    public Set getIncomingChannelRegistrations(Plugin plugin, String channel) {
+        if (plugin == null) {
+            throw new IllegalArgumentException("Plugin cannot be null");
+        } else {
+            validateChannel(channel);
+            Object object = this.incomingLock;
+
+            synchronized (this.incomingLock) {
+                Set registrations = (Set) this.incomingByPlugin.get(plugin);
+
+                if (registrations != null) {
+                    ImmutableSet.Builder builder = ImmutableSet.builder();
+                    Iterator iterator = registrations.iterator();
+
+                    while (iterator.hasNext()) {
+                        PluginMessageListenerRegistration registration = (PluginMessageListenerRegistration) iterator.next();
+
+                        if (registration.getChannel().equals(channel)) {
+                            builder.add((Object) registration);
+                        }
+                    }
+
+                    return builder.build();
+                } else {
+                    return ImmutableSet.of();
+                }
             }
         }
     }
@@ -358,132 +386,105 @@ public class StandardMessenger implements Messenger {
     public boolean isRegistrationValid(PluginMessageListenerRegistration registration) {
         if (registration == null) {
             throw new IllegalArgumentException("Registration cannot be null");
-        }
+        } else {
+            Object object = this.incomingLock;
 
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(registration.getPlugin());
+            synchronized (this.incomingLock) {
+                Set registrations = (Set) this.incomingByPlugin.get(registration.getPlugin());
 
-            if (registrations != null) {
-                return registrations.contains(registration);
+                return registrations != null ? registrations.contains(registration) : false;
             }
-
-            return false;
         }
     }
 
     public boolean isIncomingChannelRegistered(Plugin plugin, String channel) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
-        validateChannel(channel);
+        } else {
+            validateChannel(channel);
+            Object object = this.incomingLock;
 
-        synchronized (incomingLock) {
-            Set<PluginMessageListenerRegistration> registrations = incomingByPlugin.get(plugin);
+            synchronized (this.incomingLock) {
+                Set registrations = (Set) this.incomingByPlugin.get(plugin);
 
-            if (registrations != null) {
-                for (PluginMessageListenerRegistration registration : registrations) {
-                    if (registration.getChannel().equals(channel)) {
-                        return true;
+                if (registrations != null) {
+                    Iterator iterator = registrations.iterator();
+
+                    while (iterator.hasNext()) {
+                        PluginMessageListenerRegistration registration = (PluginMessageListenerRegistration) iterator.next();
+
+                        if (registration.getChannel().equals(channel)) {
+                            return true;
+                        }
                     }
                 }
-            }
 
-            return false;
+                return false;
+            }
         }
     }
 
     public boolean isOutgoingChannelRegistered(Plugin plugin, String channel) {
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
-        }
-        validateChannel(channel);
+        } else {
+            validateChannel(channel);
+            Object object = this.outgoingLock;
 
-        synchronized (outgoingLock) {
-            Set<String> channels = outgoingByPlugin.get(plugin);
+            synchronized (this.outgoingLock) {
+                Set channels = (Set) this.outgoingByPlugin.get(plugin);
 
-            if (channels != null) {
-                return channels.contains(channel);
+                return channels != null ? channels.contains(channel) : false;
             }
-
-            return false;
         }
     }
 
     public void dispatchIncomingMessage(Player source, String channel, byte[] message) {
         if (source == null) {
             throw new IllegalArgumentException("Player source cannot be null");
-        }
-        if (message == null) {
+        } else if (message == null) {
             throw new IllegalArgumentException("Message cannot be null");
-        }
-        validateChannel(channel);
+        } else {
+            validateChannel(channel);
+            Set registrations = this.getIncomingChannelRegistrations(channel);
+            Iterator iterator = registrations.iterator();
 
-        Set<PluginMessageListenerRegistration> registrations = getIncomingChannelRegistrations(channel);
+            while (iterator.hasNext()) {
+                PluginMessageListenerRegistration registration = (PluginMessageListenerRegistration) iterator.next();
 
-        for (PluginMessageListenerRegistration registration : registrations) {
-            // Spigot Start
-            try
-            {
-                registration.getListener().onPluginMessageReceived( channel, source, message );
-            } catch ( Throwable t )
-            {
-                org.bukkit.Bukkit.getLogger().log( java.util.logging.Level.WARNING, "Could not pass incoming plugin message to " + registration.getPlugin(), t );
+                try {
+                    registration.getListener().onPluginMessageReceived(channel, source, message);
+                } catch (Throwable throwable) {
+                    Bukkit.getLogger().log(Level.WARNING, "Could not pass incoming plugin message to " + registration.getPlugin(), throwable);
+                }
             }
-            // Spigot End
+
         }
     }
 
-    /**
-     * Validates a Plugin Channel name.
-     *
-     * @param channel Channel name to validate.
-     */
     public static void validateChannel(String channel) {
         if (channel == null) {
             throw new IllegalArgumentException("Channel cannot be null");
-        }
-        if (channel.length() > Messenger.MAX_CHANNEL_SIZE) {
+        } else if (channel.length() > 20) {
             throw new ChannelNameTooLongException(channel);
         }
     }
 
-    /**
-     * Validates the input of a Plugin Message, ensuring the arguments are all
-     * valid.
-     *
-     * @param messenger Messenger to use for validation.
-     * @param source Source plugin of the Message.
-     * @param channel Plugin Channel to send the message by.
-     * @param message Raw message payload to send.
-     * @throws IllegalArgumentException Thrown if the source plugin is
-     *     disabled.
-     * @throws IllegalArgumentException Thrown if source, channel or message
-     *     is null.
-     * @throws MessageTooLargeException Thrown if the message is too big.
-     * @throws ChannelNameTooLongException Thrown if the channel name is too
-     *     long.
-     * @throws ChannelNotRegisteredException Thrown if the channel is not
-     *     registered for this plugin.
-     */
     public static void validatePluginMessage(Messenger messenger, Plugin source, String channel, byte[] message) {
         if (messenger == null) {
             throw new IllegalArgumentException("Messenger cannot be null");
-        }
-        if (source == null) {
+        } else if (source == null) {
             throw new IllegalArgumentException("Plugin source cannot be null");
-        }
-        if (!source.isEnabled()) {
+        } else if (!source.isEnabled()) {
             throw new IllegalArgumentException("Plugin must be enabled to send messages");
-        }
-        if (message == null) {
+        } else if (message == null) {
             throw new IllegalArgumentException("Message cannot be null");
-        }
-        if (!messenger.isOutgoingChannelRegistered(source, channel)) {
+        } else if (!messenger.isOutgoingChannelRegistered(source, channel)) {
             throw new ChannelNotRegisteredException(channel);
-        }
-        if (message.length > Messenger.MAX_MESSAGE_SIZE) {
+        } else if (message.length > 32766) {
             throw new MessageTooLargeException(message);
+        } else {
+            validateChannel(channel);
         }
-        validateChannel(channel);
     }
 }

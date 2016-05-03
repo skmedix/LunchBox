@@ -2,118 +2,88 @@ package org.bukkit.material;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.bukkit.Material;
 
-/**
- * Represents the different types of steps.
- */
 public class Step extends TexturedMaterial {
-    private static final List<Material> textures = new ArrayList<Material>();
+
+    private static final List textures = new ArrayList();
+
     static {
-        textures.add(Material.STONE);
-        textures.add(Material.SANDSTONE);
-        textures.add(Material.WOOD);
-        textures.add(Material.COBBLESTONE);
-        textures.add(Material.BRICK);
-        textures.add(Material.SMOOTH_BRICK);
-        textures.add(Material.NETHER_BRICK);
-        textures.add(Material.QUARTZ_BLOCK);
+        Step.textures.add(Material.STONE);
+        Step.textures.add(Material.SANDSTONE);
+        Step.textures.add(Material.WOOD);
+        Step.textures.add(Material.COBBLESTONE);
+        Step.textures.add(Material.BRICK);
+        Step.textures.add(Material.SMOOTH_BRICK);
+        Step.textures.add(Material.NETHER_BRICK);
+        Step.textures.add(Material.QUARTZ_BLOCK);
     }
 
     public Step() {
         super(Material.STEP);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Step(final int type) {
+    public Step(int type) {
         super(type);
     }
 
-    public Step(final Material type) {
-        super((textures.contains(type)) ? Material.STEP : type);
-        if (textures.contains(type)) {
-            setMaterial(type);
+    public Step(Material type) {
+        super(Step.textures.contains(type) ? Material.STEP : type);
+        if (Step.textures.contains(type)) {
+            this.setMaterial(type);
         }
+
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Step(final int type, final byte data) {
+    public Step(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Step(final Material type, final byte data) {
+    public Step(Material type, byte data) {
         super(type, data);
     }
 
-    @Override
-    public List<Material> getTextures() {
-        return textures;
+    public List getTextures() {
+        return Step.textures;
     }
 
-    /**
-     * Test if step is inverted
-     *
-     * @return true if inverted (top half), false if normal (bottom half)
-     */
     public boolean isInverted() {
-        return ((getData() & 0x8) != 0);
+        return (this.getData() & 8) != 0;
     }
 
-    /**
-     * Set step inverted state
-     *
-     * @param inv - true if step is inverted (top half), false if step is
-     *     normal (bottom half)
-     */
     public void setInverted(boolean inv) {
-        int dat = getData() & 0x7;
+        int dat = this.getData() & 7;
+
         if (inv) {
-            dat |= 0x8;
+            dat |= 8;
         }
-        setData((byte) dat);
+
+        this.setData((byte) dat);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    @Override
     protected int getTextureIndex() {
-        return getData() & 0x7;
+        return this.getData() & 7;
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    @Override
     protected void setTextureIndex(int idx) {
-        setData((byte) ((getData() & 0x8) | idx));
+        this.setData((byte) (this.getData() & 8 | idx));
     }
 
-    @Override
     public Step clone() {
         return (Step) super.clone();
     }
 
-    @Override
     public String toString() {
-        return super.toString() + (isInverted()?"inverted":"");
+        return super.toString() + (this.isInverted() ? "inverted" : "");
     }
 }

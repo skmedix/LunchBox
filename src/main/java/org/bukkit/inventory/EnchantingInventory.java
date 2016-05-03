@@ -1,21 +1,12 @@
 package org.bukkit.inventory;
 
-/**
- * Interface to the inventory of an Enchantment Table.
- */
 public interface EnchantingInventory extends Inventory {
 
-    /**
-     * Set the item being enchanted.
-     *
-     * @param item The new item
-     */
-    void setItem(ItemStack item);
+    void setItem(ItemStack itemstack);
 
-    /**
-     * Get the item being enchanted.
-     *
-     * @return The current item.
-     */
     ItemStack getItem();
+
+    void setSecondary(ItemStack itemstack);
+
+    ItemStack getSecondary();
 }

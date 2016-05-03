@@ -5,14 +5,12 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.Cancellable;
 
-/**
- * Called when a piston block is triggered
- */
 public abstract class BlockPistonEvent extends BlockEvent implements Cancellable {
+
     private boolean cancelled;
     private final BlockFace direction;
 
-    public BlockPistonEvent(final Block block, final BlockFace direction) {
+    public BlockPistonEvent(Block block, BlockFace direction) {
         super(block);
         this.direction = direction;
     }
@@ -25,24 +23,11 @@ public abstract class BlockPistonEvent extends BlockEvent implements Cancellable
         this.cancelled = cancelled;
     }
 
-    /**
-     * Returns true if the Piston in the event is sticky.
-     *
-     * @return stickiness of the piston
-     */
     public boolean isSticky() {
-        return block.getType() == Material.PISTON_STICKY_BASE;
+        return this.block.getType() == Material.PISTON_STICKY_BASE || this.block.getType() == Material.PISTON_MOVING_PIECE;
     }
 
-    /**
-     * Return the direction in which the piston will operate.
-     *
-     * @return direction of the piston
-     */
     public BlockFace getDirection() {
-        // Both are meh!
-        // return ((PistonBaseMaterial) block.getType().getNewData(block.getData())).getFacing();
-        // return ((PistonBaseMaterial) block.getState().getData()).getFacing();
-        return direction;
+        return this.direction;
     }
 }

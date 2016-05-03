@@ -3,101 +3,68 @@ package org.bukkit.material;
 import org.bukkit.Material;
 import org.bukkit.TreeSpecies;
 
-/**
- * Represents the different types of wooden steps.
- */
 public class WoodenStep extends MaterialData {
 
     public WoodenStep() {
         super(Material.WOOD_STEP);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public WoodenStep(final int type) {
+    public WoodenStep(int type) {
         super(type);
     }
 
     public WoodenStep(TreeSpecies species) {
         this();
-        setSpecies(species);
+        this.setSpecies(species);
     }
 
     public WoodenStep(TreeSpecies species, boolean inv) {
         this();
-        setSpecies(species);
-        setInverted(inv);
+        this.setSpecies(species);
+        this.setInverted(inv);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public WoodenStep(final int type, final byte data) {
+    public WoodenStep(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public WoodenStep(final Material type, final byte data) {
+    public WoodenStep(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current species of this tree
-     *
-     * @return TreeSpecies of this tree
-     */
     public TreeSpecies getSpecies() {
-        return TreeSpecies.getByData((byte) (getData() & 0x3));
+        return TreeSpecies.getByData((byte) (this.getData() & 3));
     }
 
-    /**
-     * Sets the species of this tree
-     *
-     * @param species New species of this tree
-     */
     public void setSpecies(TreeSpecies species) {
-        setData((byte) ((getData() & 0xC) | species.getData()));
+        this.setData((byte) (this.getData() & 12 | species.getData()));
     }
 
-    /**
-     * Test if step is inverted
-     *
-     * @return true if inverted (top half), false if normal (bottom half)
-     */
     public boolean isInverted() {
-        return ((getData() & 0x8) != 0);
+        return (this.getData() & 8) != 0;
     }
-    
-    /**
-     * Set step inverted state
-     *
-     * @param inv - true if step is inverted (top half), false if step is
-     *     normal (bottom half)
-     */
+
     public void setInverted(boolean inv) {
-        int dat = getData() & 0x7;
+        int dat = this.getData() & 7;
+
         if (inv) {
-            dat |= 0x8;
+            dat |= 8;
         }
-        setData((byte) dat);
+
+        this.setData((byte) dat);
     }
-    
-    @Override
+
     public WoodenStep clone() {
         return (WoodenStep) super.clone();
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " " + getSpecies() + (isInverted()?" inverted":"");
+        return super.toString() + " " + this.getSpecies() + (this.isInverted() ? " inverted" : "");
     }
 }

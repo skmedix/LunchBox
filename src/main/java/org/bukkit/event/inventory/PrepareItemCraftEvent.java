@@ -6,6 +6,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.Recipe;
 
 public class PrepareItemCraftEvent extends InventoryEvent {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean repair;
     private CraftingInventory matrix;
@@ -16,41 +17,23 @@ public class PrepareItemCraftEvent extends InventoryEvent {
         this.repair = isRepair;
     }
 
-    /**
-     * Get the recipe that has been formed. If this event was triggered by a
-     * tool repair, this will be a temporary shapeless recipe representing the
-     * repair.
-     *
-     * @return The recipe being crafted.
-     */
     public Recipe getRecipe() {
-        return matrix.getRecipe();
+        return this.matrix.getRecipe();
     }
 
-    /**
-     * @return The crafting inventory on which the recipe was formed.
-     */
-    @Override
     public CraftingInventory getInventory() {
-        return matrix;
+        return this.matrix;
     }
 
-    /**
-     * Check if this event was triggered by a tool repair operation rather
-     * than a crafting recipe.
-     *
-     * @return True if this is a repair.
-     */
     public boolean isRepair() {
-        return repair;
+        return this.repair;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PrepareItemCraftEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PrepareItemCraftEvent.handlers;
     }
 }

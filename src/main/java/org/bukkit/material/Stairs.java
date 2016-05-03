@@ -3,136 +3,229 @@ package org.bukkit.material;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 
-/**
- * Represents stairs.
- */
 public class Stairs extends MaterialData implements Directional {
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+    /** @deprecated */
     @Deprecated
-    public Stairs(final int type) {
+    public Stairs(int type) {
         super(type);
     }
 
-    public Stairs(final Material type) {
+    public Stairs(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Stairs(final int type, final byte data) {
+    public Stairs(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Stairs(final Material type, final byte data) {
+    public Stairs(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * @return the direction the stairs ascend towards
-     */
     public BlockFace getAscendingDirection() {
-        byte data = getData();
+        int data = this.getData();
 
-        switch (data & 0x3) {
-        case 0x0:
+        switch (data & 3) {
+        case 0:
         default:
             return BlockFace.EAST;
 
-        case 0x1:
+        case 1:
             return BlockFace.WEST;
 
-        case 0x2:
+        case 2:
             return BlockFace.SOUTH;
 
-        case 0x3:
+        case 3:
             return BlockFace.NORTH;
         }
     }
 
-    /**
-     * @return the direction the stairs descend towards
-     */
     public BlockFace getDescendingDirection() {
-        return getAscendingDirection().getOppositeFace();
+        return this.getAscendingDirection().getOppositeFace();
     }
 
-    /**
-     * Set the direction the stair part of the block is facing
-     */
     public void setFacingDirection(BlockFace face) {
         byte data;
 
-        switch (face) {
-        case NORTH:
-            data = 0x3;
+        switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+        case 1:
+            data = 3;
             break;
 
-        case SOUTH:
-            data = 0x2;
-            break;
-
-        case EAST:
+        case 2:
         default:
-            data = 0x0;
+            data = 0;
             break;
 
-        case WEST:
-            data = 0x1;
+        case 3:
+            data = 2;
             break;
+
+        case 4:
+            data = 1;
         }
 
-        setData((byte) ((getData() & 0xC) | data));
+        this.setData((byte) (this.getData() & 12 | data));
     }
 
-    /**
-     * @return the direction the stair part of the block is facing
-     */
     public BlockFace getFacing() {
-        return getDescendingDirection();
+        return this.getDescendingDirection();
     }
 
-    /**
-     * Test if step is inverted
-     *
-     * @return true if inverted (top half), false if normal (bottom half)
-     */
     public boolean isInverted() {
-        return ((getData() & 0x4) != 0);
+        return (this.getData() & 4) != 0;
     }
 
-    /**
-     * Set step inverted state
-     *
-     * @param inv - true if step is inverted (top half), false if step is
-     *     normal (bottom half)
-     */
     public void setInverted(boolean inv) {
-        int dat = getData() & 0x3;
+        int dat = this.getData() & 3;
+
         if (inv) {
-            dat |= 0x4;
+            dat |= 4;
         }
-        setData((byte) dat);
+
+        this.setData((byte) dat);
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " facing " + getFacing() + (isInverted()?" inverted":"");
+        return super.toString() + " facing " + this.getFacing() + (this.isInverted() ? " inverted" : "");
     }
 
-    @Override
     public Stairs clone() {
         return (Stairs) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = Stairs.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (Stairs.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            Stairs.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

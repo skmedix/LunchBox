@@ -1,18 +1,19 @@
 package org.bukkit.command.defaults;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
-import com.google.common.collect.ImmutableList;
-
+/** @deprecated */
+@Deprecated
 public class TeleportCommand extends VanillaCommand {
 
     public TeleportCommand() {
@@ -22,103 +23,107 @@ public class TeleportCommand extends VanillaCommand {
         this.setPermission("bukkit.command.teleport");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length < 1 || args.length > 4) {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
-            return false;
-        }
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length >= 1 && args.length <= 4) {
+            Player player;
 
-        Player player;
-
-        if (args.length == 1 || args.length == 3) {
-            if (sender instanceof Player) {
-                player = (Player) sender;
+            if (args.length != 1 && args.length != 3) {
+                player = Bukkit.getPlayerExact(args[0]);
             } else {
-                sender.sendMessage("Please provide a player!");
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage("Please provide a player!");
+                    return true;
+                }
+
+                player = (Player) sender;
+            }
+
+            if (player == null) {
+                sender.sendMessage("Player not found: " + args[0]);
+                return true;
+            } else {
+                if (args.length < 3) {
+                    Player playerLocation = Bukkit.getPlayerExact(args[args.length - 1]);
+
+                    if (playerLocation == null) {
+                        sender.sendMessage("Can\'t find player " + args[args.length - 1] + ". No tp.");
+                        return true;
+                    }
+
+                    player.teleport((Entity) playerLocation, PlayerTeleportEvent.TeleportCause.COMMAND);
+                    Command.broadcastCommandMessage(sender, "Teleported " + player.getDisplayName() + " to " + playerLocation.getDisplayName());
+                } else if (player.getWorld() != null) {
+                    Location playerLocation1 = player.getLocation();
+                    double x = this.getCoordinate(sender, playerLocation1.getX(), args[args.length - 3]);
+                    double y = this.getCoordinate(sender, playerLocation1.getY(), args[args.length - 2], 0, 0);
+                    double z = this.getCoordinate(sender, playerLocation1.getZ(), args[args.length - 1]);
+
+                    if (x == -3.0000001E7D || y == -3.0000001E7D || z == -3.0000001E7D) {
+                        sender.sendMessage("Please provide a valid location!");
+                        return true;
+                    }
+
+                    playerLocation1.setX(x);
+                    playerLocation1.setY(y);
+                    playerLocation1.setZ(z);
+                    player.teleport(playerLocation1, PlayerTeleportEvent.TeleportCause.COMMAND);
+                    Command.broadcastCommandMessage(sender, String.format("Teleported %s to %.2f, %.2f, %.2f", new Object[] { player.getDisplayName(), Double.valueOf(x), Double.valueOf(y), Double.valueOf(z)}));
+                }
+
                 return true;
             }
         } else {
-            player = Bukkit.getPlayerExact(args[0]);
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
+            return false;
         }
-
-        if (player == null) {
-            sender.sendMessage("Player not found: " + args[0]);
-            return true;
-        }
-
-        if (args.length < 3) {
-            Player target = Bukkit.getPlayerExact(args[args.length - 1]);
-            if (target == null) {
-                sender.sendMessage("Can't find player " + args[args.length - 1] + ". No tp.");
-                return true;
-            }
-            player.teleport(target, TeleportCause.COMMAND);
-            Command.broadcastCommandMessage(sender, "Teleported " + player.getDisplayName() + " to " + target.getDisplayName());
-        } else if (player.getWorld() != null) {
-            Location playerLocation = player.getLocation();
-            double x = getCoordinate(sender, playerLocation.getX(), args[args.length - 3]);
-            double y = getCoordinate(sender, playerLocation.getY(), args[args.length - 2], 0, 0);
-            double z = getCoordinate(sender, playerLocation.getZ(), args[args.length - 1]);
-
-            if (x == MIN_COORD_MINUS_ONE || y == MIN_COORD_MINUS_ONE || z == MIN_COORD_MINUS_ONE) {
-                sender.sendMessage("Please provide a valid location!");
-                return true;
-            }
-
-            playerLocation.setX(x);
-            playerLocation.setY(y);
-            playerLocation.setZ(z);
-
-            player.teleport(playerLocation, TeleportCause.COMMAND);
-            Command.broadcastCommandMessage(sender, String.format("Teleported %s to %.2f, %.2f, %.2f", player.getDisplayName(), x, y, z));
-        }
-        return true;
     }
 
     private double getCoordinate(CommandSender sender, double current, String input) {
-        return getCoordinate(sender, current, input, MIN_COORD, MAX_COORD);
+        return this.getCoordinate(sender, current, input, -30000000, 30000000);
     }
 
     private double getCoordinate(CommandSender sender, double current, String input, int min, int max) {
         boolean relative = input.startsWith("~");
-        double result = relative ? current : 0;
+        double result = relative ? current : 0.0D;
 
         if (!relative || input.length() > 1) {
             boolean exact = input.contains(".");
-            if (relative) input = input.substring(1);
+
+            if (relative) {
+                input = input.substring(1);
+            }
 
             double testResult = getDouble(sender, input);
-            if (testResult == MIN_COORD_MINUS_ONE) {
-                return MIN_COORD_MINUS_ONE;
+
+            if (testResult == -3.0000001E7D) {
+                return -3.0000001E7D;
             }
+
             result += testResult;
-
-            if (!exact && !relative) result += 0.5f;
+            if (!exact && !relative) {
+                result += 0.5D;
+            }
         }
+
         if (min != 0 || max != 0) {
-            if (result < min) {
-                result = MIN_COORD_MINUS_ONE;
+            if (result < (double) min) {
+                result = -3.0000001E7D;
             }
 
-            if (result > max) {
-                result = MIN_COORD_MINUS_ONE;
+            if (result > (double) max) {
+                result = -3.0000001E7D;
             }
         }
 
         return result;
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
-        if (args.length == 1 || args.length == 2) {
-            return super.tabComplete(sender, alias, args);
-        }
-        return ImmutableList.of();
+        return (List) (args.length != 1 && args.length != 2 ? ImmutableList.of() : super.tabComplete(sender, alias, args));
     }
 }

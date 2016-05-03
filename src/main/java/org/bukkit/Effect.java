@@ -1,337 +1,102 @@
 package org.bukkit;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
+import java.util.Map;
 import org.bukkit.block.BlockFace;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.Potion;
 
-/**
- * A list of effects that the server is able to send to players.
- */
 public enum Effect {
-    /**
-     * An alternate click sound.
-     */
-    CLICK2(1000, Type.SOUND),
-    /**
-     * A click sound.
-     */
-    CLICK1(1001, Type.SOUND),
-    /**
-     * Sound of a bow firing.
-     */
-    BOW_FIRE(1002, Type.SOUND),
-    /**
-     * Sound of a door opening/closing.
-     */
-    DOOR_TOGGLE(1003, Type.SOUND),
-    /**
-     * Sound of fire being extinguished.
-     */
-    EXTINGUISH(1004, Type.SOUND),
-    /**
-     * A song from a record. Needs the record item ID as additional info
-     */
-    RECORD_PLAY(1005, Type.SOUND, Material.class),
-    /**
-     * Sound of ghast shrieking.
-     */
-    GHAST_SHRIEK(1007, Type.SOUND),
-    /**
-     * Sound of ghast firing.
-     */
-    GHAST_SHOOT(1008, Type.SOUND),
-    /**
-     * Sound of blaze firing.
-     */
-    BLAZE_SHOOT(1009, Type.SOUND),
-    /**
-     * Sound of zombies chewing on wooden doors.
-     */
-    ZOMBIE_CHEW_WOODEN_DOOR(1010, Type.SOUND),
-    /**
-     * Sound of zombies chewing on iron doors.
-     */
-    ZOMBIE_CHEW_IRON_DOOR(1011, Type.SOUND),
-    /**
-     * Sound of zombies destroying a door.
-     */
-    ZOMBIE_DESTROY_DOOR(1012, Type.SOUND),
-    /**
-     * A visual smoke effect. Needs direction as additional info.
-     */
-    SMOKE(2000, Type.VISUAL, BlockFace.class),
-    /**
-     * Sound of a block breaking. Needs block ID as additional info.
-     */
-    STEP_SOUND(2001, Type.SOUND, Material.class),
-    /**
-     * Visual effect of a splash potion breaking. Needs potion data value as
-     * additional info.
-     */
-    POTION_BREAK(2002, Type.VISUAL, Potion.class),
-    /**
-     * An ender eye signal; a visual effect.
-     */
-    ENDER_SIGNAL(2003, Type.VISUAL),
-    /**
-     * The flames seen on a mobspawner; a visual effect.
-     */
-    MOBSPAWNER_FLAMES(2004, Type.VISUAL),
-    /**
-     * The spark that comes off a fireworks
-     */
-    FIREWORKS_SPARK("fireworksSpark", Type.PARTICLE),
-    /**
-     * Critical hit particles
-     */
-    CRIT("crit", Type.PARTICLE),
-    /**
-     * Blue critical hit particles
-     */
-    MAGIC_CRIT("magicCrit", Type.PARTICLE),
-    /**
-     * Multicolored potion effect particles
-     */
-    POTION_SWIRL("mobSpell", Type.PARTICLE),
-    /**
-     * Multicolored potion effect particles that are slightly transparent
-     */
-    POTION_SWIRL_TRANSPARENT("mobSpellAmbient", Type.PARTICLE),
-    /**
-     * A puff of white potion swirls
-     */
-    SPELL("spell", Type.PARTICLE),
-    /**
-     * A puff of white stars
-     */
-    INSTANT_SPELL("instantSpell", Type.PARTICLE),
-    /**
-     * A puff of purple particles
-     */
-    WITCH_MAGIC("witchMagic", Type.PARTICLE),
-    /**
-     * The note that appears above note blocks
-     */
-    NOTE("note", Type.PARTICLE),
-    /**
-     * The particles shown at nether portals
-     */
-    PORTAL("portal", Type.PARTICLE),
-    /**
-     * The symbols that fly towards the enchantment table
-     */
-    FLYING_GLYPH("enchantmenttable", Type.PARTICLE),
-    /**
-     * Fire particles
-     */
-    FLAME("flame", Type.PARTICLE),
-    /**
-     * The particles that pop out of lava
-     */
-    LAVA_POP("lava", Type.PARTICLE),
-    /**
-     * A small gray square
-     */
-    FOOTSTEP("footstep", Type.PARTICLE),
-    /**
-     * Water particles
-     */
-    SPLASH("splash", Type.PARTICLE),
-    /**
-     * Smoke particles
-     */
-    PARTICLE_SMOKE("smoke", Type.PARTICLE),
-    /**
-     * The biggest explosion particle effect
-     */
-    EXPLOSION_HUGE("hugeexplosion", Type.PARTICLE),
-    /**
-     * A larger version of the explode particle
-     */
-    EXPLOSION_LARGE("largeexplode", Type.PARTICLE),
-    /**
-     * Explosion particles
-     */
-    EXPLOSION("explode", Type.PARTICLE),
-    /**
-     * Small gray particles
-     */
-    VOID_FOG("depthsuspend", Type.PARTICLE),
-    /**
-     * Small gray particles
-     */
-    SMALL_SMOKE("townaura", Type.PARTICLE),
-    /**
-     * A puff of white smoke
-     */
-    CLOUD("cloud", Type.PARTICLE),
-    /**
-     * Multicolored dust particles
-     */
-    COLOURED_DUST("reddust", Type.PARTICLE),
-    /**
-     * Snowball breaking
-     */
-    SNOWBALL_BREAK("snowballpoof", Type.PARTICLE),
-    /**
-     * The water drip particle that appears on blocks under water
-     */
-    WATERDRIP("dripWater", Type.PARTICLE),
-    /**
-     * The lava drip particle that appears on blocks under lava
-     */
-    LAVADRIP("dripLava", Type.PARTICLE),
-    /**
-     * White particles
-     */
-    SNOW_SHOVEL("snowshovel", Type.PARTICLE),
-    /**
-     * The particle shown when a slime jumps
-     */
-    SLIME("slime", Type.PARTICLE),
-    /**
-     * The particle that appears when breading animals
-     */
-    HEART("heart", Type.PARTICLE),
-    /**
-     * The particle that appears when hitting a villager
-     */
-    VILLAGER_THUNDERCLOUD("angryVillager", Type.PARTICLE),
-    /**
-     * The particle that appears when trading with a villager
-     */
-    HAPPY_VILLAGER("happyVillager", Type.PARTICLE),
-    /**
-     * The smoke particles that appears on blazes, minecarts
-     * with furnaces and fire
-     */
-    LARGE_SMOKE("largesmoke", Type.PARTICLE),
-    /**
-     * The particles generated when a tool breaks.
-     * This particle requires a Material so that the client can select the correct texture.
-     */
-    ITEM_BREAK("iconcrack", Type.PARTICLE, Material.class),
-    /**
-     * The particles generated while breaking a block.
-     * This particle requires a Material and data value so that the client can select the correct texture.
-     */
-    TILE_BREAK("blockcrack", Type.PARTICLE, MaterialData.class),
-    /**
-     * The particles generated while sprinting a block
-     * This particle requires a Material and data value so that the client can select the correct texture.
-     */
-    TILE_DUST("blockdust", Type.PARTICLE, MaterialData.class);
+
+    CLICK2(1000, Effect.Type.SOUND), CLICK1(1001, Effect.Type.SOUND), BOW_FIRE(1002, Effect.Type.SOUND), DOOR_TOGGLE(1003, Effect.Type.SOUND), EXTINGUISH(1004, Effect.Type.SOUND), RECORD_PLAY(1005, Effect.Type.SOUND, Material.class), GHAST_SHRIEK(1007, Effect.Type.SOUND), GHAST_SHOOT(1008, Effect.Type.SOUND), BLAZE_SHOOT(1009, Effect.Type.SOUND), ZOMBIE_CHEW_WOODEN_DOOR(1010, Effect.Type.SOUND), ZOMBIE_CHEW_IRON_DOOR(1011, Effect.Type.SOUND), ZOMBIE_DESTROY_DOOR(1012, Effect.Type.SOUND), SMOKE(2000, Effect.Type.VISUAL, BlockFace.class), STEP_SOUND(2001, Effect.Type.SOUND, Material.class), POTION_BREAK(2002, Effect.Type.VISUAL, Potion.class), ENDER_SIGNAL(2003, Effect.Type.VISUAL), MOBSPAWNER_FLAMES(2004, Effect.Type.VISUAL), FIREWORKS_SPARK("fireworksSpark", Effect.Type.PARTICLE), CRIT("crit", Effect.Type.PARTICLE), MAGIC_CRIT("magicCrit", Effect.Type.PARTICLE), POTION_SWIRL("mobSpell", Effect.Type.PARTICLE), POTION_SWIRL_TRANSPARENT("mobSpellAmbient", Effect.Type.PARTICLE), SPELL("spell", Effect.Type.PARTICLE), INSTANT_SPELL("instantSpell", Effect.Type.PARTICLE), WITCH_MAGIC("witchMagic", Effect.Type.PARTICLE), NOTE("note", Effect.Type.PARTICLE), PORTAL("portal", Effect.Type.PARTICLE), FLYING_GLYPH("enchantmenttable", Effect.Type.PARTICLE), FLAME("flame", Effect.Type.PARTICLE), LAVA_POP("lava", Effect.Type.PARTICLE), FOOTSTEP("footstep", Effect.Type.PARTICLE), SPLASH("splash", Effect.Type.PARTICLE), PARTICLE_SMOKE("smoke", Effect.Type.PARTICLE), EXPLOSION_HUGE("hugeexplosion", Effect.Type.PARTICLE), EXPLOSION_LARGE("largeexplode", Effect.Type.PARTICLE), EXPLOSION("explode", Effect.Type.PARTICLE), VOID_FOG("depthsuspend", Effect.Type.PARTICLE), SMALL_SMOKE("townaura", Effect.Type.PARTICLE), CLOUD("cloud", Effect.Type.PARTICLE), COLOURED_DUST("reddust", Effect.Type.PARTICLE), SNOWBALL_BREAK("snowballpoof", Effect.Type.PARTICLE), WATERDRIP("dripWater", Effect.Type.PARTICLE), LAVADRIP("dripLava", Effect.Type.PARTICLE), SNOW_SHOVEL("snowshovel", Effect.Type.PARTICLE), SLIME("slime", Effect.Type.PARTICLE), HEART("heart", Effect.Type.PARTICLE), VILLAGER_THUNDERCLOUD("angryVillager", Effect.Type.PARTICLE), HAPPY_VILLAGER("happyVillager", Effect.Type.PARTICLE), LARGE_SMOKE("largesmoke", Effect.Type.PARTICLE), ITEM_BREAK("iconcrack", Effect.Type.PARTICLE, Material.class), TILE_BREAK("blockcrack", Effect.Type.PARTICLE, MaterialData.class), TILE_DUST("blockdust", Effect.Type.PARTICLE, MaterialData.class);
 
     private final int id;
-    private final Type type;
-    private final Class<?> data;
-    private static final Map<Integer, Effect> BY_ID = Maps.newHashMap();
-    private static final Map<String, Effect> BY_NAME = Maps.newHashMap();
+    private final Effect.Type type;
+    private final Class data;
+    private static final Map BY_ID = Maps.newHashMap();
+    private static final Map BY_NAME = Maps.newHashMap();
     private final String particleName;
 
-    private Effect(int id, Type type) {
-        this(id,type,null);
+    static {
+        Effect[] aeffect;
+        int i = (aeffect = values()).length;
+
+        int j;
+        Effect effect;
+
+        for (j = 0; j < i; ++j) {
+            effect = aeffect[j];
+            if (effect.type != Effect.Type.PARTICLE) {
+                Effect.BY_ID.put(Integer.valueOf(effect.id), effect);
+            }
+        }
+
+        i = (aeffect = values()).length;
+
+        for (j = 0; j < i; ++j) {
+            effect = aeffect[j];
+            if (effect.type == Effect.Type.PARTICLE) {
+                Effect.BY_NAME.put(effect.particleName, effect);
+            }
+        }
+
     }
 
-    private Effect(int id, Type type, Class<?> data) {
+    private Effect(int id, Effect.Type type) {
+        this(id, type, (Class) null);
+    }
+
+    private Effect(int id, Effect.Type type, Class data) {
         this.id = id;
         this.type = type;
         this.data = data;
-        particleName = null;
+        this.particleName = null;
     }
 
-    private Effect(String particleName, Type type, Class<?> data) {
+    private Effect(String particleName, Effect.Type type, Class data) {
         this.particleName = particleName;
         this.type = type;
-        id = 0;
+        this.id = 0;
         this.data = data;
     }
 
-    private Effect(String particleName, Type type) {
+    private Effect(String particleName, Effect.Type type) {
         this.particleName = particleName;
         this.type = type;
-        id = 0;
+        this.id = 0;
         this.data = null;
     }
 
-    /**
-     * Gets the ID for this effect.
-     *
-     * @return if this Effect isn't of type PARTICLE it returns ID of this effect
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public int getId() {
         return this.id;
     }
 
-    /**
-     * Returns the effect's name. This returns null if the effect is not a particle
-     *
-     * @return The effect's name
-     */
     public String getName() {
-        return particleName;
+        return this.particleName;
     }
 
-    /**
-     * @return The type of the effect.
-     */
-    public Type getType() {
+    public Effect.Type getType() {
         return this.type;
     }
 
-    /**
-     * @return if this Effect isn't of type PARTICLE it returns the class which represents data for this effect, or null if none
-     */
-    public Class<?> getData() {
+    public Class getData() {
         return this.data;
     }
 
-    /**
-     * Gets the Effect associated with the given ID.
-     *
-     * @param id ID of the Effect to return
-     * @return Effect with the given ID
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public static Effect getById(int id) {
-        return BY_ID.get(id);
+        return (Effect) Effect.BY_ID.get(Integer.valueOf(id));
     }
 
-    static {
-        for (Effect effect : values()) {
-            if (effect.type != Type.PARTICLE) {
-                BY_ID.put(effect.id, effect);
-            }
-        }
-    }
-
-    /**
-     * Gets the Effect associated with the given name.
-     *
-     * @param name name of the Effect to return
-     * @return Effect with the given name
-     */
     public static Effect getByName(String name) {
-        return BY_NAME.get(name);
+        return (Effect) Effect.BY_NAME.get(name);
     }
 
-    static {
-        for (Effect effect : values()) {
-            if (effect.type == Type.PARTICLE) {
-                BY_NAME.put(effect.particleName, effect);
-            }
-        }
-    }
+    public static enum Type {
 
-    /**
-     * Represents the type of an effect.
-     */
-    public enum Type {SOUND, VISUAL, PARTICLE}
+        SOUND, VISUAL, PARTICLE;
+    }
 }

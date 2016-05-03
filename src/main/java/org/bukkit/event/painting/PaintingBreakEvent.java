@@ -5,72 +5,44 @@ import org.bukkit.entity.Painting;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Triggered when a painting is removed
- *
- * @deprecated Use {@link org.bukkit.event.hanging.HangingBreakEvent} instead.
- */
+/** @deprecated */
 @Deprecated
-@Warning(reason="This event has been replaced by HangingBreakEvent")
+@Warning(
+    reason = "This event has been replaced by HangingBreakEvent"
+)
 public class PaintingBreakEvent extends PaintingEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
-    private final RemoveCause cause;
+    private final PaintingBreakEvent.RemoveCause cause;
 
-    public PaintingBreakEvent(final Painting painting, final RemoveCause cause) {
+    public PaintingBreakEvent(Painting painting, PaintingBreakEvent.RemoveCause cause) {
         super(painting);
         this.cause = cause;
     }
 
-    /**
-     * Gets the cause for the painting's removal
-     *
-     * @return the RemoveCause for the painting's removal
-     */
-    public RemoveCause getCause() {
-        return cause;
+    public PaintingBreakEvent.RemoveCause getCause() {
+        return this.cause;
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }
 
-    /**
-     * An enum to specify the cause of the removal
-     */
-    public enum RemoveCause {
-        /**
-         * Removed by an entity
-         */
-        ENTITY,
-        /**
-         * Removed by fire
-         */
-        FIRE,
-        /**
-         * Removed by placing a block on it
-         */
-        OBSTRUCTION,
-        /**
-         * Removed by water flowing over it
-         */
-        WATER,
-        /**
-         * Removed by destroying the block behind it, etc
-         */
-        PHYSICS,
-    }
-
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PaintingBreakEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PaintingBreakEvent.handlers;
+    }
+
+    public static enum RemoveCause {
+
+        ENTITY, FIRE, OBSTRUCTION, WATER, PHYSICS;
     }
 }

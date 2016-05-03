@@ -3,74 +3,51 @@ package org.bukkit.material;
 import org.bukkit.CropState;
 import org.bukkit.Material;
 
-/**
- * Represents the different types of crops.
- */
 public class Crops extends MaterialData {
+
     public Crops() {
         super(Material.CROPS);
     }
 
     public Crops(CropState state) {
         this();
-        setState(state);
+        this.setState(state);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Crops(final int type) {
+    public Crops(int type) {
         super(type);
     }
 
-    public Crops(final Material type) {
+    public Crops(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Crops(final int type, final byte data) {
+    public Crops(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Crops(final Material type, final byte data) {
+    public Crops(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current growth state of this crop
-     *
-     * @return CropState of this crop
-     */
     public CropState getState() {
-        return CropState.getByData(getData());
+        return CropState.getByData(this.getData());
     }
 
-    /**
-     * Sets the growth state of this crop
-     *
-     * @param state New growth state of this crop
-     */
     public void setState(CropState state) {
-        setData(state.getData());
+        this.setData(state.getData());
     }
 
-    @Override
     public String toString() {
-        return getState() + " " + super.toString();
+        return this.getState() + " " + super.toString();
     }
 
-    @Override
     public Crops clone() {
         return (Crops) super.clone();
     }

@@ -1,11 +1,13 @@
 package org.bukkit.command.defaults;
 
 import java.util.List;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
+/** @deprecated */
+@Deprecated
 public abstract class VanillaCommand extends Command {
+
     static final int MAX_COORD = 30000000;
     static final int MIN_COORD_MINUS_ONE = -30000001;
     static final int MIN_COORD = -30000000;
@@ -14,7 +16,7 @@ public abstract class VanillaCommand extends Command {
         super(name);
     }
 
-    protected VanillaCommand(String name, String description, String usageMessage, List<String> aliases) {
+    protected VanillaCommand(String name, String description, String usageMessage, List aliases) {
         super(name, description, usageMessage, aliases);
     }
 
@@ -23,21 +25,21 @@ public abstract class VanillaCommand extends Command {
     }
 
     protected int getInteger(CommandSender sender, String value, int min) {
-        return getInteger(sender, value, min, Integer.MAX_VALUE);
+        return this.getInteger(sender, value, min, Integer.MAX_VALUE);
     }
 
     int getInteger(CommandSender sender, String value, int min, int max) {
-        return getInteger(sender, value, min, max, false);
+        return this.getInteger(sender, value, min, max, false);
     }
 
     int getInteger(CommandSender sender, String value, int min, int max, boolean Throws) {
         int i = min;
 
         try {
-            i = Integer.valueOf(value);
-        } catch (NumberFormatException ex) {
+            i = Integer.valueOf(value).intValue();
+        } catch (NumberFormatException numberformatexception) {
             if (Throws) {
-                throw new NumberFormatException(String.format("%s is not a valid number", value));
+                throw new NumberFormatException(String.format("%s is not a valid number", new Object[] { value}));
             }
         }
 
@@ -53,7 +55,7 @@ public abstract class VanillaCommand extends Command {
     Integer getInteger(String value) {
         try {
             return Integer.valueOf(value);
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException numberformatexception) {
             return null;
         }
     }
@@ -61,10 +63,8 @@ public abstract class VanillaCommand extends Command {
     public static double getRelativeDouble(double original, CommandSender sender, String input) {
         if (input.startsWith("~")) {
             double value = getDouble(sender, input.substring(1));
-            if (value == MIN_COORD_MINUS_ONE) {
-                return MIN_COORD_MINUS_ONE;
-            }
-            return original + value;
+
+            return value == -3.0000001E7D ? -3.0000001E7D : original + value;
         } else {
             return getDouble(sender, input);
         }
@@ -73,15 +73,14 @@ public abstract class VanillaCommand extends Command {
     public static double getDouble(CommandSender sender, String input) {
         try {
             return Double.parseDouble(input);
-        } catch (NumberFormatException ex) {
-            return MIN_COORD_MINUS_ONE;
+        } catch (NumberFormatException numberformatexception) {
+            return -3.0000001E7D;
         }
     }
 
     public static double getDouble(CommandSender sender, String input, double min, double max) {
         double result = getDouble(sender, input);
 
-        // TODO: This should throw an exception instead.
         if (result < min) {
             result = min;
         } else if (result > max) {
@@ -92,13 +91,13 @@ public abstract class VanillaCommand extends Command {
     }
 
     String createString(String[] args, int start) {
-        return createString(args, start, " ");
+        return this.createString(args, start, " ");
     }
 
     String createString(String[] args, int start, String glue) {
         StringBuilder string = new StringBuilder();
 
-        for (int x = start; x < args.length; x++) {
+        for (int x = start; x < args.length; ++x) {
             string.append(args[x]);
             if (x != args.length - 1) {
                 string.append(glue);

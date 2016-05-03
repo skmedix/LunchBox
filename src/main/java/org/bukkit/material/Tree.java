@@ -4,133 +4,231 @@ import org.bukkit.Material;
 import org.bukkit.TreeSpecies;
 import org.bukkit.block.BlockFace;
 
-/**
- * Represents the different types of Trees.
- */
 public class Tree extends MaterialData {
+
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
+
     public Tree() {
         super(Material.LOG);
     }
 
     public Tree(TreeSpecies species) {
         this();
-        setSpecies(species);
+        this.setSpecies(species);
     }
 
     public Tree(TreeSpecies species, BlockFace dir) {
         this();
-        setSpecies(species);
-        setDirection(dir);
+        this.setSpecies(species);
+        this.setDirection(dir);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Tree(final int type) {
+    public Tree(int type) {
         super(type);
     }
 
-    public Tree(final Material type) {
+    public Tree(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Tree(final int type, final byte data) {
+    public Tree(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Tree(final Material type, final byte data) {
+    public Tree(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current species of this tree
-     *
-     * @return TreeSpecies of this tree
-     */
     public TreeSpecies getSpecies() {
-        return TreeSpecies.getByData((byte) (getData() & 0x3));
+        return TreeSpecies.getByData((byte) (this.getData() & 3));
     }
 
-    /**
-     * Sets the species of this tree
-     *
-     * @param species New species of this tree
-     */
     public void setSpecies(TreeSpecies species) {
-        setData((byte) ((getData() & 0xC) | species.getData()));
+        this.setData((byte) (this.getData() & 12 | species.getData()));
     }
 
-    /**
-     * Get direction of the log
-     *
-     * @return one of:
-     *     <ul>
-     *     <li>BlockFace.TOP for upright (default)
-     *     <li>BlockFace.NORTH (east-west)
-     *     <li>BlockFace.WEST (north-south)
-     *     <li>BlockFace.SELF (directionless)
-     *     </ul>
-     */
     public BlockFace getDirection() {
-        switch ((getData() >> 2) & 0x3) {
-            case 0: // Up-down
-            default:
-                return BlockFace.UP;
-            case 1: // North-south
-                return BlockFace.WEST;
-            case 2: // East-west
-                return BlockFace.NORTH;
-            case 3: // Directionless (bark on all sides)
-                return BlockFace.SELF;
+        switch (this.getData() >> 2 & 3) {
+        case 0:
+        default:
+            return BlockFace.UP;
+
+        case 1:
+            return BlockFace.WEST;
+
+        case 2:
+            return BlockFace.NORTH;
+
+        case 3:
+            return BlockFace.SELF;
         }
     }
-    /**
-     * Set direction of the log
-     *
-     * @param dir - direction of end of log (BlockFace.SELF for no direction)
-     */
+
     public void setDirection(BlockFace dir) {
-        int dat;
-        switch (dir) {
-            case UP:
-            case DOWN:
-            default:
-                dat = 0;
-                break;
-            case WEST:
-            case EAST:
-                dat = 1;
-                break;
-            case NORTH:
-            case SOUTH:
-                dat = 2;
-                break;
-            case SELF:
-                dat = 3;
-                break;
+        byte dat;
+
+        switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[dir.ordinal()]) {
+        case 1:
+        case 3:
+            dat = 2;
+            break;
+
+        case 2:
+        case 4:
+            dat = 1;
+            break;
+
+        case 5:
+        case 6:
+        default:
+            dat = 0;
+            break;
+
+        case 19:
+            dat = 3;
         }
-        setData((byte) ((getData() & 0x3) | (dat << 2)));
+
+        this.setData((byte) (this.getData() & 3 | dat << 2));
     }
 
-    @Override
     public String toString() {
-        return getSpecies() + " " + getDirection() + " " + super.toString();
+        return this.getSpecies() + " " + this.getDirection() + " " + super.toString();
     }
 
-    @Override
     public Tree clone() {
         return (Tree) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = Tree.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (Tree.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            Tree.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

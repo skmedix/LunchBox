@@ -2,38 +2,15 @@ package org.bukkit.block;
 
 import org.bukkit.inventory.FurnaceInventory;
 
-/**
- * Represents a furnace.
- */
 public interface Furnace extends BlockState, ContainerBlock {
 
-    /**
-     * Get burn time.
-     *
-     * @return Burn time
-     */
-    public short getBurnTime();
+    short getBurnTime();
 
-    /**
-     * Set burn time.
-     *
-     * @param burnTime Burn time
-     */
-    public void setBurnTime(short burnTime);
+    void setBurnTime(short short0);
 
-    /**
-     * Get cook time.
-     *
-     * @return Cook time
-     */
-    public short getCookTime();
+    short getCookTime();
 
-    /**
-     * Set cook time.
-     *
-     * @param cookTime Cook time
-     */
-    public void setCookTime(short cookTime);
+    void setCookTime(short short0);
 
-    public FurnaceInventory getInventory();
+    FurnaceInventory getInventory();
 }

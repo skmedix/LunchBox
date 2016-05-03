@@ -1,72 +1,40 @@
 package org.bukkit;
 
+import com.google.common.collect.Maps;
 import java.util.Map;
 
-import org.bukkit.entity.HumanEntity;
-
-import com.google.common.collect.Maps;
-
-/**
- * Represents the various type of game modes that {@link HumanEntity}s may
- * have
- */
 public enum GameMode {
-    // Cauldron start - FakePlayers do not set their gametype and use the default
-    /**
-     * Default mode
-     */
-    NOT_SET(-1),
-    // Cauldron end
-    /**
-     * Creative mode may fly, build instantly, become invulnerable and create
-     * free items.
-     */
-    CREATIVE(1),
 
-    /**
-     * Survival mode is the "normal" gameplay type, with no special features.
-     */
-    SURVIVAL(0),
-
-    /**
-     * Adventure mode cannot break blocks, use chat, use buckets, etc.
-     */
-    ADVENTURE(2);
+    CREATIVE(1), SURVIVAL(0), ADVENTURE(2), SPECTATOR(3);
 
     private final int value;
-    private final static Map<Integer, GameMode> BY_ID = Maps.newHashMap();
+    private static final Map BY_ID = Maps.newHashMap();
 
-    private GameMode(final int value) {
+    static {
+        GameMode[] agamemode;
+        int i = (agamemode = values()).length;
+
+        for (int j = 0; j < i; ++j) {
+            GameMode mode = agamemode[j];
+
+            GameMode.BY_ID.put(Integer.valueOf(mode.getValue()), mode);
+        }
+
+    }
+
+    private GameMode(int value) {
         this.value = value;
     }
 
-    /**
-     * Gets the mode value associated with this GameMode
-     *
-     * @return An integer value of this gamemode
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public int getValue() {
-        return value;
+        return this.value;
     }
 
-    /**
-     * Gets the GameMode represented by the specified value
-     *
-     * @param value Value to check
-     * @return Associative {@link GameMode} with the given value, or null if
-     *     it doesn't exist
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public static GameMode getByValue(final int value) {
-        return BY_ID.get(value);
-    }
-
-    static {
-        for (GameMode mode : values()) {
-            BY_ID.put(mode.getValue(), mode);
-        }
+    public static GameMode getByValue(int value) {
+        return (GameMode) GameMode.BY_ID.get(Integer.valueOf(value));
     }
 }

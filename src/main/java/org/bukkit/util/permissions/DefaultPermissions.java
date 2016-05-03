@@ -6,10 +6,9 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
 public final class DefaultPermissions {
+
     private static final String ROOT = "craftbukkit";
     private static final String LEGACY_PREFIX = "craft";
-
-    private DefaultPermissions() {}
 
     public static Permission registerPermission(Permission perm) {
         return registerPermission(perm, true);
@@ -20,13 +19,14 @@ public final class DefaultPermissions {
 
         try {
             Bukkit.getPluginManager().addPermission(perm);
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException illegalargumentexception) {
             result = Bukkit.getPluginManager().getPermission(perm.getName());
         }
 
         if (withLegacy) {
-            Permission legacy = new Permission(LEGACY_PREFIX + result.getName(), result.getDescription(), PermissionDefault.FALSE);
-            legacy.getChildren().put(result.getName(), true);
+            Permission legacy = new Permission("craft" + result.getName(), result.getDescription(), PermissionDefault.FALSE);
+
+            legacy.getChildren().put(result.getName(), Boolean.valueOf(true));
             registerPermission(perm, false);
         }
 
@@ -34,49 +34,54 @@ public final class DefaultPermissions {
     }
 
     public static Permission registerPermission(Permission perm, Permission parent) {
-        parent.getChildren().put(perm.getName(), true);
+        parent.getChildren().put(perm.getName(), Boolean.valueOf(true));
         return registerPermission(perm);
     }
 
     public static Permission registerPermission(String name, String desc) {
         Permission perm = registerPermission(new Permission(name, desc));
+
         return perm;
     }
 
     public static Permission registerPermission(String name, String desc, Permission parent) {
         Permission perm = registerPermission(name, desc);
-        parent.getChildren().put(perm.getName(), true);
+
+        parent.getChildren().put(perm.getName(), Boolean.valueOf(true));
         return perm;
     }
 
     public static Permission registerPermission(String name, String desc, PermissionDefault def) {
         Permission perm = registerPermission(new Permission(name, desc, def));
+
         return perm;
     }
 
     public static Permission registerPermission(String name, String desc, PermissionDefault def, Permission parent) {
         Permission perm = registerPermission(name, desc, def);
-        parent.getChildren().put(perm.getName(), true);
+
+        parent.getChildren().put(perm.getName(), Boolean.valueOf(true));
         return perm;
     }
 
-    public static Permission registerPermission(String name, String desc, PermissionDefault def, Map<String, Boolean> children) {
+    public static Permission registerPermission(String name, String desc, PermissionDefault def, Map children) {
         Permission perm = registerPermission(new Permission(name, desc, def, children));
+
         return perm;
     }
 
-    public static Permission registerPermission(String name, String desc, PermissionDefault def, Map<String, Boolean> children, Permission parent) {
+    public static Permission registerPermission(String name, String desc, PermissionDefault def, Map children, Permission parent) {
         Permission perm = registerPermission(name, desc, def, children);
-        parent.getChildren().put(perm.getName(), true);
+
+        parent.getChildren().put(perm.getName(), Boolean.valueOf(true));
         return perm;
     }
 
     public static void registerCorePermissions() {
-        Permission parent = registerPermission(ROOT, "Gives the user the ability to use all CraftBukkit utilities and commands");
+        Permission parent = registerPermission("craftbukkit", "Gives the user the ability to use all CraftBukkit utilities and commands");
 
         CommandPermissions.registerPermissions(parent);
         BroadcastPermissions.registerPermissions(parent);
-
         parent.recalculatePermissibles();
     }
 }

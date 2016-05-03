@@ -6,10 +6,6 @@ import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when a note block is being played through player interaction or a
- * redstone current.
- */
 public class NotePlayEvent extends BlockEvent implements Cancellable {
 
     private static HandlerList handlers = new HandlerList();
@@ -24,36 +20,21 @@ public class NotePlayEvent extends BlockEvent implements Cancellable {
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }
 
-    /**
-     * Gets the {@link Instrument} to be used.
-     *
-     * @return the Instrument;
-     */
     public Instrument getInstrument() {
-        return instrument;
+        return this.instrument;
     }
 
-    /**
-     * Gets the {@link Note} to be played.
-     *
-     * @return the Note.
-     */
     public Note getNote() {
-        return note;
+        return this.note;
     }
 
-    /**
-     * Overrides the {@link Instrument} to be used.
-     *
-     * @param instrument the Instrument. Has no effect if null.
-     */
     public void setInstrument(Instrument instrument) {
         if (instrument != null) {
             this.instrument = instrument;
@@ -61,23 +42,18 @@ public class NotePlayEvent extends BlockEvent implements Cancellable {
 
     }
 
-    /**
-     * Overrides the {@link Note} to be played.
-     *
-     * @param note the Note. Has no effect if null.
-     */
     public void setNote(Note note) {
         if (note != null) {
             this.note = note;
         }
+
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return NotePlayEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return NotePlayEvent.handlers;
     }
 }

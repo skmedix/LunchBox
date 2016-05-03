@@ -3,74 +3,51 @@ package org.bukkit.material;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 
-/**
- * Represents a Wool/Cloth block
- */
 public class Wool extends MaterialData implements Colorable {
+
     public Wool() {
         super(Material.WOOL);
     }
 
     public Wool(DyeColor color) {
         this();
-        setColor(color);
+        this.setColor(color);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Wool(final int type) {
+    public Wool(int type) {
         super(type);
     }
 
-    public Wool(final Material type) {
+    public Wool(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Wool(final int type, final byte data) {
+    public Wool(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Wool(final Material type, final byte data) {
+    public Wool(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current color of this dye
-     *
-     * @return DyeColor of this dye
-     */
     public DyeColor getColor() {
-        return DyeColor.getByWoolData(getData());
+        return DyeColor.getByWoolData(this.getData());
     }
 
-    /**
-     * Sets the color of this dye
-     *
-     * @param color New color of this dye
-     */
     public void setColor(DyeColor color) {
-        setData(color.getWoolData());
+        this.setData(color.getWoolData());
     }
 
-    @Override
     public String toString() {
-        return getColor() + " " + super.toString();
+        return this.getColor() + " " + super.toString();
     }
 
-    @Override
     public Wool clone() {
         return (Wool) super.clone();
     }

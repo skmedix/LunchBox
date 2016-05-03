@@ -3,126 +3,236 @@ package org.bukkit.material;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 
-/**
- * Represents the tripwire hook
- */
 public class TripwireHook extends SimpleAttachableMaterialData implements Redstone {
+
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
 
     public TripwireHook() {
         super(Material.TRIPWIRE_HOOK);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public TripwireHook(final int type) {
+    public TripwireHook(int type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public TripwireHook(final int type, final byte data) {
+    public TripwireHook(int type, byte data) {
         super(type, data);
     }
 
     public TripwireHook(BlockFace dir) {
         this();
-        setFacingDirection(dir);
+        this.setFacingDirection(dir);
     }
 
-    /**
-     * Test if tripwire is connected
-     *
-     * @return true if connected, false if not
-     */
     public boolean isConnected() {
-        return (getData() & 0x4) != 0;
+        return (this.getData() & 4) != 0;
     }
 
-    /**
-     * Set tripwire connection state
-     *
-     * @param connected - true if connected, false if not
-     */
     public void setConnected(boolean connected) {
-        int dat = getData() & (0x8 | 0x3);
+        int dat = this.getData() & 11;
+
         if (connected) {
-            dat |= 0x4;
+            dat |= 4;
         }
-        setData((byte) dat);
+
+        this.setData((byte) dat);
     }
 
-    /**
-     * Test if hook is currently activated
-     *
-     * @return true if activated, false if not
-     */
     public boolean isActivated() {
-        return (getData() & 0x8) != 0;
+        return (this.getData() & 8) != 0;
     }
 
-    /**
-     * Set hook activated state
-     *
-     * @param act - true if activated, false if not
-     */
     public void setActivated(boolean act) {
-        int dat = getData() & (0x4 | 0x3);
+        int dat = this.getData() & 7;
+
         if (act) {
-            dat |= 0x8;
+            dat |= 8;
         }
-        setData((byte) dat);
+
+        this.setData((byte) dat);
     }
 
     public void setFacingDirection(BlockFace face) {
-        int dat = getData() & 0xC;
-        switch (face) {
-        case WEST:
-            dat |= 0x1;
+        int dat = this.getData() & 12;
+
+        switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+        case 1:
+            dat |= 2;
             break;
-        case NORTH:
-            dat |= 0x2;
-            break;
-        case EAST:
-            dat |= 0x3;
-            break;
-        case SOUTH:
+
+        case 2:
+            dat |= 3;
+
+        case 3:
         default:
             break;
+
+        case 4:
+            dat |= 1;
         }
-        setData((byte) dat);
+
+        this.setData((byte) dat);
     }
 
     public BlockFace getAttachedFace() {
-        switch (getData() & 0x3) {
+        switch (this.getData() & 3) {
         case 0:
             return BlockFace.NORTH;
+
         case 1:
             return BlockFace.EAST;
+
         case 2:
             return BlockFace.SOUTH;
+
         case 3:
             return BlockFace.WEST;
+
+        default:
+            return null;
         }
-        return null;
     }
 
     public boolean isPowered() {
-        return isActivated();
+        return this.isActivated();
     }
 
-    @Override
     public TripwireHook clone() {
         return (TripwireHook) super.clone();
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " facing " + getFacing() + (isActivated()?" Activated":"") + (isConnected()?" Connected":"");
+        return super.toString() + " facing " + this.getFacing() + (this.isActivated() ? " Activated" : "") + (this.isConnected() ? " Connected" : "");
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = TripwireHook.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (TripwireHook.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            TripwireHook.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

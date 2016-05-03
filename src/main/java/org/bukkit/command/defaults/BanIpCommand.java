@@ -1,8 +1,10 @@
 package org.bukkit.command.defaults;
 
+import com.google.common.collect.ImmutableList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanList;
@@ -12,9 +14,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.ImmutableList;
-
+/** @deprecated */
+@Deprecated
 public class BanIpCommand extends VanillaCommand {
+
     public static final Pattern ipValidity = Pattern.compile("^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\.([01]?\\d\\d?|2[0-4]\\d|25[0-5])$");
 
     public BanIpCommand() {
@@ -24,37 +27,39 @@ public class BanIpCommand extends VanillaCommand {
         this.setPermission("bukkit.command.ban.ip");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length < 1)  {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
             return false;
-        }
-
-        String reason = StringUtils.join(args, ' ', 1, args.length);
-
-        if (ipValidity.matcher(args[0]).matches()) {
-            processIPBan(args[0], sender, reason);
         } else {
-            Player player = Bukkit.getPlayer(args[0]);
+            String reason = args.length > 0 ? StringUtils.join(args, ' ', 1, args.length) : null;
 
-            if (player == null) {
-                sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
-                return false;
+            if (BanIpCommand.ipValidity.matcher(args[0]).matches()) {
+                this.processIPBan(args[0], sender, reason);
+            } else {
+                Player player = Bukkit.getPlayer(args[0]);
+
+                if (player == null) {
+                    sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
+                    return false;
+                }
+
+                this.processIPBan(player.getAddress().getAddress().getHostAddress(), sender, reason);
             }
 
-            processIPBan(player.getAddress().getAddress().getHostAddress(), sender, reason);
+            return true;
         }
-
-        return true;
     }
 
     private void processIPBan(String ip, CommandSender sender, String reason) {
-        Bukkit.getBanList(BanList.Type.IP).addBan(ip, reason, null, sender.getName());
+        Bukkit.getBanList(BanList.Type.IP).addBan(ip, reason, (Date) null, sender.getName());
+        Iterator iterator = Bukkit.getOnlinePlayers().iterator();
 
-        // Find all matching players and kick
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        while (iterator.hasNext()) {
+            Player player = (Player) iterator.next();
+
             if (player.getAddress().getAddress().getHostAddress().equals(ip)) {
                 player.kickPlayer("You have been IP banned.");
             }
@@ -63,15 +68,10 @@ public class BanIpCommand extends VanillaCommand {
         Command.broadcastCommandMessage(sender, "Banned IP Address " + ip);
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
-        if (args.length == 1) {
-            return super.tabComplete(sender, alias, args);
-        }
-        return ImmutableList.of();
+        return (List) (args.length == 1 ? super.tabComplete(sender, alias, args) : ImmutableList.of());
     }
 }

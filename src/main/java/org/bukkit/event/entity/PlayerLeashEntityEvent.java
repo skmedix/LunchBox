@@ -6,10 +6,8 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called immediately prior to a creature being leashed by a player.
- */
 public class PlayerLeashEntityEvent extends Event implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private final Entity leashHolder;
     private final Entity entity;
@@ -22,40 +20,24 @@ public class PlayerLeashEntityEvent extends Event implements Cancellable {
         this.player = leasher;
     }
 
-    /**
-     * Returns the entity that is holding the leash.
-     *
-     * @return The leash holder
-     */
     public Entity getLeashHolder() {
-        return leashHolder;
+        return this.leashHolder;
     }
 
-    /**
-     * Returns the entity being leashed.
-     *
-     * @return The entity
-     */
     public Entity getEntity() {
-        return entity;
+        return this.entity;
     }
 
-    /**
-     * Returns the player involved in this event
-     *
-     * @return Player who is involved in this event
-     */
     public final Player getPlayer() {
-        return player;
+        return this.player;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PlayerLeashEntityEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PlayerLeashEntityEvent.handlers;
     }
 
     public boolean isCancelled() {
@@ -63,6 +45,6 @@ public class PlayerLeashEntityEvent extends Event implements Cancellable {
     }
 
     public void setCancelled(boolean cancel) {
-        this.cancelled  = cancel;
+        this.cancelled = cancel;
     }
 }

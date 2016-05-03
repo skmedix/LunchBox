@@ -2,15 +2,12 @@ package org.bukkit.material;
 
 import java.util.EnumSet;
 import java.util.Set;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 
-/**
- * Represents a huge mushroom block
- */
 public class Mushroom extends MaterialData {
+
     private static final byte SHROOM_NONE = 0;
     private static final byte SHROOM_STEM = 10;
     private static final byte NORTH_LIMIT = 4;
@@ -20,178 +17,292 @@ public class Mushroom extends MaterialData {
     private static final byte WEST_REMAINDER = 1;
     private static final byte NORTH_SOUTH_MOD = 3;
     private static final byte EAST_WEST_MOD = 1;
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
 
     public Mushroom(Material shroom) {
         super(shroom);
         Validate.isTrue(shroom == Material.HUGE_MUSHROOM_1 || shroom == Material.HUGE_MUSHROOM_2, "Not a mushroom!");
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public Mushroom(Material shroom, byte data) {
         super(shroom, data);
         Validate.isTrue(shroom == Material.HUGE_MUSHROOM_1 || shroom == Material.HUGE_MUSHROOM_2, "Not a mushroom!");
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Mushroom(int type, byte data){
+    public Mushroom(int type, byte data) {
         super(type, data);
         Validate.isTrue(type == Material.HUGE_MUSHROOM_1.getId() || type == Material.HUGE_MUSHROOM_2.getId(), "Not a mushroom!");
     }
 
-    /**
-     * @return Whether this is a mushroom stem.
-     */
     public boolean isStem() {
-        return getData() == SHROOM_STEM;
+        return this.getData() == 10;
     }
 
-    /**
-     * Sets this to be a mushroom stem.
-     */
     public void setStem() {
-        setData((byte) 10);
+        this.setData((byte) 10);
     }
 
-    /**
-     * Checks whether a face of the block is painted.
-     *
-     * @param face The face to check.
-     * @return True if it is painted.
-     */
     public boolean isFacePainted(BlockFace face) {
-        byte data = getData();
+        byte data = this.getData();
 
-        if (data == SHROOM_NONE || data == SHROOM_STEM) {
-            return false;
-        }
+        if (data != 0 && data != 10) {
+            switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+            case 1:
+                if (data % 3 == 0) {
+                    return true;
+                }
 
-        switch (face) {
-            case WEST:
-                return data < NORTH_LIMIT;
-            case EAST:
-                return data > SOUTH_LIMIT;
-            case NORTH:
-                return data % EAST_WEST_LIMIT == EAST_REMAINDER;
-            case SOUTH:
-                return data % EAST_WEST_LIMIT == WEST_REMAINDER;
-            case UP:
+                return false;
+
+            case 2:
+                if (data > 6) {
+                    return true;
+                }
+
+                return false;
+
+            case 3:
+                if (data % 3 == 1) {
+                    return true;
+                }
+
+                return false;
+
+            case 4:
+                if (data < 4) {
+                    return true;
+                }
+
+                return false;
+
+            case 5:
                 return true;
+
             default:
                 return false;
+            }
+        } else {
+            return false;
         }
     }
 
-    /**
-     * Set a face of the block to be painted or not. Note that due to the
-     * nature of how the data is stored, setting a face painted or not is not
-     * guaranteed to leave the other faces unchanged.
-     *
-     * @param face The face to paint or unpaint.
-     * @param painted True if you want to paint it, false if you want the
-     *     pores to show.
-     */
     public void setFacePainted(BlockFace face, boolean painted) {
-        if (painted == isFacePainted(face)) {
-            return;
-        }
+        if (painted != this.isFacePainted(face)) {
+            byte data = this.getData();
 
-        byte data = getData();
+            if (data == 10) {
+                data = 5;
+            }
 
-        if (data == SHROOM_STEM) {
-            data = 5;
-        }
-
-        switch (face) {
-            case WEST:
+            switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+            case 1:
                 if (painted) {
-                    data -= NORTH_SOUTH_MOD;
+                    ++data;
                 } else {
-                    data += NORTH_SOUTH_MOD;
+                    --data;
                 }
-
                 break;
-            case EAST:
+
+            case 2:
                 if (painted) {
-                    data += NORTH_SOUTH_MOD;
+                    data = (byte) (data + 3);
                 } else {
-                    data -= NORTH_SOUTH_MOD;
+                    data = (byte) (data - 3);
                 }
-
                 break;
-            case NORTH:
+
+            case 3:
                 if (painted) {
-                    data += EAST_WEST_MOD;
+                    --data;
                 } else {
-                    data -= EAST_WEST_MOD;
+                    ++data;
                 }
-
                 break;
-            case SOUTH:
+
+            case 4:
                 if (painted) {
-                    data -= EAST_WEST_MOD;
+                    data = (byte) (data - 3);
                 } else {
-                    data += EAST_WEST_MOD;
+                    data = (byte) (data + 3);
                 }
-
                 break;
-            case UP:
+
+            case 5:
                 if (!painted) {
                     data = 0;
                 }
-
                 break;
-            default:
-                throw new IllegalArgumentException("Can't paint that face of a mushroom!");
-        }
 
-        setData(data);
+            default:
+                throw new IllegalArgumentException("Can\'t paint that face of a mushroom!");
+            }
+
+            this.setData(data);
+        }
     }
 
-    /**
-     * @return A set of all faces that are currently painted (an empty set if
-     *     it is a stem)
-     */
-    public Set<BlockFace> getPaintedFaces() {
-        EnumSet<BlockFace> faces = EnumSet.noneOf(BlockFace.class);
+    public Set getPaintedFaces() {
+        EnumSet faces = EnumSet.noneOf(BlockFace.class);
 
-        if (isFacePainted(BlockFace.WEST)) {
+        if (this.isFacePainted(BlockFace.WEST)) {
             faces.add(BlockFace.WEST);
         }
 
-        if (isFacePainted(BlockFace.NORTH)) {
+        if (this.isFacePainted(BlockFace.NORTH)) {
             faces.add(BlockFace.NORTH);
         }
 
-        if (isFacePainted(BlockFace.SOUTH)) {
+        if (this.isFacePainted(BlockFace.SOUTH)) {
             faces.add(BlockFace.SOUTH);
         }
 
-        if (isFacePainted(BlockFace.EAST)) {
+        if (this.isFacePainted(BlockFace.EAST)) {
             faces.add(BlockFace.EAST);
         }
 
-        if (isFacePainted(BlockFace.UP)) {
+        if (this.isFacePainted(BlockFace.UP)) {
             faces.add(BlockFace.UP);
         }
 
         return faces;
     }
 
-    @Override
     public String toString() {
-        return Material.getMaterial(getItemTypeId()).toString() + (isStem() ? "{STEM}" : getPaintedFaces());
+        return Material.getMaterial(this.getItemTypeId()).toString() + (this.isStem() ? "{STEM}" : this.getPaintedFaces());
     }
 
-    @Override
     public Mushroom clone() {
         return (Mushroom) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = Mushroom.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (Mushroom.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            Mushroom.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

@@ -2,43 +2,30 @@ package org.bukkit.material;
 
 import org.bukkit.Material;
 
-/**
- * Represents a furnace or dispenser, two types of directional containers
- */
 public class FurnaceAndDispenser extends DirectionalContainer {
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public FurnaceAndDispenser(final int type) {
+    public FurnaceAndDispenser(int type) {
         super(type);
     }
 
-    public FurnaceAndDispenser(final Material type) {
+    public FurnaceAndDispenser(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public FurnaceAndDispenser(final int type, final byte data) {
+    public FurnaceAndDispenser(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public FurnaceAndDispenser(final Material type, final byte data) {
+    public FurnaceAndDispenser(Material type, byte data) {
         super(type, data);
     }
 
-    @Override
     public FurnaceAndDispenser clone() {
         return (FurnaceAndDispenser) super.clone();
     }

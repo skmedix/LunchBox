@@ -5,10 +5,8 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when a projectile is launched.
- */
 public class ProjectileLaunchEvent extends EntityEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
 
@@ -17,24 +15,22 @@ public class ProjectileLaunchEvent extends EntityEvent implements Cancellable {
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
-        cancelled = cancel;
+        this.cancelled = cancel;
     }
 
-    @Override
     public Projectile getEntity() {
-        return (Projectile) entity;
+        return (Projectile) this.entity;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return ProjectileLaunchEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return ProjectileLaunchEvent.handlers;
     }
 }

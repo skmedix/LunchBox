@@ -3,28 +3,23 @@ package org.bukkit.event.entity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when a projectile hits an object
- */
 public class ProjectileHitEvent extends EntityEvent {
+
     private static final HandlerList handlers = new HandlerList();
 
-    public ProjectileHitEvent(final Projectile projectile) {
+    public ProjectileHitEvent(Projectile projectile) {
         super(projectile);
     }
 
-    @Override
     public Projectile getEntity() {
-        return (Projectile) entity;
+        return (Projectile) this.entity;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return ProjectileHitEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return ProjectileHitEvent.handlers;
     }
-
 }

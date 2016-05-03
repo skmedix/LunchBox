@@ -1,8 +1,8 @@
 package org.bukkit.command.defaults;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -10,10 +10,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
 
-import com.google.common.collect.ImmutableList;
-
+/** @deprecated */
+@Deprecated
 public class DefaultGameModeCommand extends VanillaCommand {
-    private static final List<String> GAMEMODE_NAMES = ImmutableList.of("adventure", "creative", "survival");
+
+    private static final List GAMEMODE_NAMES = ImmutableList.of("adventure", "creative", "survival");
 
     public DefaultGameModeCommand() {
         super("defaultgamemode");
@@ -22,49 +23,46 @@ public class DefaultGameModeCommand extends VanillaCommand {
         this.setPermission("bukkit.command.defaultgamemode");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length == 0) {
-            sender.sendMessage("Usage: " + usageMessage);
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length == 0) {
+            sender.sendMessage("Usage: " + this.usageMessage);
             return false;
-        }
+        } else {
+            String modeArg = args[0];
+            int value = -1;
 
-        String modeArg = args[0];
-        int value = -1;
-
-        try {
-            value = Integer.parseInt(modeArg);
-        } catch (NumberFormatException ex) {}
-
-        GameMode mode = GameMode.getByValue(value);
-
-        if (mode == null) {
-            if (modeArg.equalsIgnoreCase("creative") || modeArg.equalsIgnoreCase("c")) {
-                mode = GameMode.CREATIVE;
-            } else if (modeArg.equalsIgnoreCase("adventure") || modeArg.equalsIgnoreCase("a")) {
-                mode = GameMode.ADVENTURE;
-            } else {
-                mode = GameMode.SURVIVAL;
+            try {
+                value = Integer.parseInt(modeArg);
+            } catch (NumberFormatException numberformatexception) {
+                ;
             }
+
+            GameMode mode = GameMode.getByValue(value);
+
+            if (mode == null) {
+                if (!modeArg.equalsIgnoreCase("creative") && !modeArg.equalsIgnoreCase("c")) {
+                    if (!modeArg.equalsIgnoreCase("adventure") && !modeArg.equalsIgnoreCase("a")) {
+                        mode = GameMode.SURVIVAL;
+                    } else {
+                        mode = GameMode.ADVENTURE;
+                    }
+                } else {
+                    mode = GameMode.CREATIVE;
+                }
+            }
+
+            Bukkit.getServer().setDefaultGameMode(mode);
+            Command.broadcastCommandMessage(sender, "Default game mode set to " + mode.toString().toLowerCase());
+            return true;
         }
-
-        Bukkit.getServer().setDefaultGameMode(mode);
-        Command.broadcastCommandMessage(sender, "Default game mode set to " + mode.toString().toLowerCase());
-
-        return true;
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+    public List tabComplete(CommandSender sender, String alias, String[] args) {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
-        if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], GAMEMODE_NAMES, new ArrayList<String>(GAMEMODE_NAMES.size()));
-        }
-
-        return ImmutableList.of();
+        return (List) (args.length == 1 ? (List) StringUtil.copyPartialMatches(args[0], DefaultGameModeCommand.GAMEMODE_NAMES, new ArrayList(DefaultGameModeCommand.GAMEMODE_NAMES.size())) : ImmutableList.of());
     }
 }

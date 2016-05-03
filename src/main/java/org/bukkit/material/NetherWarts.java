@@ -3,97 +3,121 @@ package org.bukkit.material;
 import org.bukkit.Material;
 import org.bukkit.NetherWartsState;
 
-/**
- * Represents nether wart
- */
 public class NetherWarts extends MaterialData {
+
+    private static int[] $SWITCH_TABLE$org$bukkit$NetherWartsState;
+
     public NetherWarts() {
         super(Material.NETHER_WARTS);
     }
 
     public NetherWarts(NetherWartsState state) {
         this();
-        setState(state);
+        this.setState(state);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public NetherWarts(final int type) {
+    public NetherWarts(int type) {
         super(type);
     }
 
-    public NetherWarts(final Material type) {
-        super (type);
+    public NetherWarts(Material type) {
+        super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public NetherWarts(final int type, final byte data) {
+    public NetherWarts(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public NetherWarts(final Material type, final byte data) {
+    public NetherWarts(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current growth state of this nether wart
-     *
-     * @return NetherWartsState of this nether wart
-     */
     public NetherWartsState getState() {
-        switch (getData()) {
-            case 0:
-                return NetherWartsState.SEEDED;
-            case 1:
-                return NetherWartsState.STAGE_ONE;
-            case 2:
-                return NetherWartsState.STAGE_TWO;
-            default:
-                return NetherWartsState.RIPE;
+        switch (this.getData()) {
+        case 0:
+            return NetherWartsState.SEEDED;
+
+        case 1:
+            return NetherWartsState.STAGE_ONE;
+
+        case 2:
+            return NetherWartsState.STAGE_TWO;
+
+        default:
+            return NetherWartsState.RIPE;
         }
     }
 
-    /**
-     * Sets the growth state of this nether wart
-     *
-     * @param state New growth state of this nether wart
-     */
     public void setState(NetherWartsState state) {
-        switch (state) {
-            case SEEDED:
-                setData((byte) 0x0);
-                return;
-            case STAGE_ONE:
-                setData((byte) 0x1);
-                return;
-            case STAGE_TWO:
-                setData((byte) 0x2);
-                return;
-            case RIPE:
-                setData((byte) 0x3);
-                return;
+        switch ($SWITCH_TABLE$org$bukkit$NetherWartsState()[state.ordinal()]) {
+        case 1:
+            this.setData((byte) 0);
+            return;
+
+        case 2:
+            this.setData((byte) 1);
+            return;
+
+        case 3:
+            this.setData((byte) 2);
+            return;
+
+        case 4:
+            this.setData((byte) 3);
+            return;
+
+        default:
         }
     }
 
-    @Override
     public String toString() {
-        return getState() + " " + super.toString();
+        return this.getState() + " " + super.toString();
     }
 
-    @Override
     public NetherWarts clone() {
         return (NetherWarts) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$NetherWartsState() {
+        int[] aint = NetherWarts.$SWITCH_TABLE$org$bukkit$NetherWartsState;
+
+        if (NetherWarts.$SWITCH_TABLE$org$bukkit$NetherWartsState != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[NetherWartsState.values().length];
+
+            try {
+                aint1[NetherWartsState.RIPE.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[NetherWartsState.SEEDED.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[NetherWartsState.STAGE_ONE.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[NetherWartsState.STAGE_TWO.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            NetherWarts.$SWITCH_TABLE$org$bukkit$NetherWartsState = aint1;
+            return aint1;
+        }
     }
 }

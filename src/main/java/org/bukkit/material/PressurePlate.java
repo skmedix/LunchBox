@@ -2,18 +2,13 @@ package org.bukkit.material;
 
 import org.bukkit.Material;
 
-/**
- * Represents a pressure plate
- */
 public class PressurePlate extends MaterialData implements PressureSensor {
+
     public PressurePlate() {
         super(Material.WOOD_PLATE);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public PressurePlate(int type) {
         super(type);
@@ -23,34 +18,26 @@ public class PressurePlate extends MaterialData implements PressureSensor {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public PressurePlate(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public PressurePlate(Material type, byte data) {
         super(type, data);
     }
 
     public boolean isPressed() {
-        return getData() == 0x1;
+        return this.getData() == 1;
     }
 
-    @Override
     public String toString() {
-        return super.toString() + (isPressed() ? " PRESSED" : "");
+        return super.toString() + (this.isPressed() ? " PRESSED" : "");
     }
 
-    @Override
     public PressurePlate clone() {
         return (PressurePlate) super.clone();
     }

@@ -1,135 +1,90 @@
 package org.bukkit.material;
 
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
-/**
- * Handles specific metadata for certain items or blocks
- */
 public class MaterialData implements Cloneable {
+
     private final int type;
-    private byte data = 0;
+    private byte data;
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public MaterialData(final int type) {
+    public MaterialData(int type) {
         this(type, (byte) 0);
     }
 
-    public MaterialData(final Material type) {
+    public MaterialData(Material type) {
         this(type, (byte) 0);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public MaterialData(final int type, final byte data) {
+    public MaterialData(int type, byte data) {
+        this.data = 0;
         this.type = type;
         this.data = data;
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public MaterialData(final Material type, final byte data) {
+    public MaterialData(Material type, byte data) {
         this(type.getId(), data);
     }
 
-    /**
-     * Gets the raw data in this material
-     *
-     * @return Raw data
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public byte getData() {
-        return data;
+        return this.data;
     }
 
-    /**
-     * Sets the raw data of this material
-     *
-     * @param data New raw data
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public void setData(byte data) {
         this.data = data;
     }
 
-    /**
-     * Gets the Material that this MaterialData represents
-     *
-     * @return Material represented by this MaterialData
-     */
     public Material getItemType() {
-        return Material.getMaterial(type);
+        return Material.getMaterial(this.type);
     }
 
-    /**
-     * Gets the Material Id that this MaterialData represents
-     *
-     * @return Material Id represented by this MaterialData
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public int getItemTypeId() {
-        return type;
+        return this.type;
     }
 
-    /**
-     * Creates a new ItemStack based on this MaterialData
-     *
-     * @return New ItemStack containing a copy of this MaterialData
-     */
     public ItemStack toItemStack() {
-        return new ItemStack(type, 0, data);
+        return new ItemStack(this.type, 0, this.data);
     }
 
-    /**
-     * Creates a new ItemStack based on this MaterialData
-     *
-     * @param amount The stack size of the new stack
-     * @return New ItemStack containing a copy of this MaterialData
-     */
     public ItemStack toItemStack(int amount) {
-        return new ItemStack(type, amount, data);
+        return new ItemStack(this.type, amount, this.data);
     }
 
-    @Override
     public String toString() {
-        return getItemType() + "(" + getData() + ")";
+        return this.getItemType() + "(" + this.getData() + ")";
     }
 
-    @Override
     public int hashCode() {
-        return ((getItemTypeId() << 8) ^ getData());
+        return this.getItemTypeId() << 8 ^ this.getData();
     }
 
-    @Override
     public boolean equals(Object obj) {
         if (obj != null && obj instanceof MaterialData) {
             MaterialData md = (MaterialData) obj;
 
-            return (md.getItemTypeId() == getItemTypeId() && md.getData() == getData());
+            return md.getItemTypeId() == this.getItemTypeId() && md.getData() == this.getData();
         } else {
             return false;
         }
     }
 
-    @Override
     public MaterialData clone() {
         try {
             return (MaterialData) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new Error(e);
+        } catch (CloneNotSupportedException clonenotsupportedexception) {
+            throw new Error(clonenotsupportedexception);
         }
     }
 }

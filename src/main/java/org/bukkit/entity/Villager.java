@@ -1,69 +1,44 @@
 package org.bukkit.entity;
 
-/**
- * Represents a villager NPC
- */
 public interface Villager extends Ageable, NPC {
 
-    /**
-     * Gets the current profession of this villager.
-     *
-     * @return Current profession.
-     */
-    public Profession getProfession();
+    Villager.Profession getProfession();
 
-    /**
-     * Sets the new profession of this villager.
-     *
-     * @param profession New profession.
-     */
-    public void setProfession(Profession profession);
+    void setProfession(Villager.Profession villager_profession);
 
+    public static enum Profession {
 
-    /**
-     * Represents the various different Villager professions there may be.
-     */
-    public enum Profession {
-        FARMER(0),
-        LIBRARIAN(1),
-        PRIEST(2),
-        BLACKSMITH(3),
-        BUTCHER(4);
+        FARMER(0), LIBRARIAN(1), PRIEST(2), BLACKSMITH(3), BUTCHER(4);
 
-        private static final Profession[] professions = new Profession[Profession.values().length];
+        private static final Villager.Profession[] professions = new Villager.Profession[values().length];
         private final int id;
 
         static {
-            for (Profession type : values()) {
-                professions[type.getId()] = type;
+            Villager.Profession[] avillager_profession;
+            int i = (avillager_profession = values()).length;
+
+            for (int j = 0; j < i; ++j) {
+                Villager.Profession type = avillager_profession[j];
+
+                Villager.Profession.professions[type.getId()] = type;
             }
+
         }
 
         private Profession(int id) {
             this.id = id;
         }
 
-        /**
-         * Gets the ID of this profession.
-         *
-         * @return Profession ID.
-         * @deprecated Magic value
-         */
+        /** @deprecated */
         @Deprecated
         public int getId() {
-            return id;
+            return this.id;
         }
 
-        /**
-         * Gets a profession by its ID.
-         *
-         * @param id ID of the profession to get.
-         * @return Resulting profession, or null if not found.
-         * @deprecated Magic value
-         */
+        /** @deprecated */
         @Deprecated
-        public static Profession getProfession(int id) {
-            return (id >= professions.length) ? null : professions[id];
+        public static Villager.Profession getProfession(int id) {
+            return id >= Villager.Profession.professions.length ? null : Villager.Profession.professions[id];
         }
     }
 }

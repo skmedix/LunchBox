@@ -1,312 +1,103 @@
 package org.bukkit.entity;
 
-import org.bukkit.Location;
+import java.util.List;
+import java.util.UUID;
 import org.bukkit.EntityEffect;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-import java.util.UUID;
-import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+public interface Entity extends Metadatable, CommandSender {
 
-/**
- * Represents a base entity in the world
- */
-public interface Entity extends Metadatable {
+    Location getLocation();
 
-    /**
-     * Gets the entity's current position
-     *
-     * @return a new copy of Location containing the position of this entity
-     */
-    public Location getLocation();
+    Location getLocation(Location location);
 
-    /**
-     * Stores the entity's current position in the provided Location object.
-     * <p>
-     * If the provided Location is null this method does nothing and returns
-     * null.
-     *
-     * @return The Location object provided or null
-     */
-    public Location getLocation(Location loc);
+    void setVelocity(Vector vector);
 
-    /**
-     * Sets this entity's velocity
-     *
-     * @param velocity New velocity to travel with
-     */
-    public void setVelocity(Vector velocity);
+    Vector getVelocity();
 
-    /**
-     * Gets this entity's current velocity
-     *
-     * @return Current travelling velocity of this entity
-     */
-    public Vector getVelocity();
+    boolean isOnGround();
 
-    /**
-     * Returns true if the entity is supported by a block. This value is a
-     * state updated by the server and is not recalculated unless the entity
-     * moves.
-     *
-     * @return True if entity is on ground.
-     */
-    public boolean isOnGround();
+    World getWorld();
 
-    /**
-     * Gets the current world this entity resides in
-     *
-     * @return World
-     */
-    public World getWorld();
+    boolean teleport(Location location);
 
-    /**
-     * Teleports this entity to the given location
-     *
-     * @param location New location to teleport this entity to
-     * @return <code>true</code> if the teleport was successful
-     */
-    public boolean teleport(Location location);
+    boolean teleport(Location location, PlayerTeleportEvent.TeleportCause playerteleportevent_teleportcause);
 
-    /**
-     * Teleports this entity to the given location
-     *
-     * @param location New location to teleport this entity to
-     * @param cause The cause of this teleportation
-     * @return <code>true</code> if the teleport was successful
-     */
-    public boolean teleport(Location location, TeleportCause cause);
+    boolean teleport(Entity entity);
 
-    /**
-     * Teleports this entity to the target Entity
-     *
-     * @param destination Entity to teleport this entity to
-     * @return <code>true</code> if the teleport was successful
-     */
-    public boolean teleport(Entity destination);
+    boolean teleport(Entity entity, PlayerTeleportEvent.TeleportCause playerteleportevent_teleportcause);
 
-    /**
-     * Teleports this entity to the target Entity
-     *
-     * @param destination Entity to teleport this entity to
-     * @param cause The cause of this teleportation
-     * @return <code>true</code> if the teleport was successful
-     */
-    public boolean teleport(Entity destination, TeleportCause cause);
+    List getNearbyEntities(double d0, double d1, double d2);
 
-    /**
-     * Returns a list of entities within a bounding box centered around this
-     * entity
-     *
-     * @param x 1/2 the size of the box along x axis
-     * @param y 1/2 the size of the box along y axis
-     * @param z 1/2 the size of the box along z axis
-     * @return List<Entity> List of entities nearby
-     */
-    public List<org.bukkit.entity.Entity> getNearbyEntities(double x, double y, double z);
+    int getEntityId();
 
-    /**
-     * Returns a unique id for this entity
-     *
-     * @return Entity id
-     */
-    public int getEntityId();
+    int getFireTicks();
 
-    /**
-     * Returns the entity's current fire ticks (ticks before the entity stops
-     * being on fire).
-     *
-     * @return int fireTicks
-     */
-    public int getFireTicks();
+    int getMaxFireTicks();
 
-    /**
-     * Returns the entity's maximum fire ticks.
-     *
-     * @return int maxFireTicks
-     */
-    public int getMaxFireTicks();
+    void setFireTicks(int i);
 
-    /**
-     * Sets the entity's current fire ticks (ticks before the entity stops
-     * being on fire).
-     *
-     * @param ticks Current ticks remaining
-     */
-    public void setFireTicks(int ticks);
+    void remove();
 
-    /**
-     * Mark the entity's removal.
-     */
-    public void remove();
+    boolean isDead();
 
-    /**
-     * Returns true if this entity has been marked for removal.
-     *
-     * @return True if it is dead.
-     */
-    public boolean isDead();
+    boolean isValid();
 
-    /**
-     * Returns false if the entity has died or been despawned for some other
-     * reason.
-     *
-     * @return True if valid.
-     */
-    public boolean isValid();
+    Server getServer();
 
-    /**
-     * Gets the {@link Server} that contains this Entity
-     *
-     * @return Server instance running this Entity
-     */
-    public Server getServer();
+    Entity getPassenger();
 
-    /**
-     * Gets the primary passenger of a vehicle. For vehicles that could have
-     * multiple passengers, this will only return the primary passenger.
-     *
-     * @return an entity
-     */
-    public abstract Entity getPassenger();
+    boolean setPassenger(Entity entity);
 
-    /**
-     * Set the passenger of a vehicle.
-     *
-     * @param passenger The new passenger.
-     * @return false if it could not be done for whatever reason
-     */
-    public abstract boolean setPassenger(Entity passenger);
+    boolean isEmpty();
 
-    /**
-     * Check if a vehicle has passengers.
-     *
-     * @return True if the vehicle has no passengers.
-     */
-    public abstract boolean isEmpty();
+    boolean eject();
 
-    /**
-     * Eject any passenger.
-     *
-     * @return True if there was a passenger.
-     */
-    public abstract boolean eject();
+    float getFallDistance();
 
-    /**
-     * Returns the distance this entity has fallen
-     *
-     * @return The distance.
-     */
-    public float getFallDistance();
+    void setFallDistance(float f);
 
-    /**
-     * Sets the fall distance for this entity
-     *
-     * @param distance The new distance.
-     */
-    public void setFallDistance(float distance);
+    void setLastDamageCause(EntityDamageEvent entitydamageevent);
 
-    /**
-     * Record the last {@link EntityDamageEvent} inflicted on this entity
-     *
-     * @param event a {@link EntityDamageEvent}
-     */
-    public void setLastDamageCause(EntityDamageEvent event);
+    EntityDamageEvent getLastDamageCause();
 
-    /**
-     * Retrieve the last {@link EntityDamageEvent} inflicted on this entity.
-     * This event may have been cancelled.
-     *
-     * @return the last known {@link EntityDamageEvent} or null if hitherto
-     *     unharmed
-     */
-    public EntityDamageEvent getLastDamageCause();
+    UUID getUniqueId();
 
-    /**
-     * Returns a unique and persistent id for this entity
-     *
-     * @return unique id
-     */
-    public UUID getUniqueId();
+    int getTicksLived();
 
-    /**
-     * Gets the amount of ticks this entity has lived for.
-     * <p>
-     * This is the equivalent to "age" in entities.
-     *
-     * @return Age of entity
-     */
-    public int getTicksLived();
+    void setTicksLived(int i);
 
-    /**
-     * Sets the amount of ticks this entity has lived for.
-     * <p>
-     * This is the equivalent to "age" in entities. May not be less than one
-     * tick.
-     *
-     * @param value Age of entity
-     */
-    public void setTicksLived(int value);
+    void playEffect(EntityEffect entityeffect);
 
-    /**
-     * Performs the specified {@link EntityEffect} for this entity.
-     * <p>
-     * This will be viewable to all players near the entity.
-     *
-     * @param type Effect to play.
-     */
-    public void playEffect(EntityEffect type);
+    EntityType getType();
 
-    /**
-     * Get the type of the entity.
-     *
-     * @return The entity type.
-     */
-    public EntityType getType();
+    boolean isInsideVehicle();
 
-    /**
-     * Returns whether this entity is inside a vehicle.
-     *
-     * @return True if the entity is in a vehicle.
-     */
-    public boolean isInsideVehicle();
+    boolean leaveVehicle();
 
-    /**
-     * Leave the current vehicle. If the entity is currently in a vehicle (and
-     * is removed from it), true will be returned, otherwise false will be
-     * returned.
-     *
-     * @return True if the entity was in a vehicle.
-     */
-    public boolean leaveVehicle();
+    Entity getVehicle();
 
-    /**
-     * Get the vehicle that this player is inside. If there is no vehicle,
-     * null will be returned.
-     *
-     * @return The current vehicle.
-     */
-    public Entity getVehicle();
+    void setCustomName(String s);
 
-    // Spigot Start
-    public class Spigot
-    {
+    String getCustomName();
 
-        /**
-         * Returns whether this entity is invulnerable.
-         *         
-        * @return True if the entity is invulnerable.
-         */
-        public boolean isInvulnerable()
-        {
-            throw new UnsupportedOperationException( "Not supported yet." );
+    void setCustomNameVisible(boolean flag);
+
+    boolean isCustomNameVisible();
+
+    Entity.Spigot spigot();
+
+    public static class Spigot {
+
+        public boolean isInvulnerable() {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-
-    Spigot spigot();
-    // Spigot End
 }

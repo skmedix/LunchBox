@@ -1,135 +1,72 @@
 package org.bukkit.event.player;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fish;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 
-/**
- * Thrown when a player is fishing
- */
 public class PlayerFishEvent extends PlayerEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private final Entity entity;
-    private boolean cancel = false;
+    private boolean cancel;
     private int exp;
-    private final State state;
+    private final PlayerFishEvent.State state;
     private final Fish hookEntity;
 
-    /**
-     * @deprecated replaced by {@link #PlayerFishEvent(Player, Entity, Fish,
-     *     State)} to include the {@link Fish} hook entity.
-     * @param player
-     * @param entity
-     * @param state
-     */
+    /** @deprecated */
     @Deprecated
-    public PlayerFishEvent(final Player player, final Entity entity, final State state) {
-        this(player, entity, null, state);
+    public PlayerFishEvent(Player player, Entity entity, PlayerFishEvent.State state) {
+        this(player, entity, (Fish) null, state);
     }
 
-    public PlayerFishEvent(final Player player, final Entity entity, final Fish hookEntity, final State state) {
+    public PlayerFishEvent(Player player, Entity entity, Fish hookEntity, PlayerFishEvent.State state) {
         super(player);
+        this.cancel = false;
         this.entity = entity;
         this.hookEntity = hookEntity;
         this.state = state;
     }
 
-    /**
-     * Gets the entity caught by the player
-     *
-     * @return Entity caught by the player, null if fishing, bobber has gotten
-     *     stuck in the ground or nothing has been caught
-     */
     public Entity getCaught() {
-        return entity;
+        return this.entity;
     }
 
-    /**
-     * Gets the fishing hook.
-     *
-     * @return Fish the entity representing the fishing hook/bobber.
-     */
     public Fish getHook() {
-        return hookEntity;
+        return this.hookEntity;
     }
 
     public boolean isCancelled() {
-        return cancel;
+        return this.cancel;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancel = cancel;
     }
 
-    /**
-     * Gets the amount of experience received when fishing.
-     * <p>
-     * Note: This value has no default effect unless the event state is {@link
-     * State#CAUGHT_FISH}.
-     *
-     * @return the amount of experience to drop
-     */
     public int getExpToDrop() {
-        return exp;
+        return this.exp;
     }
 
-    /**
-     * Sets the amount of experience received when fishing.
-     * <p>
-     * Note: This value has no default effect unless the event state is {@link
-     * State#CAUGHT_FISH}.
-     *
-     * @param amount the amount of experience to drop
-     */
     public void setExpToDrop(int amount) {
-        exp = amount;
+        this.exp = amount;
     }
 
-    /**
-     * Gets the state of the fishing
-     *
-     * @return A State detailing the state of the fishing
-     */
-    public State getState() {
-        return state;
+    public PlayerFishEvent.State getState() {
+        return this.state;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PlayerFishEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PlayerFishEvent.handlers;
     }
 
-    /**
-     * An enum to specify the state of the fishing
-     */
-    public enum State {
+    public static enum State {
 
-        /**
-         * When a player is fishing, ie casting the line out.
-         */
-        FISHING,
-        /**
-         * When a player has successfully caught a fish and is reeling it in.
-         */
-        CAUGHT_FISH,
-        /**
-         * When a player has successfully caught an entity
-         */
-        CAUGHT_ENTITY,
-        /**
-         * When a bobber is stuck in the ground
-         */
-        IN_GROUND,
-        /**
-         * When a player fails to catch anything while fishing usually due to
-         * poor aiming or timing
-         */
-        FAILED_ATTEMPT,
+        FISHING, CAUGHT_FISH, CAUGHT_ENTITY, IN_GROUND, FAILED_ATTEMPT;
     }
 }

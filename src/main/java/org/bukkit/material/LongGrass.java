@@ -3,74 +3,51 @@ package org.bukkit.material;
 import org.bukkit.GrassSpecies;
 import org.bukkit.Material;
 
-/**
- * Represents the different types of long grasses.
- */
 public class LongGrass extends MaterialData {
+
     public LongGrass() {
         super(Material.LONG_GRASS);
     }
 
     public LongGrass(GrassSpecies species) {
         this();
-        setSpecies(species);
+        this.setSpecies(species);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public LongGrass(final int type) {
+    public LongGrass(int type) {
         super(type);
     }
 
-    public LongGrass(final Material type) {
+    public LongGrass(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public LongGrass(final int type, final byte data) {
+    public LongGrass(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public LongGrass(final Material type, final byte data) {
+    public LongGrass(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current species of this grass
-     *
-     * @return GrassSpecies of this grass
-     */
     public GrassSpecies getSpecies() {
-        return GrassSpecies.getByData(getData());
+        return GrassSpecies.getByData(this.getData());
     }
 
-    /**
-     * Sets the species of this grass
-     *
-     * @param species New species of this grass
-     */
     public void setSpecies(GrassSpecies species) {
-        setData(species.getData());
+        this.setData(species.getData());
     }
 
-    @Override
     public String toString() {
-        return getSpecies() + " " + super.toString();
+        return this.getSpecies() + " " + super.toString();
     }
 
-    @Override
     public LongGrass clone() {
         return (LongGrass) super.clone();
     }

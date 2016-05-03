@@ -3,74 +3,51 @@ package org.bukkit.material;
 import org.bukkit.CoalType;
 import org.bukkit.Material;
 
-/**
- * Represents the different types of coals.
- */
 public class Coal extends MaterialData {
+
     public Coal() {
         super(Material.COAL);
     }
 
     public Coal(CoalType type) {
         this();
-        setType(type);
+        this.setType(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Coal(final int type) {
+    public Coal(int type) {
         super(type);
     }
 
-    public Coal(final Material type) {
+    public Coal(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Coal(final int type, final byte data) {
+    public Coal(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Coal(final Material type, final byte data) {
+    public Coal(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current type of this coal
-     *
-     * @return CoalType of this coal
-     */
     public CoalType getType() {
-        return CoalType.getByData(getData());
+        return CoalType.getByData(this.getData());
     }
 
-    /**
-     * Sets the type of this coal
-     *
-     * @param type New type of this coal
-     */
     public void setType(CoalType type) {
-        setData(type.getData());
+        this.setData(type.getData());
     }
 
-    @Override
     public String toString() {
-        return getType() + " " + super.toString();
+        return this.getType() + " " + super.toString();
     }
 
-    @Override
     public Coal clone() {
         return (Coal) super.clone();
     }

@@ -2,61 +2,42 @@ package org.bukkit.material;
 
 import org.bukkit.Material;
 
-/**
- * Represents redstone wire
- */
 public class RedstoneWire extends MaterialData implements Redstone {
+
     public RedstoneWire() {
         super(Material.REDSTONE_WIRE);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public RedstoneWire(final int type) {
+    public RedstoneWire(int type) {
         super(type);
     }
 
-    public RedstoneWire(final Material type) {
+    public RedstoneWire(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public RedstoneWire(final int type, final byte data) {
+    public RedstoneWire(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public RedstoneWire(final Material type, final byte data) {
+    public RedstoneWire(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current state of this Material, indicating if it's powered or
-     * unpowered
-     *
-     * @return true if powered, otherwise false
-     */
     public boolean isPowered() {
-        return getData() > 0;
+        return this.getData() > 0;
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " " + (isPowered() ? "" : "NOT ") + "POWERED";
+        return super.toString() + " " + (this.isPowered() ? "" : "NOT ") + "POWERED";
     }
 
-    @Override
     public RedstoneWire clone() {
         return (RedstoneWire) super.clone();
     }

@@ -5,47 +5,38 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Thrown when a LivingEntity is tamed
- */
 public class EntityTameEvent extends EntityEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
     private final AnimalTamer owner;
 
-    public EntityTameEvent(final LivingEntity entity, final AnimalTamer owner) {
+    public EntityTameEvent(LivingEntity entity, AnimalTamer owner) {
         super(entity);
         this.owner = owner;
     }
 
-    @Override
     public LivingEntity getEntity() {
-        return (LivingEntity) entity;
+        return (LivingEntity) this.entity;
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
-        cancelled = cancel;
+        this.cancelled = cancel;
     }
 
-    /**
-     * Gets the owning AnimalTamer
-     *
-     * @return the owning AnimalTamer
-     */
     public AnimalTamer getOwner() {
-        return owner;
+        return this.owner;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return EntityTameEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return EntityTameEvent.handlers;
     }
 }

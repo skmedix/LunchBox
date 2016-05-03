@@ -1,10 +1,14 @@
 package org.bukkit.command.defaults;
 
-import org.bukkit.Bukkit;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+/** @deprecated */
+@Deprecated
 public class TestForCommand extends VanillaCommand {
+
     public TestForCommand() {
         super("testfor");
         this.description = "Tests whether a specifed player is online";
@@ -12,27 +16,19 @@ public class TestForCommand extends VanillaCommand {
         this.setPermission("bukkit.command.testfor");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length < 1)  {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length < 1) {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
             return false;
+        } else {
+            sender.sendMessage(ChatColor.RED + "/testfor is only usable by commandblocks with analog output.");
+            return true;
         }
-
-        sender.sendMessage(ChatColor.RED + "/testfor is only usable by commandblocks with analog output.");
-        return true;
     }
 
-    // Spigot Start
-    @Override
-    public java.util.List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException
-    {
-        if ( args.length == 0 )
-        {
-            return super.tabComplete( sender, alias, args );
-        }
-        return java.util.Collections.emptyList();
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+        return args.length == 0 ? super.tabComplete(sender, alias, args) : Collections.emptyList();
     }
-    // Spigot End
 }

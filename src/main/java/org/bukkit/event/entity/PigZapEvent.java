@@ -6,59 +6,44 @@ import org.bukkit.entity.PigZombie;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Stores data for pigs being zapped
- */
 public class PigZapEvent extends EntityEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean canceled;
     private final PigZombie pigzombie;
     private final LightningStrike bolt;
 
-    public PigZapEvent(final Pig pig, final LightningStrike bolt, final PigZombie pigzombie) {
+    public PigZapEvent(Pig pig, LightningStrike bolt, PigZombie pigzombie) {
         super(pig);
         this.bolt = bolt;
         this.pigzombie = pigzombie;
     }
 
     public boolean isCancelled() {
-        return canceled;
+        return this.canceled;
     }
 
     public void setCancelled(boolean cancel) {
-        canceled = cancel;
+        this.canceled = cancel;
     }
 
-    @Override
     public Pig getEntity() {
-        return (Pig) entity;
+        return (Pig) this.entity;
     }
 
-    /**
-     * Gets the bolt which is striking the pig.
-     *
-     * @return lightning entity
-     */
     public LightningStrike getLightning() {
-        return bolt;
+        return this.bolt;
     }
 
-    /**
-     * Gets the zombie pig that will replace the pig, provided the event is
-     * not cancelled first.
-     *
-     * @return resulting entity
-     */
     public PigZombie getPigZombie() {
-        return pigzombie;
+        return this.pigzombie;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PigZapEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PigZapEvent.handlers;
     }
 }

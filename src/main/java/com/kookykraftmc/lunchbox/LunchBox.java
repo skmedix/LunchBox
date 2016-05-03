@@ -1,13 +1,16 @@
 package com.kookykraftmc.lunchbox;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.DedicatedPlayerList;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.event.CraftEventFactory;
+
+
+import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.plugin.PluginLoadOrder;
 
 import static java.util.logging.Level.INFO;
@@ -20,11 +23,11 @@ import java.util.logging.Logger;
 @Mod(name = "LunchBox", modid = "lunchbox", serverSideOnly = true, version = "0.0.1")
 public class LunchBox {
     public Logger logger = Logger.getLogger("lunchbox");
-    private CraftServer server;
+    private static CraftServer server;
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) throws Exception {
-        server = new CraftServer(MinecraftServer.getServer(), MinecraftServer.getServer().getConfigurationManager());
+        this.server = new CraftServer(MinecraftServer.getServer(), (DedicatedPlayerList) MinecraftServer.getServer().getConfigurationManager().playerEntityList);
         //will work on registering events later...
         //logger.log(INFO, "Registering events...");
 
@@ -48,5 +51,9 @@ public class LunchBox {
     public void onStopping(FMLServerStoppingEvent event) throws Exception {
         logger.log(INFO, "Disabling plugins...");
         server.disablePlugins();
+    }
+
+    public static CraftServer getServer() {
+        return server;
     }
 }

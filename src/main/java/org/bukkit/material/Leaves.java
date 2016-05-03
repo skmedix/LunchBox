@@ -3,74 +3,51 @@ package org.bukkit.material;
 import org.bukkit.Material;
 import org.bukkit.TreeSpecies;
 
-/**
- * Represents the different types of leaves.
- */
 public class Leaves extends MaterialData {
+
     public Leaves() {
         super(Material.LEAVES);
     }
 
     public Leaves(TreeSpecies species) {
         this();
-        setSpecies(species);
+        this.setSpecies(species);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Leaves(final int type) {
+    public Leaves(int type) {
         super(type);
     }
 
-    public Leaves(final Material type) {
+    public Leaves(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Leaves(final int type, final byte data) {
+    public Leaves(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Leaves(final Material type, final byte data) {
+    public Leaves(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current species of this leave
-     *
-     * @return TreeSpecies of this leave
-     */
     public TreeSpecies getSpecies() {
-        return TreeSpecies.getByData((byte) (getData() & 3));
+        return TreeSpecies.getByData((byte) (this.getData() & 3));
     }
 
-    /**
-     * Sets the species of this leave
-     *
-     * @param species New species of this leave
-     */
     public void setSpecies(TreeSpecies species) {
-        setData(species.getData());
+        this.setData(species.getData());
     }
 
-    @Override
     public String toString() {
-        return getSpecies() + " " + super.toString();
+        return this.getSpecies() + " " + super.toString();
     }
 
-    @Override
     public Leaves clone() {
         return (Leaves) super.clone();
     }

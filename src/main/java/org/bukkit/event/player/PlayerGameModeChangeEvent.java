@@ -5,42 +5,34 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when the GameMode of the player is changed.
- */
 public class PlayerGameModeChangeEvent extends PlayerEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
     private final GameMode newGameMode;
 
-    public PlayerGameModeChangeEvent(final Player player, final GameMode newGameMode) {
+    public PlayerGameModeChangeEvent(Player player, GameMode newGameMode) {
         super(player);
         this.newGameMode = newGameMode;
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }
 
-    /**
-     * Gets the GameMode the player is switched to.
-     *
-     * @return  player's new GameMode
-     */
     public GameMode getNewGameMode() {
-        return newGameMode;
+        return this.newGameMode;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PlayerGameModeChangeEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PlayerGameModeChangeEvent.handlers;
     }
 }

@@ -1,19 +1,22 @@
 package org.bukkit.command.defaults;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Difficulty;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.util.StringUtil;
-import org.bukkit.Difficulty;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/** @deprecated */
+@Deprecated
 public class DifficultyCommand extends VanillaCommand {
-    private static final List<String> DIFFICULTY_NAMES = ImmutableList.of("peaceful", "easy", "normal", "hard");
+
+    private static final List DIFFICULTY_NAMES = ImmutableList.of("peaceful", "easy", "normal", "hard");
 
     public DifficultyCommand() {
         super("difficulty");
@@ -22,60 +25,44 @@ public class DifficultyCommand extends VanillaCommand {
         this.setPermission("bukkit.command.difficulty");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length != 1 || args[0].length() == 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length == 1 && args[0].length() != 0) {
+            Difficulty difficulty = Difficulty.getByValue(this.getDifficultyForString(sender, args[0]));
+
+            if (Bukkit.isHardcore()) {
+                difficulty = Difficulty.HARD;
+            }
+
+            ((World) Bukkit.getWorlds().get(0)).setDifficulty(difficulty);
+            int levelCount = 1;
+
+            if (Bukkit.getAllowNether()) {
+                ((World) Bukkit.getWorlds().get(levelCount)).setDifficulty(difficulty);
+                ++levelCount;
+            }
+
+            if (Bukkit.getAllowEnd()) {
+                ((World) Bukkit.getWorlds().get(levelCount)).setDifficulty(difficulty);
+            }
+
+            Command.broadcastCommandMessage(sender, "Set difficulty to " + difficulty.toString());
+            return true;
+        } else {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
             return false;
         }
-
-        Difficulty difficulty = Difficulty.getByValue(getDifficultyForString(sender, args[0]));
-
-        if (Bukkit.isHardcore()) {
-            difficulty = Difficulty.HARD;
-        }
-
-        Bukkit.getWorlds().get(0).setDifficulty(difficulty);
-
-        int levelCount = 1;
-        if (Bukkit.getAllowNether()) {
-            Bukkit.getWorlds().get(levelCount).setDifficulty(difficulty);
-            levelCount++;
-        }
-
-        if (Bukkit.getAllowEnd()) {
-            Bukkit.getWorlds().get(levelCount).setDifficulty(difficulty);
-        }
-
-        Command.broadcastCommandMessage(sender, "Set difficulty to " + difficulty.toString());
-        return true;
     }
 
     protected int getDifficultyForString(CommandSender sender, String name) {
-        if (name.equalsIgnoreCase("peaceful") || name.equalsIgnoreCase("p")) {
-            return 0;
-        } else if (name.equalsIgnoreCase("easy") || name.equalsIgnoreCase("e")) {
-            return 1;
-        } else if (name.equalsIgnoreCase("normal") || name.equalsIgnoreCase("n")) {
-            return 2;
-        } else if (name.equalsIgnoreCase("hard") || name.equalsIgnoreCase("h")) {
-            return 3;
-        } else {
-            return getInteger(sender, name, 0, 3);
-        }
+        return !name.equalsIgnoreCase("peaceful") && !name.equalsIgnoreCase("p") ? (!name.equalsIgnoreCase("easy") && !name.equalsIgnoreCase("e") ? (!name.equalsIgnoreCase("normal") && !name.equalsIgnoreCase("n") ? (!name.equalsIgnoreCase("hard") && !name.equalsIgnoreCase("h") ? this.getInteger(sender, name, 0, 3) : 3) : 2) : 1) : 0;
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+    public List tabComplete(CommandSender sender, String alias, String[] args) {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
-        if (args.length == 1) {
-            return StringUtil.copyPartialMatches(args[0], DIFFICULTY_NAMES, new ArrayList<String>(DIFFICULTY_NAMES.size()));
-        }
-
-        return ImmutableList.of();
+        return (List) (args.length == 1 ? (List) StringUtil.copyPartialMatches(args[0], DifficultyCommand.DIFFICULTY_NAMES, new ArrayList(DifficultyCommand.DIFFICULTY_NAMES.size())) : ImmutableList.of());
     }
 }

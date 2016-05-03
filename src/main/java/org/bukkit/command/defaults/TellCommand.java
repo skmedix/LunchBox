@@ -1,60 +1,58 @@
 package org.bukkit.command.defaults;
 
 import java.util.Arrays;
-
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/** @deprecated */
+@Deprecated
 public class TellCommand extends VanillaCommand {
+
     public TellCommand() {
         super("tell");
         this.description = "Sends a private message to the given player";
         this.usageMessage = "/tell <player> <message>";
-        this.setAliases(Arrays.asList(new String[] { "w", "msg" }));
+        this.setAliases(Arrays.asList(new String[] { "w", "msg"}));
         this.setPermission("bukkit.command.tell");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length < 2)  {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length < 2) {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
             return false;
-        }
-
-        Player player = Bukkit.getPlayerExact(args[0]);
-
-        // If a player is hidden from the sender pretend they are offline
-        if (player == null || (sender instanceof Player && !((Player) sender).canSee(player))) {
-            sender.sendMessage("There's no player by that name online.");
         } else {
-            StringBuilder message = new StringBuilder();
+            Player player = Bukkit.getPlayerExact(args[0]);
 
-            for (int i = 1; i < args.length; i++) {
-                if (i > 1) message.append(" ");
-                message.append(args[i]);
+            if (player != null && (!(sender instanceof Player) || ((Player) sender).canSee(player))) {
+                StringBuilder message = new StringBuilder();
+
+                for (int result = 1; result < args.length; ++result) {
+                    if (result > 1) {
+                        message.append(" ");
+                    }
+
+                    message.append(args[result]);
+                }
+
+                String s = ChatColor.GRAY + sender.getName() + " whispers " + message;
+
+                sender.sendMessage("[" + sender.getName() + "->" + player.getName() + "] " + message);
+                player.sendMessage(s);
+            } else {
+                sender.sendMessage("There\'s no player by that name online.");
             }
 
-            String result = ChatColor.GRAY + sender.getName() + " whispers " + message;
-
-            sender.sendMessage("[" + sender.getName() + "->" + player.getName() + "] " + message);
-            player.sendMessage(result);
+            return true;
         }
-
-        return true;
     }
 
-    // Spigot Start
-    @Override
-    public java.util.List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException
-    {
-        if ( args.length == 0 )
-        {
-            return super.tabComplete( sender, alias, args );
-        }
-        return java.util.Collections.emptyList();
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+        return args.length == 0 ? super.tabComplete(sender, alias, args) : Collections.emptyList();
     }
-    // Spigot End
 }

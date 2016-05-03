@@ -8,69 +8,51 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
-/**
- * Triggered when a painting is created in the world
- *
- * @deprecated Use {@link org.bukkit.event.hanging.HangingPlaceEvent} instead.
- */
+/** @deprecated */
 @Deprecated
-@Warning(reason="This event has been replaced by HangingPlaceEvent")
+@Warning(
+    reason = "This event has been replaced by HangingPlaceEvent"
+)
 public class PaintingPlaceEvent extends PaintingEvent implements Cancellable {
+
     private static final HandlerList handlers = new HandlerList();
     private boolean cancelled;
     private final Player player;
     private final Block block;
     private final BlockFace blockFace;
 
-    public PaintingPlaceEvent(final Painting painting, final Player player, final Block block, final BlockFace blockFace) {
+    public PaintingPlaceEvent(Painting painting, Player player, Block block, BlockFace blockFace) {
         super(painting);
         this.player = player;
         this.block = block;
         this.blockFace = blockFace;
     }
 
-    /**
-     * Returns the player placing the painting
-     *
-     * @return Entity returns the player placing the painting
-     */
     public Player getPlayer() {
-        return player;
+        return this.player;
     }
 
-    /**
-     * Returns the block that the painting was placed on
-     *
-     * @return Block returns the block painting placed on
-     */
     public Block getBlock() {
-        return block;
+        return this.block;
     }
 
-    /**
-     * Returns the face of the block that the painting was placed on
-     *
-     * @return BlockFace returns the face of the block the painting was placed
-     *     on
-     */
     public BlockFace getBlockFace() {
-        return blockFace;
+        return this.blockFace;
     }
 
     public boolean isCancelled() {
-        return cancelled;
+        return this.cancelled;
     }
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
     }
 
-    @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return PaintingPlaceEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return PaintingPlaceEvent.handlers;
     }
 }

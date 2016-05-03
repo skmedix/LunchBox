@@ -4,19 +4,16 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
 public final class BroadcastPermissions {
-    private static final String ROOT = "bukkit.broadcast";
-    private static final String PREFIX = ROOT + ".";
 
-    private BroadcastPermissions() {}
+    private static final String ROOT = "bukkit.broadcast";
+    private static final String PREFIX = "bukkit.broadcast.";
 
     public static Permission registerPermissions(Permission parent) {
-        Permission broadcasts = DefaultPermissions.registerPermission(ROOT, "Allows the user to receive all broadcast messages", parent);
+        Permission broadcasts = DefaultPermissions.registerPermission("bukkit.broadcast", "Allows the user to receive all broadcast messages", parent);
 
-        DefaultPermissions.registerPermission(PREFIX + "admin", "Allows the user to receive administrative broadcasts", PermissionDefault.OP, broadcasts);
-        DefaultPermissions.registerPermission(PREFIX + "user", "Allows the user to receive user broadcasts", PermissionDefault.TRUE, broadcasts);
-
+        DefaultPermissions.registerPermission("bukkit.broadcast.admin", "Allows the user to receive administrative broadcasts", PermissionDefault.OP, broadcasts);
+        DefaultPermissions.registerPermission("bukkit.broadcast.user", "Allows the user to receive user broadcasts", PermissionDefault.TRUE, broadcasts);
         broadcasts.recalculatePermissibles();
-
         return broadcasts;
     }
 }

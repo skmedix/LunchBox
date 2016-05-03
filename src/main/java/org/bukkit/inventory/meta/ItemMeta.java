@@ -2,128 +2,59 @@ package org.bukkit.inventory.meta;
 
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemFlag;
 
-/**
- * This type represents the storage mechanism for auxiliary item data.
- * <p>
- * An implementation will handle the creation and application for ItemMeta.
- * This class should not be implemented by a plugin in a live environment.
- */
 public interface ItemMeta extends Cloneable, ConfigurationSerializable {
 
-    /**
-     * Checks for existence of a display name.
-     *
-     * @return true if this has a display name
-     */
     boolean hasDisplayName();
 
-    /**
-     * Gets the display name that is set.
-     * <p>
-     * Plugins should check that hasDisplayName() returns <code>true</code>
-     * before calling this method.
-     *
-     * @return the display name that is set
-     */
     String getDisplayName();
 
-    /**
-     * Sets the display name.
-     *
-     * @param name the name to set
-     */
-    void setDisplayName(String name);
+    void setDisplayName(String s);
 
-    /**
-     * Checks for existence of lore.
-     *
-     * @return true if this has lore
-     */
     boolean hasLore();
 
-    /**
-     * Gets the lore that is set.
-     * <p>
-     * Plugins should check if hasLore() returns <code>true</code> before
-     * calling this method.
-     * 
-     * @return a list of lore that is set
-     */
-    List<String> getLore();
+    List getLore();
 
-    /**
-     * Sets the lore for this item. 
-     * Removes lore when given null.
-     *
-     * @param lore the lore that will be set
-     */
-    void setLore(List<String> lore);
+    void setLore(List list);
 
-    /**
-     * Checks for the existence of any enchantments.
-     *
-     * @return true if an enchantment exists on this meta
-     */
     boolean hasEnchants();
 
-    /**
-     * Checks for existence of the specified enchantment.
-     *
-     * @param ench enchantment to check
-     * @return true if this enchantment exists for this meta
-     */
-    boolean hasEnchant(Enchantment ench);
+    boolean hasEnchant(Enchantment enchantment);
 
-    /**
-     * Checks for the level of the specified enchantment.
-     *
-     * @param ench enchantment to check
-     * @return The level that the specified enchantment has, or 0 if none
-     */
-    int getEnchantLevel(Enchantment ench);
+    int getEnchantLevel(Enchantment enchantment);
 
-    /**
-     * Returns a copy the enchantments in this ItemMeta.<br />
-     * Returns an empty map if none.
-     *
-     * @return An immutable copy of the enchantments
-     */
-    Map<Enchantment, Integer> getEnchants();
+    Map getEnchants();
 
-    /**
-     * Adds the specified enchantment to this item meta.
-     *
-     * @param ench Enchantment to add
-     * @param level Level for the enchantment
-     * @param ignoreLevelRestriction this indicates the enchantment should be
-     *     applied, ignoring the level limit
-     * @return true if the item meta changed as a result of this call, false
-     *     otherwise
-     */
-    boolean addEnchant(Enchantment ench, int level, boolean ignoreLevelRestriction);
+    boolean addEnchant(Enchantment enchantment, int i, boolean flag);
 
-    /**
-     * Removes the specified enchantment from this item meta.
-     *
-     * @param ench Enchantment to remove
-     * @return true if the item meta changed as a result of this call, false
-     *     otherwise
-     */
-    boolean removeEnchant(Enchantment ench);
+    boolean removeEnchant(Enchantment enchantment);
 
-   /**
-    * Checks if the specified enchantment conflicts with any enchantments in
-    * this ItemMeta.
-    *
-    * @param ench enchantment to test
-    * @return true if the enchantment conflicts, false otherwise
-    */
-    boolean hasConflictingEnchant(Enchantment ench);
+    boolean hasConflictingEnchant(Enchantment enchantment);
 
-    @SuppressWarnings("javadoc")
+    void addItemFlags(ItemFlag... aitemflag);
+
+    void removeItemFlags(ItemFlag... aitemflag);
+
+    Set getItemFlags();
+
+    boolean hasItemFlag(ItemFlag itemflag);
+
     ItemMeta clone();
+
+    ItemMeta.Spigot spigot();
+
+    public static class Spigot {
+
+        public void setUnbreakable(boolean unbreakable) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean isUnbreakable() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
 }

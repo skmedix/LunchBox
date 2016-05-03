@@ -3,64 +3,97 @@ package org.bukkit.permissions;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Represents the possible default values for permissions
- */
 public enum PermissionDefault {
-    TRUE("true"),
-    FALSE("false"),
-    OP("op", "isop", "operator", "isoperator", "admin", "isadmin"),
-    NOT_OP("!op", "notop", "!operator", "notoperator", "!admin", "notadmin");
+
+    TRUE(new String[] { "true"}), FALSE(new String[] { "false"}), OP(new String[] { "op", "isop", "operator", "isoperator", "admin", "isadmin"}), NOT_OP(new String[] { "!op", "notop", "!operator", "notoperator", "!admin", "notadmin"});
 
     private final String[] names;
-    private final static Map<String, PermissionDefault> lookup = new HashMap<String, PermissionDefault>();
+    private static final Map lookup = new HashMap();
+    private static int[] $SWITCH_TABLE$org$bukkit$permissions$PermissionDefault;
+
+    static {
+        PermissionDefault[] apermissiondefault;
+        int i = (apermissiondefault = values()).length;
+
+        for (int j = 0; j < i; ++j) {
+            PermissionDefault value = apermissiondefault[j];
+            String[] astring = value.names;
+            int k = value.names.length;
+
+            for (int l = 0; l < k; ++l) {
+                String name = astring[l];
+
+                PermissionDefault.lookup.put(name, value);
+            }
+        }
+
+    }
 
     private PermissionDefault(String... names) {
         this.names = names;
     }
 
-    /**
-     * Calculates the value of this PermissionDefault for the given operator
-     * value
-     *
-     * @param op If the target is op
-     * @return True if the default should be true, or false
-     */
     public boolean getValue(boolean op) {
-        switch (this) {
-        case TRUE:
+        switch ($SWITCH_TABLE$org$bukkit$permissions$PermissionDefault()[this.ordinal()]) {
+        case 1:
             return true;
-        case FALSE:
+
+        case 2:
             return false;
-        case OP:
+
+        case 3:
             return op;
-        case NOT_OP:
+
+        case 4:
             return !op;
+
         default:
             return false;
         }
     }
 
-    /**
-     * Looks up a PermissionDefault by name
-     *
-     * @param name Name of the default
-     * @return Specified value, or null if not found
-     */
     public static PermissionDefault getByName(String name) {
-        return lookup.get(name.toLowerCase().replaceAll("[^a-z!]", ""));
+        return (PermissionDefault) PermissionDefault.lookup.get(name.toLowerCase().replaceAll("[^a-z!]", ""));
     }
 
-    @Override
     public String toString() {
-        return names[0];
+        return this.names[0];
     }
 
-    static {
-        for (PermissionDefault value : values()) {
-            for (String name : value.names) {
-                lookup.put(name, value);
+    static int[] $SWITCH_TABLE$org$bukkit$permissions$PermissionDefault() {
+        int[] aint = PermissionDefault.$SWITCH_TABLE$org$bukkit$permissions$PermissionDefault;
+
+        if (PermissionDefault.$SWITCH_TABLE$org$bukkit$permissions$PermissionDefault != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[values().length];
+
+            try {
+                aint1[PermissionDefault.FALSE.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
             }
+
+            try {
+                aint1[PermissionDefault.NOT_OP.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[PermissionDefault.OP.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[PermissionDefault.TRUE.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            PermissionDefault.$SWITCH_TABLE$org$bukkit$permissions$PermissionDefault = aint1;
+            return aint1;
         }
     }
 }

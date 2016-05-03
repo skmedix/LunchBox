@@ -1,7 +1,7 @@
 package org.bukkit.command.defaults;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -9,9 +9,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.ImmutableList;
-
+/** @deprecated */
+@Deprecated
 public class ExpCommand extends VanillaCommand {
+
     public ExpCommand() {
         super("xp");
         this.description = "Gives the specified player a certain amount of experience. Specify <amount>L to give levels instead, with a negative amount resulting in taking levels.";
@@ -19,20 +20,22 @@ public class ExpCommand extends VanillaCommand {
         this.setPermission("bukkit.command.xp");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-
-        if (args.length > 0) {
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length <= 0) {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
+            return false;
+        } else {
             String inputAmount = args[0];
             Player player = null;
-
             boolean isLevel = inputAmount.endsWith("l") || inputAmount.endsWith("L");
+
             if (isLevel && inputAmount.length() > 1) {
                 inputAmount = inputAmount.substring(0, inputAmount.length() - 1);
             }
 
-            int amount = getInteger(sender, inputAmount, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int amount = this.getInteger(sender, inputAmount, Integer.MIN_VALUE, Integer.MAX_VALUE);
             boolean isTaking = amount < 0;
 
             if (isTaking) {
@@ -58,32 +61,24 @@ public class ExpCommand extends VanillaCommand {
                     if (isTaking) {
                         sender.sendMessage(ChatColor.RED + "Taking experience can only be done by levels, cannot give players negative experience points");
                         return false;
-                    } else {
-                        player.giveExp(amount);
-                        Command.broadcastCommandMessage(sender, "Given " + amount + " experience to " + player.getName());
                     }
+
+                    player.giveExp(amount);
+                    Command.broadcastCommandMessage(sender, "Given " + amount + " experience to " + player.getName());
                 }
+
+                return true;
             } else {
-                sender.sendMessage("Can't find player, was one provided?\n" + ChatColor.RED + "Usage: " + usageMessage);
+                sender.sendMessage("Can\'t find player, was one provided?\n" + ChatColor.RED + "Usage: " + this.usageMessage);
                 return false;
             }
-
-            return true;
         }
-
-        sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
-        return false;
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
-        if (args.length == 2) {
-            return super.tabComplete(sender, alias, args);
-        }
-        return ImmutableList.of();
+        return (List) (args.length == 2 ? super.tabComplete(sender, alias, args) : ImmutableList.of());
     }
 }

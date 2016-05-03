@@ -1,23 +1,21 @@
 package org.bukkit.util.io;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.util.Map;
-
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 
-import com.google.common.collect.ImmutableMap;
+class Wrapper implements Serializable {
 
-class Wrapper<T extends Map<String, ?> & Serializable> implements Serializable {
     private static final long serialVersionUID = -986209235411767547L;
+    final Map map;
 
-    final T map;
-
-    static Wrapper<ImmutableMap<String, ?>> newWrapper(ConfigurationSerializable obj) {
-        return new Wrapper<ImmutableMap<String, ?>>(ImmutableMap.<String, Object>builder().put(ConfigurationSerialization.SERIALIZED_TYPE_KEY, ConfigurationSerialization.getAlias(obj.getClass())).putAll(obj.serialize()).build());
+    static Wrapper newWrapper(ConfigurationSerializable obj) {
+        return new Wrapper(ImmutableMap.builder().put("==", ConfigurationSerialization.getAlias(obj.getClass())).putAll(obj.serialize()).build());
     }
 
-    private Wrapper(T map) {
+    private Wrapper(Map map) {
         this.map = map;
     }
 }

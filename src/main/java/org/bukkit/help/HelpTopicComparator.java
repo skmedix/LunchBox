@@ -1,48 +1,37 @@
 package org.bukkit.help;
 
-import org.bukkit.help.HelpTopic;
-
 import java.util.Comparator;
 
-/**
- * Used to impose a custom total ordering on help topics.
- * <p>
- * All topics are listed in alphabetic order, but topics that start with a
- * slash come after topics that don't.
- */
-public class HelpTopicComparator implements Comparator<HelpTopic> {
-    
-    // Singleton implementations
-    private static final TopicNameComparator tnc = new TopicNameComparator();
-    public static TopicNameComparator topicNameComparatorInstance() {
-        return tnc;
-    }
-    
+public class HelpTopicComparator implements Comparator {
+
+    private static final HelpTopicComparator.TopicNameComparator tnc = new HelpTopicComparator.TopicNameComparator((HelpTopicComparator.TopicNameComparator) null);
     private static final HelpTopicComparator htc = new HelpTopicComparator();
-    public static HelpTopicComparator helpTopicComparatorInstance() {
-        return htc;
+
+    public static HelpTopicComparator.TopicNameComparator topicNameComparatorInstance() {
+        return HelpTopicComparator.tnc;
     }
-    
-    private HelpTopicComparator() {}
+
+    public static HelpTopicComparator helpTopicComparatorInstance() {
+        return HelpTopicComparator.htc;
+    }
 
     public int compare(HelpTopic lhs, HelpTopic rhs) {
-        return tnc.compare(lhs.getName(), rhs.getName());
+        return HelpTopicComparator.tnc.compare(lhs.getName(), rhs.getName());
     }
 
-    public static class TopicNameComparator implements Comparator<String> {
-        private TopicNameComparator(){}
-        
+    public static class TopicNameComparator implements Comparator {
+
+        private TopicNameComparator() {}
+
         public int compare(String lhs, String rhs) {
             boolean lhsStartSlash = lhs.startsWith("/");
             boolean rhsStartSlash = rhs.startsWith("/");
-            
-            if (lhsStartSlash && !rhsStartSlash) {
-                return 1;
-            } else if (!lhsStartSlash && rhsStartSlash) {
-                return -1;
-            } else {
-                return lhs.compareToIgnoreCase(rhs);
-            }
+
+            return lhsStartSlash && !rhsStartSlash ? 1 : (!lhsStartSlash && rhsStartSlash ? -1 : lhs.compareToIgnoreCase(rhs));
+        }
+
+        TopicNameComparator(HelpTopicComparator.TopicNameComparator helptopiccomparator_topicnamecomparator) {
+            this();
         }
     }
 }

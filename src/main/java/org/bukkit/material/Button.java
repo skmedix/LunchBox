@@ -1,126 +1,236 @@
 package org.bukkit.material;
 
-import org.bukkit.block.BlockFace;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 
-/**
- * Represents a button
- */
 public class Button extends SimpleAttachableMaterialData implements Redstone {
+
+    private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
+
     public Button() {
         super(Material.STONE_BUTTON);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Button(final int type) {
+    public Button(int type) {
         super(type);
     }
 
-    public Button(final Material type) {
+    public Button(Material type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Button(final int type, final byte data) {
+    public Button(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public Button(final Material type, final byte data) {
+    public Button(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Gets the current state of this Material, indicating if it's powered or
-     * unpowered
-     *
-     * @return true if powered, otherwise false
-     */
     public boolean isPowered() {
-        return (getData() & 0x8) == 0x8;
+        return (this.getData() & 8) == 8;
     }
 
-    /**
-     * Sets the current state of this button
-     *
-     * @param bool
-     *            whether or not the button is powered
-     */
     public void setPowered(boolean bool) {
-        setData((byte) (bool ? (getData() | 0x8) : (getData() & ~0x8)));
+        this.setData((byte) (bool ? this.getData() | 8 : this.getData() & -9));
     }
 
-    /**
-     * Gets the face that this block is attached on
-     *
-     * @return BlockFace attached to
-     */
     public BlockFace getAttachedFace() {
-        byte data = (byte) (getData() & 0x7);
+        byte data = (byte) (this.getData() & 7);
 
         switch (data) {
-        case 0x1:
+        case 0:
+            return BlockFace.UP;
+
+        case 1:
             return BlockFace.WEST;
 
-        case 0x2:
+        case 2:
             return BlockFace.EAST;
 
-        case 0x3:
+        case 3:
             return BlockFace.NORTH;
 
-        case 0x4:
+        case 4:
             return BlockFace.SOUTH;
-        }
 
-        return null;
+        case 5:
+            return BlockFace.DOWN;
+
+        default:
+            return null;
+        }
     }
 
-    /**
-     * Sets the direction this button is pointing toward
-     */
     public void setFacingDirection(BlockFace face) {
-        byte data = (byte) (getData() & 0x8);
+        byte data = (byte) (this.getData() & 8);
 
-        switch (face) {
-        case EAST:
-            data |= 0x1;
+        switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
+        case 1:
+            data = (byte) (data | 4);
             break;
 
-        case WEST:
-            data |= 0x2;
+        case 2:
+            data = (byte) (data | 1);
             break;
 
-        case SOUTH:
-            data |= 0x3;
+        case 3:
+            data = (byte) (data | 3);
             break;
 
-        case NORTH:
-            data |= 0x4;
+        case 4:
+            data = (byte) (data | 2);
             break;
+
+        case 5:
+            data = (byte) (data | 5);
+            break;
+
+        case 6:
+            data = (byte) (data | 0);
         }
 
-        setData(data);
+        this.setData(data);
     }
 
-    @Override
     public String toString() {
-        return super.toString() + " " + (isPowered() ? "" : "NOT ") + "POWERED";
+        return super.toString() + " " + (this.isPowered() ? "" : "NOT ") + "POWERED";
     }
 
-    @Override
     public Button clone() {
         return (Button) super.clone();
+    }
+
+    static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace() {
+        int[] aint = Button.$SWITCH_TABLE$org$bukkit$block$BlockFace;
+
+        if (Button.$SWITCH_TABLE$org$bukkit$block$BlockFace != null) {
+            return aint;
+        } else {
+            int[] aint1 = new int[BlockFace.values().length];
+
+            try {
+                aint1[BlockFace.DOWN.ordinal()] = 6;
+            } catch (NoSuchFieldError nosuchfielderror) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST.ordinal()] = 2;
+            } catch (NoSuchFieldError nosuchfielderror1) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_NORTH_EAST.ordinal()] = 14;
+            } catch (NoSuchFieldError nosuchfielderror2) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.EAST_SOUTH_EAST.ordinal()] = 15;
+            } catch (NoSuchFieldError nosuchfielderror3) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH.ordinal()] = 1;
+            } catch (NoSuchFieldError nosuchfielderror4) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_EAST.ordinal()] = 7;
+            } catch (NoSuchFieldError nosuchfielderror5) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_EAST.ordinal()] = 13;
+            } catch (NoSuchFieldError nosuchfielderror6) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_NORTH_WEST.ordinal()] = 12;
+            } catch (NoSuchFieldError nosuchfielderror7) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.NORTH_WEST.ordinal()] = 8;
+            } catch (NoSuchFieldError nosuchfielderror8) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SELF.ordinal()] = 19;
+            } catch (NoSuchFieldError nosuchfielderror9) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH.ordinal()] = 3;
+            } catch (NoSuchFieldError nosuchfielderror10) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_EAST.ordinal()] = 9;
+            } catch (NoSuchFieldError nosuchfielderror11) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_EAST.ordinal()] = 16;
+            } catch (NoSuchFieldError nosuchfielderror12) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_SOUTH_WEST.ordinal()] = 17;
+            } catch (NoSuchFieldError nosuchfielderror13) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.SOUTH_WEST.ordinal()] = 10;
+            } catch (NoSuchFieldError nosuchfielderror14) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.UP.ordinal()] = 5;
+            } catch (NoSuchFieldError nosuchfielderror15) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST.ordinal()] = 4;
+            } catch (NoSuchFieldError nosuchfielderror16) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_NORTH_WEST.ordinal()] = 11;
+            } catch (NoSuchFieldError nosuchfielderror17) {
+                ;
+            }
+
+            try {
+                aint1[BlockFace.WEST_SOUTH_WEST.ordinal()] = 18;
+            } catch (NoSuchFieldError nosuchfielderror18) {
+                ;
+            }
+
+            Button.$SWITCH_TABLE$org$bukkit$block$BlockFace = aint1;
+            return aint1;
+        }
     }
 }

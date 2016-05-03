@@ -1,9 +1,10 @@
 package org.bukkit.command.defaults;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -12,12 +13,11 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
-import thermos.Thermos;
-import net.minecraft.server.MinecraftServer;
 
-import com.google.common.collect.ImmutableList;
-
+/** @deprecated */
+@Deprecated
 public class OpCommand extends VanillaCommand {
+
     public OpCommand() {
         super("op");
         this.description = "Gives the specified player operator status";
@@ -25,69 +25,53 @@ public class OpCommand extends VanillaCommand {
         this.setPermission("bukkit.command.op.give");
     }
 
-    @Override
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
-        if (!testPermission(sender)) return true;
-        if (args.length != 1 || args[0].length() == 0)  {
-            sender.sendMessage(ChatColor.RED + "Usage: " + usageMessage);
-            return false;
-        }
+        if (!this.testPermission(sender)) {
+            return true;
+        } else if (args.length == 1 && args[0].length() != 0) {
+            OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
 
-        OfflinePlayer player = Bukkit.getOfflinePlayer(args[0]);
-
-        if(MinecraftServer.thermosConfig.opConsoleOnly.getValue()) {
-
-            if(!(sender instanceof Player)) {
-                player.setOp(true);
-
-                Command.broadcastCommandMessage(sender, "Opped " + args[0]);
-                return true;
-            } else {
-                sender.sendMessage(ChatColor.RED + "This command can only be run in the console.");
-                return false;
-            }
-
-        } else {
             player.setOp(true);
-
             Command.broadcastCommandMessage(sender, "Opped " + args[0]);
             return true;
+        } else {
+            sender.sendMessage(ChatColor.RED + "Usage: " + this.usageMessage);
+            return false;
         }
-
     }
 
-    @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
         if (args.length == 1) {
             if (!(sender instanceof Player)) {
                 return ImmutableList.of();
-            }
+            } else {
+                String lastWord = args[0];
 
-            String lastWord = args[0];
-            if (lastWord.length() == 0) {
-                return ImmutableList.of();
-            }
+                if (lastWord.length() == 0) {
+                    return ImmutableList.of();
+                } else {
+                    Player senderPlayer = (Player) sender;
+                    ArrayList matchedPlayers = new ArrayList();
+                    Iterator iterator = sender.getServer().getOnlinePlayers().iterator();
 
-            Player senderPlayer = (Player) sender;
+                    while (iterator.hasNext()) {
+                        Player player = (Player) iterator.next();
+                        String name = player.getName();
 
-            ArrayList<String> matchedPlayers = new ArrayList<String>();
-            for (Player player : sender.getServer().getOnlinePlayers()) {
-                String name = player.getName();
-                if (!senderPlayer.canSee(player) || player.isOp()) {
-                    continue;
+                        if (senderPlayer.canSee(player) && !player.isOp() && StringUtil.startsWithIgnoreCase(name, lastWord)) {
+                            matchedPlayers.add(name);
+                        }
+                    }
+
+                    Collections.sort(matchedPlayers, String.CASE_INSENSITIVE_ORDER);
+                    return matchedPlayers;
                 }
-                if (StringUtil.startsWithIgnoreCase(name, lastWord)) {
-                    matchedPlayers.add(name);
-                }
             }
-
-            Collections.sort(matchedPlayers, String.CASE_INSENSITIVE_ORDER);
-            return matchedPlayers;
+        } else {
+            return ImmutableList.of();
         }
-        return ImmutableList.of();
     }
 }

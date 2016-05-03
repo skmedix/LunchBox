@@ -5,47 +5,36 @@ import java.util.Map;
 
 public enum PistonMoveReaction {
 
-    /**
-     * Indicates that the block can be pushed or pulled.
-     */
-    MOVE(0),
-    /**
-     * Indicates the block is fragile and will break if pushed on.
-     */
-    BREAK(1),
-    /**
-     * Indicates that the block will resist being pushed or pulled.
-     */
-    BLOCK(2);
+    MOVE(0), BREAK(1), BLOCK(2);
 
     private int id;
-    private static Map<Integer, PistonMoveReaction> byId = new HashMap<Integer, PistonMoveReaction>();
+    private static Map byId = new HashMap();
+
     static {
-        for (PistonMoveReaction reaction : PistonMoveReaction.values()) {
-            byId.put(reaction.id, reaction);
+        PistonMoveReaction[] apistonmovereaction;
+        int i = (apistonmovereaction = values()).length;
+
+        for (int j = 0; j < i; ++j) {
+            PistonMoveReaction reaction = apistonmovereaction[j];
+
+            PistonMoveReaction.byId.put(Integer.valueOf(reaction.id), reaction);
         }
+
     }
 
     private PistonMoveReaction(int id) {
         this.id = id;
     }
 
-    /**
-     * @return The ID of the move reaction
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public int getId() {
         return this.id;
     }
 
-    /**
-     * @param id An ID
-     * @return The move reaction with that ID
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public static PistonMoveReaction getById(int id) {
-        return byId.get(id);
+        return (PistonMoveReaction) PistonMoveReaction.byId.get(Integer.valueOf(id));
     }
 }

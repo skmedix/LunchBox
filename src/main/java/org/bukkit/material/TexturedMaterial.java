@@ -1,109 +1,69 @@
 package org.bukkit.material;
 
 import java.util.List;
-
 import org.bukkit.Material;
 
-/**
- * Represents textured materials like steps and smooth bricks
- */
 public abstract class TexturedMaterial extends MaterialData {
 
     public TexturedMaterial(Material m) {
         super(m);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     public TexturedMaterial(int type) {
         super(type);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public TexturedMaterial(final int type, final byte data) {
+    public TexturedMaterial(int type, byte data) {
         super(type, data);
     }
 
-    /**
-     *
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
-    public TexturedMaterial(final Material type, final byte data) {
+    public TexturedMaterial(Material type, byte data) {
         super(type, data);
     }
 
-    /**
-     * Retrieve a list of possible textures. The first element of the list
-     * will be used as a default.
-     *
-     * @return a list of possible textures for this block
-     */
-    public abstract List<Material> getTextures();
+    public abstract List getTextures();
 
-    /**
-     * Gets the current Material this block is made of
-     *
-     * @return Material of this block
-     */
     public Material getMaterial() {
-        int n = getTextureIndex();
-        if (n > getTextures().size() - 1) {
+        int n = this.getTextureIndex();
+
+        if (n > this.getTextures().size() - 1) {
             n = 0;
         }
 
-        return getTextures().get(n);
+        return (Material) this.getTextures().get(n);
     }
 
-    /**
-     * Sets the material this block is made of
-     *
-     * @param material
-     *            New material of this block
-     */
     public void setMaterial(Material material) {
-        if (getTextures().contains(material)) {
-            setTextureIndex(getTextures().indexOf(material));
+        if (this.getTextures().contains(material)) {
+            this.setTextureIndex(this.getTextures().indexOf(material));
         } else {
-            setTextureIndex(0x0);
+            this.setTextureIndex(0);
         }
+
     }
 
-    /**
-     * Get material index from data
-     *
-     * @return index of data in textures list
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     protected int getTextureIndex() {
-        return getData(); // Default to using all bits - override for other mappings
+        return this.getData();
     }
 
-    /**
-     * Set material index
-     *
-     * @param idx - index of data in textures list
-     * @deprecated Magic value
-     */
+    /** @deprecated */
     @Deprecated
     protected void setTextureIndex(int idx) {
-        setData((byte) idx); // Defult to using all bits - override for other mappings
+        this.setData((byte) idx);
     }
 
-    @Override
     public String toString() {
-        return getMaterial() + " " + super.toString();
+        return this.getMaterial() + " " + super.toString();
     }
 
-    @Override
     public TexturedMaterial clone() {
         return (TexturedMaterial) super.clone();
     }

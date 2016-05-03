@@ -1,35 +1,36 @@
 package org.bukkit.event.block;
 
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.HandlerList;
 
-/**
- * Called when a piston retracts
- */
 public class BlockPistonRetractEvent extends BlockPistonEvent {
+
     private static final HandlerList handlers = new HandlerList();
-    public BlockPistonRetractEvent(final Block block, final BlockFace direction) {
+    private List blocks;
+
+    public BlockPistonRetractEvent(Block block, List blocks, BlockFace direction) {
         super(block, direction);
+        this.blocks = blocks;
     }
 
-    /**
-     * Gets the location where the possible moving block might be if the
-     * retracting piston is sticky.
-     *
-     * @return The possible location of the possibly moving block.
-     */
+    /** @deprecated */
+    @Deprecated
     public Location getRetractLocation() {
-        return getBlock().getRelative(getDirection(), 2).getLocation();
+        return this.getBlock().getRelative(this.getDirection(), 2).getLocation();
     }
 
-    @Override
+    public List getBlocks() {
+        return this.blocks;
+    }
+
     public HandlerList getHandlers() {
-        return handlers;
+        return BlockPistonRetractEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return handlers;
+        return BlockPistonRetractEvent.handlers;
     }
 }

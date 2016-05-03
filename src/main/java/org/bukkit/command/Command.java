@@ -1,349 +1,224 @@
 package org.bukkit.command;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.util.StringUtil;
+import org.spigotmc.CustomTimingsHandler;
 
-import com.google.common.collect.ImmutableList;
-
-/**
- * Represents a Command, which executes various tasks upon user input
- */
 public abstract class Command {
-    private final String name;
+
+    private String name;
     private String nextLabel;
     private String label;
-    private List<String> aliases;
-    private List<String> activeAliases;
-    private CommandMap commandMap = null;
-    protected String description = "";
+    private List aliases;
+    private List activeAliases;
+    private CommandMap commandMap;
+    protected String description;
     protected String usageMessage;
     private String permission;
     private String permissionMessage;
-    public org.spigotmc.CustomTimingsHandler timings; // Spigot
+    public CustomTimingsHandler timings;
 
     protected Command(String name) {
-        this(name, "", "/" + name, new ArrayList<String>());
+        this(name, "", "/" + name, new ArrayList());
     }
 
-    protected Command(String name, String description, String usageMessage, List<String> aliases) {
+    protected Command(String name, String description, String usageMessage, List aliases) {
+        this.commandMap = null;
+        this.description = "";
         this.name = name;
         this.nextLabel = name;
         this.label = name;
         this.description = description;
         this.usageMessage = usageMessage;
         this.aliases = aliases;
-        this.activeAliases = new ArrayList<String>(aliases);
-        this.timings = new org.spigotmc.CustomTimingsHandler("** Command: " + name); // Spigot
+        this.activeAliases = new ArrayList(aliases);
+        this.timings = new CustomTimingsHandler("** Command: " + name);
     }
 
-    /**
-     * Executes the command, returning its success
-     *
-     * @param sender Source object which is executing this command
-     * @param commandLabel The alias of the command used
-     * @param args All arguments passed to the command, split via ' '
-     * @return true if the command was successful, otherwise false
-     */
-    public abstract boolean execute(CommandSender sender, String commandLabel, String[] args);
+    public abstract boolean execute(CommandSender commandsender, String s, String[] astring);
 
-    /**
-     * @deprecated This method is not supported and returns null
-     */
+    /** @deprecated */
     @Deprecated
-    public List<String> tabComplete(CommandSender sender, String[] args) {
+    public List tabComplete(CommandSender sender, String[] args) {
         return null;
     }
 
-    /**
-     * Executed on tab completion for this command, returning a list of
-     * options the player can tab through.
-     *
-     * @param sender Source object which is executing this command
-     * @param alias the alias being used
-     * @param args All arguments passed to the command, split via ' '
-     * @return a list of tab-completions for the specified arguments. This
-     *     will never be null. List may be immutable.
-     * @throws IllegalArgumentException if sender, alias, or args is null
-     */
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
+    public List tabComplete(CommandSender sender, String alias, String[] args) throws IllegalArgumentException {
         Validate.notNull(sender, "Sender cannot be null");
         Validate.notNull(args, "Arguments cannot be null");
         Validate.notNull(alias, "Alias cannot be null");
-
         if (args.length == 0) {
             return ImmutableList.of();
-        }
+        } else {
+            String lastWord = args[args.length - 1];
+            Player senderPlayer = sender instanceof Player ? (Player) sender : null;
+            ArrayList matchedPlayers = new ArrayList();
+            Iterator iterator = sender.getServer().getOnlinePlayers().iterator();
 
-        String lastWord = args[args.length - 1];
+            while (iterator.hasNext()) {
+                Player player = (Player) iterator.next();
+                String name = player.getName();
 
-        Player senderPlayer = sender instanceof Player ? (Player) sender : null;
-
-        ArrayList<String> matchedPlayers = new ArrayList<String>();
-        for (Player player : sender.getServer().getOnlinePlayers()) {
-            String name = player.getName();
-            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
-                matchedPlayers.add(name);
+                if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
+                    matchedPlayers.add(name);
+                }
             }
+
+            Collections.sort(matchedPlayers, String.CASE_INSENSITIVE_ORDER);
+            return matchedPlayers;
         }
-
-        Collections.sort(matchedPlayers, String.CASE_INSENSITIVE_ORDER);
-        return matchedPlayers;
     }
 
-    /**
-     * Returns the name of this command
-     *
-     * @return Name of this command
-     */
     public String getName() {
-        return name;
+        return this.name;
     }
 
-    /**
-     * Gets the permission required by users to be able to perform this
-     * command
-     *
-     * @return Permission name, or null if none
-     */
+    public boolean setName(String name) {
+        if (!this.isRegistered()) {
+            this.name = name;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public String getPermission() {
-        return permission;
+        return this.permission;
     }
 
-    /**
-     * Sets the permission required by users to be able to perform this
-     * command
-     *
-     * @param permission Permission name or null
-     */
     public void setPermission(String permission) {
         this.permission = permission;
     }
 
-    /**
-     * Tests the given {@link CommandSender} to see if they can perform this
-     * command.
-     * <p>
-     * If they do not have permission, they will be informed that they cannot
-     * do this.
-     *
-     * @param target User to test
-     * @return true if they can use it, otherwise false
-     */
     public boolean testPermission(CommandSender target) {
-        if (testPermissionSilent(target)) {
+        if (this.testPermissionSilent(target)) {
             return true;
-        }
+        } else {
+            if (this.permissionMessage == null) {
+                target.sendMessage(ChatColor.RED + "I\'m sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.");
+            } else if (this.permissionMessage.length() != 0) {
+                String[] astring;
+                int i = (astring = this.permissionMessage.replace("<permission>", this.permission).split("\n")).length;
 
-        if (permissionMessage == null) {
-            target.sendMessage(ChatColor.RED + "I'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.");
-        } else if (permissionMessage.length() != 0) {
-            for (String line : permissionMessage.replace("<permission>", permission).split("\n")) {
-                target.sendMessage(line);
+                for (int j = 0; j < i; ++j) {
+                    String line = astring[j];
+
+                    target.sendMessage(line);
+                }
             }
-        }
 
-        return false;
+            return false;
+        }
     }
 
-    /**
-     * Tests the given {@link CommandSender} to see if they can perform this
-     * command.
-     * <p>
-     * No error is sent to the sender.
-     *
-     * @param target User to test
-     * @return true if they can use it, otherwise false
-     */
     public boolean testPermissionSilent(CommandSender target) {
-        if ((permission == null) || (permission.length() == 0)) {
+        if (this.permission != null && this.permission.length() != 0) {
+            String[] astring;
+            int i = (astring = this.permission.split(";")).length;
+
+            for (int j = 0; j < i; ++j) {
+                String p = astring[j];
+
+                if (target.hasPermission(p)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } else {
             return true;
         }
-
-        for (String p : permission.split(";")) {
-            if (target.hasPermission(p)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
-    /**
-     * Returns the current label for this command
-     *
-     * @return Label of this command or null if not registered
-     */
     public String getLabel() {
-        return label;
+        return this.label;
     }
 
-    /**
-     * Sets the label of this command.
-     * <p>
-     * If the command is currently registered the label change will only take
-     * effect after its been re-registered e.g. after a /reload
-     *
-     * @param name The command's name
-     * @return returns true if the name change happened instantly or false if
-     *     it was scheduled for re-registration
-     */
     public boolean setLabel(String name) {
         this.nextLabel = name;
-        if (!isRegistered()) {
-            this.timings = new org.spigotmc.CustomTimingsHandler("** Command: " + name); // Spigot
+        if (!this.isRegistered()) {
+            this.timings = new CustomTimingsHandler("** Command: " + name);
             this.label = name;
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
-    /**
-     * Registers this command to a CommandMap.
-     * Once called it only allows changes the registered CommandMap
-     *
-     * @param commandMap the CommandMap to register this command to
-     * @return true if the registration was successful (the current registered
-     *     CommandMap was the passed CommandMap or null) false otherwise
-     */
     public boolean register(CommandMap commandMap) {
-        if (allowChangesFrom(commandMap)) {
+        if (this.allowChangesFrom(commandMap)) {
             this.commandMap = commandMap;
             return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
-    /**
-     * Unregisters this command from the passed CommandMap applying any
-     * outstanding changes
-     *
-     * @param commandMap the CommandMap to unregister
-     * @return true if the unregistration was successfull (the current
-     *     registered CommandMap was the passed CommandMap or null) false
-     *     otherwise
-     */
     public boolean unregister(CommandMap commandMap) {
-        if (allowChangesFrom(commandMap)) {
+        if (this.allowChangesFrom(commandMap)) {
             this.commandMap = null;
-            this.activeAliases = new ArrayList<String>(this.aliases);
+            this.activeAliases = new ArrayList(this.aliases);
             this.label = this.nextLabel;
             return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     private boolean allowChangesFrom(CommandMap commandMap) {
-        return (null == this.commandMap || this.commandMap == commandMap);
+        return this.commandMap == null || this.commandMap == commandMap;
     }
 
-    /**
-     * Returns the current registered state of this command
-     *
-     * @return true if this command is currently registered false otherwise
-     */
     public boolean isRegistered() {
-        return (null != this.commandMap);
+        return this.commandMap != null;
     }
 
-    /**
-     * Returns a list of active aliases of this command
-     *
-     * @return List of aliases
-     */
-    public List<String> getAliases() {
-        return activeAliases;
+    public List getAliases() {
+        return this.activeAliases;
     }
 
-    /**
-     * Returns a message to be displayed on a failed permission check for this
-     * command
-     *
-     * @return Permission check failed message
-     */
     public String getPermissionMessage() {
-        return permissionMessage;
+        return this.permissionMessage;
     }
 
-    /**
-     * Gets a brief description of this command
-     *
-     * @return Description of this command
-     */
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
-    /**
-     * Gets an example usage of this command
-     *
-     * @return One or more example usages
-     */
     public String getUsage() {
-        return usageMessage;
+        return this.usageMessage;
     }
 
-    /**
-     * Sets the list of aliases to request on registration for this command.
-     * This is not effective outside of defining aliases in the {@link
-     * PluginDescriptionFile#getCommands()} (under the
-     * `<code>aliases</code>' node) is equivalent to this method.
-     *
-     * @param aliases aliases to register to this command
-     * @return this command object, for chaining
-     */
-    public Command setAliases(List<String> aliases) {
+    public Command setAliases(List aliases) {
         this.aliases = aliases;
-        if (!isRegistered()) {
-            this.activeAliases = new ArrayList<String>(aliases);
+        if (!this.isRegistered()) {
+            this.activeAliases = new ArrayList(aliases);
         }
+
         return this;
     }
 
-    /**
-     * Sets a brief description of this command. Defining a description in the
-     * {@link PluginDescriptionFile#getCommands()} (under the
-     * `<code>description</code>' node) is equivalent to this method.
-     *
-     * @param description new command description
-     * @return this command object, for chaining
-     */
     public Command setDescription(String description) {
         this.description = description;
         return this;
     }
 
-    /**
-     * Sets the message sent when a permission check fails
-     *
-     * @param permissionMessage new permission message, null to indicate
-     *     default message, or an empty string to indicate no message
-     * @return this command object, for chaining
-     */
     public Command setPermissionMessage(String permissionMessage) {
         this.permissionMessage = permissionMessage;
         return this;
     }
 
-    /**
-     * Sets the example usage of this command
-     *
-     * @param usage new example usage
-     * @return this command object, for chaining
-     */
     public Command setUsage(String usage) {
         this.usageMessage = usage;
         return this;
@@ -357,29 +232,33 @@ public abstract class Command {
         String result = source.getName() + ": " + message;
 
         if (source instanceof BlockCommandSender) {
-            BlockCommandSender blockCommandSender = (BlockCommandSender) source;
+            BlockCommandSender users = (BlockCommandSender) source;
 
-            if (blockCommandSender.getBlock().getWorld().getGameRuleValue("commandBlockOutput").equalsIgnoreCase("false")) {
+            if (users.getBlock().getWorld().getGameRuleValue("commandBlockOutput").equalsIgnoreCase("false")) {
                 Bukkit.getConsoleSender().sendMessage(result);
                 return;
             }
         } else if (source instanceof CommandMinecart) {
-            CommandMinecart commandMinecart = (CommandMinecart) source;
+            CommandMinecart users1 = (CommandMinecart) source;
 
-            if (commandMinecart.getWorld().getGameRuleValue("commandBlockOutput").equalsIgnoreCase("false")) {
+            if (users1.getWorld().getGameRuleValue("commandBlockOutput").equalsIgnoreCase("false")) {
                 Bukkit.getConsoleSender().sendMessage(result);
                 return;
             }
         }
 
-        Set<Permissible> users = Bukkit.getPluginManager().getPermissionSubscriptions(Server.BROADCAST_CHANNEL_ADMINISTRATIVE);
-        String colored = ChatColor.GRAY + "" + ChatColor.ITALIC + "[" + result + ChatColor.GRAY + ChatColor.ITALIC + "]";
+        Set users2 = Bukkit.getPluginManager().getPermissionSubscriptions("bukkit.broadcast.admin");
+        String colored = "" + ChatColor.GRAY + ChatColor.ITALIC + "[" + result + ChatColor.GRAY + ChatColor.ITALIC + "]";
 
         if (sendToSource && !(source instanceof ConsoleCommandSender)) {
             source.sendMessage(message);
         }
 
-        for (Permissible user : users) {
+        Iterator iterator = users2.iterator();
+
+        while (iterator.hasNext()) {
+            Permissible user = (Permissible) iterator.next();
+
             if (user instanceof CommandSender) {
                 CommandSender target = (CommandSender) user;
 
@@ -390,10 +269,10 @@ public abstract class Command {
                 }
             }
         }
+
     }
 
-    @Override
     public String toString() {
-        return getClass().getName() + '(' + name + ')';
+        return this.getClass().getName() + '(' + this.name + ')';
     }
 }
