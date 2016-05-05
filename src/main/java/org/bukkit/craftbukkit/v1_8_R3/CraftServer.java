@@ -41,10 +41,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
-import net.md_5.bungee.api.chat.BaseComponent;
+//import net.md_5.bungee.api.chat.BaseComponent; //LunchBox - remove
+import net.minecraft.client.resources.Locale;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandManager;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
+import net.minecraft.server.integrated.IntegratedServerCommandManager;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.CommandAbstract;
 import net.minecraft.server.v1_8_R3.CommandDispatcher;
@@ -61,7 +69,6 @@ import net.minecraft.server.v1_8_R3.ICommandListener;
 import net.minecraft.server.v1_8_R3.IProgressUpdate;
 import net.minecraft.server.v1_8_R3.Items;
 import net.minecraft.server.v1_8_R3.JsonListEntry;
-import net.minecraft.server.v1_8_R3.LocaleI18n;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
 import net.minecraft.server.v1_8_R3.MobEffectList;
 import net.minecraft.server.v1_8_R3.PersistentCollection;
@@ -207,6 +214,7 @@ public final class CraftServer implements Server {
     public int reloadCount;
     //private final Server.Spigot spigot;
     private static int[] $SWITCH_TABLE$org$bukkit$BanList$Type;
+    private ICommandManager cmdManager;
 
     static {
         ConfigurationSerialization.registerClass(CraftOfflinePlayer.class);
@@ -271,12 +279,12 @@ public final class CraftServer implements Server {
             }
         }));
         this.serverVersion = CraftServer.class.getPackage().getImplementationVersion();
-        this.online.value = console.getPropertyManager().getBoolean("online-mode", true);
+        this.online.value = console.isServerInOnlineMode();
         Bukkit.setServer(this);
-        Enchantment.DAMAGE_ALL.getClass();
+        Enchantment.sharpness.getClass();
         org.bukkit.enchantments.Enchantment.stopAcceptingRegistrations();
         Potion.setPotionBrewer(new CraftPotionBrewer());
-        MobEffectList.BLINDNESS.getClass();
+        net.minecraft.potion.Potion.moveSlowdown.getClass();
         PotionEffectType.stopAcceptingRegistrations();
         if (!Main.useConsole) {
             this.getLogger().info("Console input is disabled due to --noconsole command argument");
@@ -325,13 +333,14 @@ public final class CraftServer implements Server {
         }
 
         this.saveCommandsConfig();
+        this.cmdManager = MinecraftServer.getServer().getCommandManager();
         this.overrideAllCommandBlockCommands = this.commandsConfiguration.getStringList("command-block-overrides").contains("*");
         ((SimplePluginManager) this.pluginManager).useTimings(this.configuration.getBoolean("settings.plugin-profiling"));
         this.monsterSpawn = this.configuration.getInt("spawn-limits.monsters");
         this.animalSpawn = this.configuration.getInt("spawn-limits.animals");
         this.waterAnimalSpawn = this.configuration.getInt("spawn-limits.water-animals");
         this.ambientSpawn = this.configuration.getInt("spawn-limits.ambient");
-        console.autosavePeriod = this.configuration.getInt("ticks-per.autosave");
+        //console.autosavePeriod = this.configuration.getInt("ticks-per.autosave");//LunchBox - remove for now
         this.warningState = Warning.WarningState.value(this.configuration.getString("settings.deprecated-verbose"));
         this.chunkGCPeriod = this.configuration.getInt("chunk-gc.period-in-ticks");
         this.chunkGCLoadThresh = this.configuration.getInt("chunk-gc.load-threshold");
@@ -343,11 +352,11 @@ public final class CraftServer implements Server {
     }
 
     private File getConfigFile() {
-        return (File) this.console.options.valueOf("bukkit-settings");
+        return new File(this.console.getDataDirectory(), "bukkit.yml");
     }
 
     private File getCommandsConfigFile() {
-        return (File) this.console.options.valueOf("commands-settings");
+        return new File(this.console.getDataDirectory(), "commands.yml");
     }
 
     private void saveConfig() {
@@ -370,7 +379,7 @@ public final class CraftServer implements Server {
 
     public void loadPlugins() {
         this.pluginManager.registerInterface(JavaPluginLoader.class);
-        File pluginFolder = (File) this.console.options.valueOf("plugins");
+        File pluginFolder = new File(this.console.getDataDirectory(), "/plugins");
 
         if (pluginFolder.exists()) {
             Plugin[] plugins = this.pluginManager.loadPlugins(pluginFolder);
@@ -431,20 +440,21 @@ public final class CraftServer implements Server {
     }
 
     private void setVanillaCommands(boolean first) {
-        Map commands = (new CommandDispatcher()).getCommands();
+        Map commands = cmdManager.getCommands();
         Iterator iterator = commands.values().iterator();
 
         while (iterator.hasNext()) {
             ICommand cmd = (ICommand) iterator.next();
-            VanillaCommandWrapper wrapper = new VanillaCommandWrapper((CommandAbstract) cmd, LocaleI18n.get(cmd.getUsage((ICommandListener) null)));
-
+            String usage = cmd.getCommandUsage(null);
+            VanillaCommandWrapper wrapper = new VanillaCommandWrapper(cmd, usage);
+            /* LunchBox - Remove spigot until later.
             if (SpigotConfig.replaceCommands.contains(wrapper.getName())) {
                 if (first) {
                     this.commandMap.register("minecraft", wrapper);
                 }
             } else if (!first) {
                 this.commandMap.register("minecraft", wrapper);
-            }
+            }*/
         }
 
     }
@@ -475,14 +485,13 @@ public final class CraftServer implements Server {
     }
 
     public String getVersion() {
-        return this.serverVersion + " (MC: " + this.console.getVersion() + ")";
+        return this.serverVersion + " (MC: " + this.console.getMinecraftVersion() + ")";
     }
 
     public String getBukkitVersion() {
         return this.bukkitVersion;
     }
 
-    /** @deprecated */
     @Deprecated
     public Player[] getOnlinePlayers() {
         return (Player[]) this.getOnlinePlayers().toArray(CraftServer.EMPTY_PLAYER_ARRAY);
@@ -530,15 +539,15 @@ public final class CraftServer implements Server {
     @Deprecated
     public Player getPlayerExact(String name) {
         Validate.notNull(name, "Name cannot be null");
-        EntityPlayer player = this.playerList.getPlayer(name);
+        EntityPlayer player = this.playerList.getPlayerByUsername(name);
 
-        return player != null ? player.getBukkitEntity() : null;
+        return player != null ? (Player) com.kookykraftmc.lunchbox.Player.getBukkitEntity(player) : null;
     }
 
     public Player getPlayer(UUID id) {
-        EntityPlayer player = this.playerList.a(id);
+        EntityPlayer player = this.playerList.getPlayerByUUID(id);
 
-        return player != null ? player.getBukkitEntity() : null;
+        return player != null ? (Player) com.kookykraftmc.lunchbox.Player.getBukkitEntity(player) : null;
     }
 
     public int broadcastMessage(String message) {
@@ -546,7 +555,7 @@ public final class CraftServer implements Server {
     }
 
     public Player getPlayer(EntityPlayer entity) {
-        return entity.getBukkitEntity();
+        return (Player) com.kookykraftmc.lunchbox.Player.getBukkitEntity(entity);
     }
 
     /** @deprecated */

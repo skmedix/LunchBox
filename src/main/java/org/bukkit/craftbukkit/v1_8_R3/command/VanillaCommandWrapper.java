@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.v1_8_R3.command;
 
 import java.util.Iterator;
 import java.util.List;
+
+import net.minecraft.command.ICommand;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.ChatMessage;
 import net.minecraft.server.v1_8_R3.CommandAbstract;
@@ -41,7 +43,7 @@ public final class VanillaCommandWrapper extends VanillaCommand {
         this.vanillaCommand = vanillaCommand;
     }
 
-    public VanillaCommandWrapper(CommandAbstract vanillaCommand, String usage) {
+    public VanillaCommandWrapper(ICommand vanillaCommand, String usage) {
         super(vanillaCommand.getCommand());
         this.vanillaCommand = vanillaCommand;
         this.description = "A Mojang provided command.";
