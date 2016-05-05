@@ -96,6 +96,8 @@ import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.server.v1_8_R3.WorldType;
 import net.minecraft.world.*;
 import net.minecraft.world.storage.MapData;
+import net.minecraft.world.storage.SaveHandler;
+import net.minecraftforge.common.DimensionManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.*;
@@ -1436,17 +1438,10 @@ public final class CraftServer implements Server {
         Validate.notNull(address, "Address cannot be null.");
         this.getBanList(BanList.Type.IP).pardon(address);
     }
-    //TODO: Rework this
+
     public Set getBannedPlayers() {
         HashSet result = new HashSet();
-        Iterator iterator = this.playerList.getProfileBans().getValues().iterator();
-
-        while (iterator.hasNext()) {
-            JsonListEntry entry = (JsonListEntry) iterator.next();
-
-            result.add(this.getOfflinePlayer((GameProfile) entry.getKey()));
-        }
-
+        result = (HashSet) Arrays.asList(this.playerList.getBannedPlayers());
         return result;
     }
 
@@ -1455,52 +1450,38 @@ public final class CraftServer implements Server {
         switch ($SWITCH_TABLE$org$bukkit$BanList$Type()[type.ordinal()]) {
         case 1:
         default:
-            return new CraftProfileBanList(this.playerList.getBannedIPs());
+            return new CraftProfileBanList((BanList) this.playerList.getBannedPlayers());
 
         case 2:
-            return new CraftIpBanList(this.playerList.getIPBans());
+            return new CraftIpBanList(this.playerList.getBannedIPs());
         }
     }
 
     public void setWhitelist(boolean value) {
-        this.playerList.setHasWhitelist(value);
-        this.console.getPropertyManager().setProperty("white-list", Boolean.valueOf(value));
+        this.playerList.setWhiteListEnabled(value);
+        this.pManager.setProperty("white-list", Boolean.valueOf(value));
     }
 
     public Set getWhitelistedPlayers() {
         LinkedHashSet result = new LinkedHashSet();
-        Iterator iterator = this.playerList.getWhitelist().getValues().iterator();
-
-        while (iterator.hasNext()) {
-            JsonListEntry entry = (JsonListEntry) iterator.next();
-
-            result.add(this.getOfflinePlayer((GameProfile) entry.getKey()));
-        }
-
+        result = (LinkedHashSet) Arrays.asList(this.console.getConfigurationManager().getWhitelistedPlayerNames());
         return result;
     }
 
     public Set getOperators() {
         HashSet result = new HashSet();
-        Iterator iterator = this.playerList.getOPs().getValues().iterator();
-
-        while (iterator.hasNext()) {
-            JsonListEntry entry = (JsonListEntry) iterator.next();
-
-            result.add(this.getOfflinePlayer((GameProfile) entry.getKey()));
-        }
-
+        result = (HashSet) Arrays.asList(this.console.getConfigurationManager().getOppedPlayerNames());
         return result;
     }
 
     public void reloadWhitelist() {
-        this.playerList.reloadWhitelist();
+        this.playerList.loadWhiteList();
     }
 
     public GameMode getDefaultGameMode() {
-        return GameMode.getByValue(((WorldServer) this.console.worlds.get(0)).getWorldData().getGameType().getId());
+        return GameMode.getByValue((this.console.worldServerForDimension(0)).getWorldInfo().getGameType().getID());
     }
-
+    //TODO: setDefaultGameMode
     public void setDefaultGameMode(GameMode mode) {
         Validate.notNull(mode, "Mode cannot be null");
         Iterator iterator = this.getWorlds().iterator();
@@ -1508,7 +1489,7 @@ public final class CraftServer implements Server {
         while (iterator.hasNext()) {
             World world = (World) iterator.next();
 
-            ((CraftWorld) world).getHandle().worldData.setGameType(WorldSettings.EnumGamemode.getById(mode.getValue()));
+            ((CraftWorld) world).getHandle().world.setGameType(WorldSettings.EnumGamemode.getById(mode.getValue()));
         }
 
     }
@@ -1530,8 +1511,8 @@ public final class CraftServer implements Server {
     }
 
     public File getWorldContainer() {
-        if (this.getServer().universe != null) {
-            return this.getServer().universe;
+        if (DimensionManager.getWorld(0) != null) {
+            return DimensionManager.getWorld(0).getSaveHandler().getWorldDirectory();
         } else {
             if (this.container == null) {
                 this.container = new File(this.configuration.getString("settings.world-container", "."));
@@ -1542,24 +1523,22 @@ public final class CraftServer implements Server {
     }
 
     public OfflinePlayer[] getOfflinePlayers() {
-        WorldNBTStorage storage = (WorldNBTStorage) ((WorldServer) this.console.worlds.get(0)).getDataManager();
-        String[] files = storage.getPlayerDir().list(new DatFileFilter());
-        HashSet players = new HashSet();
-        String[] astring = files;
-        int i = files.length;
+        File playerDir = new File(console.worldServerForDimension(0).getSaveHandler().getWorldDirectory(), "playerdata");
+        net.minecraft.world.storage.SaveHandler storage = (net.minecraft.world.storage.SaveHandler) console.worldServerForDimension(0).getSaveHandler();
+        String[] files = playerDir.list(new DatFileFilter());
+        Set<OfflinePlayer> players = new HashSet<OfflinePlayer>();
 
-        for (int j = 0; j < i; ++j) {
-            String file = astring[j];
-
+        for (String file : files) {
             try {
-                players.add(this.getOfflinePlayer(UUID.fromString(file.substring(0, file.length() - 4))));
-            } catch (IllegalArgumentException illegalargumentexception) {
-                ;
+                players.add(getOfflinePlayer(UUID.fromString(file.substring(0, file.length() - 4))));
+            } catch (IllegalArgumentException ex) {
+
             }
         }
 
-        players.addAll(this.getOnlinePlayers());
-        return (OfflinePlayer[]) players.toArray(new OfflinePlayer[players.size()]);
+        players.addAll(getOnlinePlayers());
+
+        return players.toArray(new OfflinePlayer[players.size()]);
     }
 
     public Messenger getMessenger() {
@@ -1634,7 +1613,7 @@ public final class CraftServer implements Server {
     }
 
     public boolean isPrimaryThread() {
-        return Thread.currentThread().equals(this.console.primaryThread);
+        return Thread.currentThread().equals(this.console.getServerThread());
     }
 
     public String getMotd() {
@@ -1645,11 +1624,11 @@ public final class CraftServer implements Server {
         return this.warningState;
     }
 
-    public List tabComplete(ICommandListener sender, String message) {
+    public List tabComplete(ICommandSender sender, String message) {
         if (!(sender instanceof EntityPlayer)) {
             return ImmutableList.of();
         } else {
-            CraftPlayer player = ((EntityPlayer) sender).getBukkitEntity();
+            CraftPlayer player = (CraftPlayer) com.kookykraftmc.lunchbox.Player.getBukkitEntity((EntityPlayer) sender);
 
             return message.startsWith("/") ? this.tabCompleteCommand(player, message) : this.tabCompleteChat(player, message);
         }
@@ -1708,12 +1687,13 @@ public final class CraftServer implements Server {
     public CraftScoreboardManager getScoreboardManager() {
         return this.scoreboardManager;
     }
-
+    //TODO: checkSaveState()
     public void checkSaveState() {
-        if (!this.playerCommandState && !this.printSaveWarning && this.console.autosavePeriod > 0) {
-            this.printSaveWarning = true;
-            this.getLogger().log(Level.WARNING, "A manual (plugin-induced) save has been detected while server is configured to auto-save. This may affect performance.", this.warningState == Warning.WarningState.ON ? new Throwable() : null);
+        if (this.playerCommandState || this.printSaveWarning || this.console.autosaveInterval <= 0) {
+            return;
         }
+        this.printSaveWarning = true;
+        getLogger().log(Level.WARNING, "A manual (plugin-induced) save has been detected while server is configured to auto-save. This may affect performance.", warningState == Warning.WarningState.ON ? new Throwable() : null);
     }
 
     public CraftIconCache getServerIcon() {
@@ -1750,11 +1730,11 @@ public final class CraftServer implements Server {
     }
 
     public void setIdleTimeout(int threshold) {
-        this.console.setIdleTimeout(threshold);
+        this.console.setPlayerIdleTimeout(threshold);
     }
 
     public int getIdleTimeout() {
-        return this.console.getIdleTimeout();
+        return this.console.getMaxPlayerIdleMinutes();
     }
 
     public ChunkGenerator.ChunkData createChunkData(World world) {
@@ -1767,9 +1747,10 @@ public final class CraftServer implements Server {
         return CraftMagicNumbers.INSTANCE;
     }
 
+    /* LunchBox - remove for now
     public Server.Spigot spigot() {
         return this.spigot;
-    }
+    }*/
 
     static int[] $SWITCH_TABLE$org$bukkit$BanList$Type() {
         int[] aint = CraftServer.$SWITCH_TABLE$org$bukkit$BanList$Type;

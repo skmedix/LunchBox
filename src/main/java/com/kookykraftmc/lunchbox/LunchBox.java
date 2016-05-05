@@ -2,7 +2,7 @@ package com.kookykraftmc.lunchbox;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
-import net.minecraft.server.dedicated.DedicatedServer;
+
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
@@ -28,7 +28,7 @@ public class LunchBox {
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) throws Exception {
         this.server = new CraftServer(MinecraftServer.getServer(), (DedicatedPlayerList) MinecraftServer.getServer().getConfigurationManager().playerEntityList);
-        //will work on registering events later...
+        //todo: will work on registering events later...
         //logger.log(INFO, "Registering events...");
 
         logger.log(INFO, "Loading plugins...");

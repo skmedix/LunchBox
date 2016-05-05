@@ -240,7 +240,7 @@ public interface Server extends PluginMessageRecipient {
     /** @deprecated */
     @Deprecated
     UnsafeValues getUnsafe();
-
+    /*
     Server.Spigot spigot();
 
     public static class Spigot {
@@ -260,5 +260,5 @@ public interface Server extends PluginMessageRecipient {
         public void restart() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-    }
+    }*/
 }

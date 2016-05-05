@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
+
+import com.mojang.authlib.GameProfileRepository;
 import net.minecraft.server.v1_8_R3.GameProfileBanEntry;
 import net.minecraft.server.v1_8_R3.GameProfileBanList;
 import net.minecraft.server.v1_8_R3.JsonListEntry;
@@ -19,9 +21,9 @@ import org.bukkit.Bukkit;
 
 public class CraftProfileBanList implements BanList {
 
-    private final GameProfileBanList list;
+    private final net.minecraft.server.management.BanList list;
 
-    public CraftProfileBanList(GameProfileBanList list) {
+    public CraftProfileBanList(BanList list) {
         this.list = list;
     }
 

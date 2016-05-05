@@ -3,9 +3,12 @@ package org.bukkit.craftbukkit.v1_8_R3;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Date;
 import java.util.Set;
 import java.util.logging.Level;
+
+import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.v1_8_R3.IpBanEntry;
 import net.minecraft.server.v1_8_R3.IpBanList;
 import org.apache.commons.lang.StringUtils;
@@ -16,15 +19,15 @@ import org.bukkit.Bukkit;
 
 public class CraftIpBanList implements BanList {
 
-    private final IpBanList list;
+    private final net.minecraft.server.management.BanList list;
 
-    public CraftIpBanList(IpBanList list) {
+    public CraftIpBanList(net.minecraft.server.management.BanList list) {
         this.list = list;
     }
 
     public BanEntry getBanEntry(String target) {
         Validate.notNull(target, "Target cannot be null");
-        IpBanEntry entry = (IpBanEntry) this.list.get((Object) target);
+        IPBanEntry entry = this.list.getEntry(target);
 
         return entry == null ? null : new CraftIpBanEntry(target, entry, this.list);
     }
