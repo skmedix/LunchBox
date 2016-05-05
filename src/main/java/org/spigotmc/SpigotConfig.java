@@ -95,7 +95,7 @@ public class SpigotConfig {
         while (iterator.hasNext()) {
             Entry ex = (Entry) iterator.next();
 
-            MinecraftServer.getServer().server.getCommandMap().register((String) ex.getKey(), "Spigot", (Command) ex.getValue());
+            MineCraftServer.getServer().server.getCommandMap().register((String) ex.getKey(), "Spigot", (Command) ex.getValue());
         }
 
         if (SpigotConfig.metrics == null) {
