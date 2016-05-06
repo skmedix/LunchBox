@@ -2,19 +2,23 @@ package org.bukkit.craftbukkit.v1_8_R3;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import net.minecraft.server.v1_8_R3.BiomeBase;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.ChunkSection;
-import net.minecraft.server.v1_8_R3.EmptyChunk;
-import net.minecraft.server.v1_8_R3.IBlockData;
-import net.minecraft.server.v1_8_R3.WorldChunkManager;
-import net.minecraft.server.v1_8_R3.WorldServer;
+
+
+import com.kookykraftmc.lunchbox.LunchBox;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
 public class CraftChunk implements Chunk {
@@ -31,29 +35,29 @@ public class CraftChunk implements Chunk {
         Arrays.fill(CraftChunk.emptySkyLight, (byte) -1);
     }
 
-    public CraftChunk(net.minecraft.server.v1_8_R3.Chunk chunk) {
-        if (!(chunk instanceof EmptyChunk)) {
-            this.weakChunk = new WeakReference(chunk);
+    public CraftChunk(net.minecraft.world.chunk.Chunk chunk) {
+        if (!(chunk instanceof net.minecraft.world.chunk.EmptyChunk)) {
+            this.weakChunk = new WeakReference<net.minecraft.world.chunk.Chunk>(chunk);
         }
 
-        this.worldServer = (WorldServer) this.getHandle().world;
-        this.x = this.getHandle().locX;
-        this.z = this.getHandle().locZ;
+        worldServer = chunk.getWorld() instanceof net.minecraft.world.World ? (WorldServer) chunk.getWorld() : null; // Thermos - use world instead of worldserver for NatureOverhaul
+        x = chunk.xPosition;
+        z = chunk.zPosition;
     }
 
     public World getWorld() {
-        return this.worldServer.getWorld();
+        return (World) this.worldServer;
     }
 
     public CraftWorld getCraftWorld() {
         return (CraftWorld) this.getWorld();
     }
 
-    public net.minecraft.server.v1_8_R3.Chunk getHandle() {
-        net.minecraft.server.v1_8_R3.Chunk c = (net.minecraft.server.v1_8_R3.Chunk) this.weakChunk.get();
+    public net.minecraft.world.chunk.Chunk getHandle() {
+        net.minecraft.world.chunk.Chunk c = (net.minecraft.world.chunk.Chunk) this.weakChunk.get();
 
         if (c == null) {
-            c = this.worldServer.getChunkAt(this.x, this.z);
+            c = this.worldServer.getChunkFromChunkCoords(this.x, this.z);
             if (!(c instanceof EmptyChunk)) {
                 this.weakChunk = new WeakReference(c);
             }
@@ -83,49 +87,41 @@ public class CraftChunk implements Chunk {
     }
 
     public Entity[] getEntities() {
-        int count = 0;
-        int index = 0;
-        net.minecraft.server.v1_8_R3.Chunk chunk = this.getHandle();
+        int count = 0, index = 0;
+        net.minecraft.world.chunk.Chunk chunk = getHandle();
 
-        for (int entities = 0; entities < 16; ++entities) {
-            count += chunk.entitySlices[entities].size();
+        for (int i = 0; i < 16; i++) {
+            count += chunk.getEntityLists()[i].size();
         }
 
-        Entity[] aentity = new Entity[count];
+        Entity[] entities = new Entity[count];
 
-        for (int i = 0; i < 16; ++i) {
-            Object[] aobject;
-            int i = (aobject = chunk.entitySlices[i].toArray()).length;
-
-            for (int j = 0; j < i; ++j) {
-                Object obj = aobject[j];
-
-                if (obj instanceof net.minecraft.server.v1_8_R3.Entity) {
-                    aentity[index++] = ((net.minecraft.server.v1_8_R3.Entity) obj).getBukkitEntity();
+        for (int i = 0; i < 16; i++) {
+            for (Object obj : chunk.getEntityLists()[i].toArray()) {
+                if (!(obj instanceof net.minecraft.entity.Entity)) {
+                    continue;
                 }
+
+                entities[index++] = CraftEntity.getEntity(LunchBox.getServer(), (net.minecraft.entity.Entity) obj);
             }
         }
 
-        return aentity;
+        return entities;
     }
-
+    //TODO: need to rework getTileEntities().
     public BlockState[] getTileEntities() {
         int index = 0;
-        net.minecraft.server.v1_8_R3.Chunk chunk = this.getHandle();
-        BlockState[] entities = new BlockState[chunk.tileEntities.size()];
-        Object[] aobject;
-        int i = (aobject = chunk.tileEntities.keySet().toArray()).length;
+        net.minecraft.world.chunk.Chunk chunk = getHandle();
+        BlockState[] entities = new BlockState[chunk.getTileEntityMap().size()];
 
-        for (int j = 0; j < i; ++j) {
-            Object obj = aobject[j];
-
-            if (obj instanceof BlockPosition) {
-                BlockPosition position = (BlockPosition) obj;
-
-                entities[index++] = this.worldServer.getWorld().getBlockAt(position.getX(), position.getY(), position.getZ()).getState();
+        for (Object obj : chunk.getTileEntityMap().keySet().toArray()) {
+            if (!(obj instanceof net.minecraft.world.chunk.Chunk)) {
+                continue;
             }
-        }
 
+            net.minecraft.world.chunk.Chunk position = (net.minecraft.world.chunk.Chunk) obj;
+            entities[index++] = chunk.getBlock(position.chunkXPos + (chunk.xPosition << 4), position.chunkPosY, position.chunkZPos + (chunk.zPosition << 4)).getState();
+        }
         return entities;
     }
 
@@ -158,8 +154,8 @@ public class CraftChunk implements Chunk {
     }
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxBlockY, boolean includeBiome, boolean includeBiomeTempRain) {
-        net.minecraft.server.v1_8_R3.Chunk chunk = this.getHandle();
-        ChunkSection[] cs = chunk.getSections();
+        net.minecraft.world.chunk.Chunk chunk = this.getHandle();
+        ExtendedBlockStorage[] cs = chunk.getBlockStorageArray();
         short[][] sectionBlockIDs = new short[cs.length][];
         byte[][] sectionBlockData = new byte[cs.length][];
         byte[][] sectionSkyLights = new byte[cs.length][];
@@ -176,17 +172,18 @@ public class CraftChunk implements Chunk {
                 sectionEmitLights[hmap] = CraftChunk.emptyData;
                 sectionEmpty[hmap] = true;
             } else {
+                //TODO: work on this
                 short[] biome = new short[4096];
-                char[] biomeTemp = cs[hmap].getIdArray();
+                char[] biomeTemp = cs[hmap].getData();
                 byte[] biomeRain = sectionBlockData[hmap] = new byte[2048];
 
                 for (int world = 0; world < 4096; ++world) {
                     if (biomeTemp[world] != 0) {
-                        IBlockData dat = (IBlockData) net.minecraft.server.v1_8_R3.Block.d.a(biomeTemp[world]);
+                        IBlockState dat = (IBlockState) net.minecraft.block.Block.getStateId(biomeTemp[world]);
 
                         if (dat != null) {
-                            biome[world] = (short) net.minecraft.server.v1_8_R3.Block.getId(dat.getBlock());
-                            i = dat.getBlock().toLegacyData(dat);
+                            biome[world] = (short) net.minecraft.block.Block.getIdFromBlock(dat.getBlock());
+                            i = dat.getBlock().toLegacyData(dat);//TODO: toLegacyData() does not exist, need to find new method
                             int jj = world >> 1;
 
                             if ((world & 1) == 0) {
@@ -199,15 +196,15 @@ public class CraftChunk implements Chunk {
                 }
 
                 sectionBlockIDs[hmap] = biome;
-                if (cs[hmap].getSkyLightArray() == null) {
+                if (cs[hmap].getSkylightArray() == null) {
                     sectionSkyLights[hmap] = CraftChunk.emptyData;
                 } else {
                     sectionSkyLights[hmap] = new byte[2048];
-                    System.arraycopy(cs[hmap].getSkyLightArray().a(), 0, sectionSkyLights[hmap], 0, 2048);
+                    System.arraycopy(cs[hmap].getSkylightArray().getData(), 0, sectionSkyLights[hmap], 0, 2048);
                 }
 
                 sectionEmitLights[hmap] = new byte[2048];
-                System.arraycopy(cs[hmap].getEmittedLightArray().a(), 0, sectionEmitLights[hmap], 0, 2048);
+                System.arraycopy(cs[hmap].getBlocklightArray().getData(), 0, sectionEmitLights[hmap], 0, 2048);
             }
         }
 
@@ -215,21 +212,21 @@ public class CraftChunk implements Chunk {
 
         if (includeMaxBlockY) {
             aint = new int[256];
-            System.arraycopy(chunk.heightMap, 0, aint, 0, 256);
+            System.arraycopy(chunk.getHeightMap(), 0, aint, 0, 256);
         }
 
-        BiomeBase[] abiomebase = null;
+        BiomeGenBase[] abiomebase = null;
         double[] adouble = null;
         double[] adouble1 = null;
 
         if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager worldchunkmanager = chunk.world.getWorldChunkManager();
+            WorldChunkManager worldchunkmanager = chunk.getWorld().getWorldChunkManager();
 
             if (includeBiome) {
-                abiomebase = new BiomeBase[256];
+                abiomebase = new BiomeGenBase[256];
 
                 for (int i = 0; i < 256; ++i) {
-                    abiomebase[i] = chunk.getBiome(new BlockPosition(i & 15, 0, i >> 4), worldchunkmanager);
+                    abiomebase[i] = chunk.getBiome(new BlockPos(i & 15, 0, i >> 4), worldchunkmanager);
                 }
             }
 
@@ -242,7 +239,7 @@ public class CraftChunk implements Chunk {
                     adouble[i] = (double) afloat[i];
                 }
 
-                afloat = worldchunkmanager.getWetness((float[]) null, this.getX() << 4, this.getZ() << 4, 16, 16);
+                afloat = worldchunkmanager.getRainfall(null, this.getX() << 4, this.getZ() << 4, 16, 16);
 
                 for (i = 0; i < 256; ++i) {
                     adouble1[i] = (double) afloat[i];
@@ -256,18 +253,19 @@ public class CraftChunk implements Chunk {
     }
 
     public static ChunkSnapshot getEmptyChunkSnapshot(int x, int z, CraftWorld world, boolean includeBiome, boolean includeBiomeTempRain) {
-        BiomeBase[] biome = null;
+        BiomeGenBase[] biome = null;
         double[] biomeTemp = null;
         double[] biomeRain = null;
 
         if (includeBiome || includeBiomeTempRain) {
-            WorldChunkManager hSection = world.getHandle().getWorldChunkManager();
+            WorldServer w = world.getHandle();
+            WorldChunkManager hSection = w.getWorldChunkManager();
 
             if (includeBiome) {
-                biome = new BiomeBase[256];
+                biome = new BiomeGenBase[256];
 
                 for (int blockIDs = 0; blockIDs < 256; ++blockIDs) {
-                    biome[blockIDs] = world.getHandle().getBiome(new BlockPosition((x << 4) + (blockIDs & 15), 0, (z << 4) + (blockIDs >> 4)));
+                    biome[blockIDs] = world.getHandle().getBiomeGenForCoords(new BlockPos((x << 4) + (blockIDs & 15), 0, (z << 4) + (blockIDs >> 4)));
                 }
             }
 
@@ -282,7 +280,7 @@ public class CraftChunk implements Chunk {
                     biomeTemp[skyLight] = (double) afloat[skyLight];
                 }
 
-                afloat = hSection.getWetness((float[]) null, x << 4, z << 4, 16, 16);
+                afloat = hSection.getRainfall(null, x << 4, z << 4, 16, 16);
 
                 for (skyLight = 0; skyLight < 256; ++skyLight) {
                     biomeRain[skyLight] = (double) afloat[skyLight];
@@ -309,7 +307,7 @@ public class CraftChunk implements Chunk {
     }
 
     private static float[] getTemperatures(WorldChunkManager chunkmanager, int chunkX, int chunkZ) {
-        BiomeBase[] biomes = chunkmanager.getBiomes((BiomeBase[]) null, chunkX, chunkZ, 16, 16);
+        BiomeGenBase[] biomes = chunkmanager.getBiomesForGeneration(null, chunkX, chunkZ, 16, 16);
         float[] temps = new float[biomes.length];
 
         for (int i = 0; i < biomes.length; ++i) {

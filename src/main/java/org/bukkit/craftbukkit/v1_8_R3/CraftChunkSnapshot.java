@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3;
 
 import net.minecraft.server.v1_8_R3.BiomeBase;
+import net.minecraft.world.biome.BiomeGenBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock;
@@ -21,7 +22,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
     private final double[] biomeTemp;
     private final double[] biomeRain;
 
-    CraftChunkSnapshot(int x, int z, String wname, long wtime, short[][] sectionBlockIDs, byte[][] sectionBlockData, byte[][] sectionSkyLights, byte[][] sectionEmitLights, boolean[] sectionEmpty, int[] hmap, BiomeBase[] biome, double[] biomeTemp, double[] biomeRain) {
+    CraftChunkSnapshot(int x, int z, String wname, long wtime, short[][] sectionBlockIDs, byte[][] sectionBlockData, byte[][] sectionSkyLights, byte[][] sectionEmitLights, boolean[] sectionEmpty, int[] hmap, BiomeGenBase[] biome, double[] biomeTemp, double[] biomeRain) {
         this.x = x;
         this.z = z;
         this.worldname = wname;

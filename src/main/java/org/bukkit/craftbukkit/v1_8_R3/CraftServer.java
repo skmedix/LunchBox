@@ -550,13 +550,13 @@ public final class CraftServer implements Server {
         Validate.notNull(name, "Name cannot be null");
         EntityPlayer player = this.playerList.getPlayerByUsername(name);
 
-        return player != null ? (Player) com.kookykraftmc.lunchbox.Player.getBukkitEntity(player) : null;
+        return player != null ? (Player) CraftEntity.getEntity(LunchBox.getServer(), (player)) : null;
     }
 
     public Player getPlayer(UUID id) {
         EntityPlayer player = this.playerList.getPlayerByUUID(id);
 
-        return player != null ? (Player) com.kookykraftmc.lunchbox.Player.getBukkitEntity(player) : null;
+        return player != null ? (Player) CraftEntity.getEntity(LunchBox.getServer(), player) : null;
     }
 
     public int broadcastMessage(String message) {
@@ -564,7 +564,7 @@ public final class CraftServer implements Server {
     }
 
     public Player getPlayer(EntityPlayer entity) {
-        return (Player) com.kookykraftmc.lunchbox.Player.getBukkitEntity(entity);
+        return (Player) CraftEntity.getEntity(LunchBox.getServer(), entity);
     }
 
     /** @deprecated */
@@ -732,7 +732,6 @@ public final class CraftServer implements Server {
             return false;
         }
     }
-
     public void reload() {
         ++this.reloadCount;
         this.configuration = YamlConfiguration.loadConfiguration(this.getConfigFile());
@@ -740,7 +739,7 @@ public final class CraftServer implements Server {
         PropertyManager config = this.pManager;
 
         boolean animals = config.getBooleanProperty("spawn-animals", this.console.getCanSpawnAnimals());
-        boolean monsters = config.getBooleanProperty("spawn-monsters", ((WorldServer) this.console.worlds.get(0)).getDifficulty() != EnumDifficulty.PEACEFUL);
+        boolean monsters = config.getBooleanProperty("spawn-monsters", ((WorldServer) this.console.worldServerForDimension(0)).getDifficulty() != EnumDifficulty.PEACEFUL);
         EnumDifficulty difficulty = EnumDifficulty.getDifficultyEnum(config.getIntProperty("difficulty", (this.console.worldServerForDimension(0)).getDifficulty().ordinal()));
 
         this.online.value = config.getBooleanProperty("online-mode", this.console.isServerInOnlineMode());
@@ -1628,7 +1627,7 @@ public final class CraftServer implements Server {
         if (!(sender instanceof EntityPlayer)) {
             return ImmutableList.of();
         } else {
-            CraftPlayer player = (CraftPlayer) com.kookykraftmc.lunchbox.Player.getBukkitEntity((EntityPlayer) sender);
+            CraftPlayer player = (CraftPlayer) CraftEntity.getEntity(LunchBox.getServer(), (EntityPlayer) sender);
 
             return message.startsWith("/") ? this.tabCompleteCommand(player, message) : this.tabCompleteChat(player, message);
         }

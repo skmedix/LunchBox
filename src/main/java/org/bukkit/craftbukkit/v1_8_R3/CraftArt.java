@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3;
 
-import net.minecraft.server.v1_8_R3.EntityPainting;
+import net.minecraft.entity.item.EntityPainting;
 import org.bukkit.Art;
 
 public class CraftArt {

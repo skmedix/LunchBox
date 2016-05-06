@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 /**
  * Created by TimeTheCat on 5/2/2016.
  */
-public class Player {
+public class EntityHelper {
 
     public static CraftEntity getBukkitEntity(Entity entity) {
         return CraftEntity.getEntity((CraftServer) Bukkit.getServer(), entity);

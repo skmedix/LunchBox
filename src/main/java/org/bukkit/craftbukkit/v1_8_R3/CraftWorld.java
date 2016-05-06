@@ -116,6 +116,7 @@ import net.minecraft.server.v1_8_R3.WorldGenerator;
 import net.minecraft.server.v1_8_R3.WorldNBTStorage;
 import net.minecraft.server.v1_8_R3.WorldProvider;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.world.WorldServer;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
