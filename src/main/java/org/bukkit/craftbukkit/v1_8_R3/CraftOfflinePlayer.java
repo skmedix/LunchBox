@@ -9,10 +9,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.WorldNBTStorage;
-import net.minecraft.server.v1_8_R3.WorldServer;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.world.storage.SaveHandler;
+import net.minecraftforge.common.DimensionManager;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,12 +28,12 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
     private final GameProfile profile;
     private final CraftServer server;
-    private final WorldSavedData storage;
+    private final SaveHandler storage;
 
     protected CraftOfflinePlayer(CraftServer server, GameProfile profile) {
         this.server = server;
         this.profile = profile;
-        this.storage = (WorldSavedData) (server.console.worldServerForDimension(0)).getSaveHandler().getPlayerNBTManager();
+        this.storage = (SaveHandler) DimensionManager.getWorld(0).getSaveHandler();
     }
 
     public GameProfile getProfile() {
@@ -148,7 +146,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     private NBTTagCompound getData() {
-        return this.storage.getPlayerData(this.getUniqueId().toString());
+        return storage.getPlayerNBT(server.getHandle().getPlayerByUUID(this.getUniqueId()));
     }
 
     private NBTTagCompound getBukkitData() {
@@ -156,17 +154,17 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
         if (result != null) {
             if (!result.hasKey("bukkit")) {
-                result.set("bukkit", new NBTTagCompound());
+                result.setTag("bukkit", new NBTTagCompound());
             }
 
-            result = result.getCompound("bukkit");
+            result = result.getCompoundTag("bukkit");
         }
 
         return result;
     }
 
     private File getDataFile() {
-        return new File(this.storage.getPlayerDir(), this.getUniqueId() + ".dat");
+        return new File((File) this.storage.getPlayerNBTManager(), this.getUniqueId() + ".dat");
     }
 
     public long getFirstPlayed() {
@@ -229,7 +227,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
                 spawnWorld = ((World) this.server.getWorlds().get(0)).getName();
             }
 
-            return new Location(this.server.getWorld(spawnWorld), (double) data.getInt("SpawnX"), (double) data.getInt("SpawnY"), (double) data.getInt("SpawnZ"));
+            return new Location(this.server.getWorld(spawnWorld), (double) data.getInteger("SpawnX"), (double) data.getInteger("SpawnY"), (double) data.getInteger("SpawnZ"));
         } else {
             return null;
         }
