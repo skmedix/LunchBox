@@ -3,27 +3,28 @@ package org.bukkit.craftbukkit.v1_8_R3;
 import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Level;
-import net.minecraft.server.v1_8_R3.IpBanEntry;
-import net.minecraft.server.v1_8_R3.IpBanList;
+
+import net.minecraft.server.management.BanList;
+import net.minecraft.server.management.IPBanEntry;
 import org.bukkit.BanEntry;
 import org.bukkit.Bukkit;
 
 public final class CraftIpBanEntry implements BanEntry {
 
-    private final IpBanList list;
+    private final BanList list;
     private final String target;
     private Date created;
     private String source;
     private Date expiration;
     private String reason;
 
-    public CraftIpBanEntry(String target, IpBanEntry entry, IpBanList list) {
+    public CraftIpBanEntry(String target, net.minecraft.server.management.IPBanEntry entry, BanList list) {
         this.list = list;
         this.target = target;
-        this.created = entry.getCreated() != null ? new Date(entry.getCreated().getTime()) : null;
-        this.source = entry.getSource();
-        this.expiration = entry.getExpires() != null ? new Date(entry.getExpires().getTime()) : null;
-        this.reason = entry.getReason();
+        this.created = entry.getBanEndDate() != null ? new Date(entry.getBanEndDate().getTime()) : null;
+        this.source = entry.getBanReason();
+        this.expiration = entry.getBanEndDate() != null ? new Date(entry.getBanEndDate().getTime()) : null;
+        this.reason = entry.getBanReason();
     }
 
     public String getTarget() {
@@ -67,12 +68,12 @@ public final class CraftIpBanEntry implements BanEntry {
     }
 
     public void save() {
-        IpBanEntry entry = new IpBanEntry(this.target, this.created, this.source, this.expiration, this.reason);
+        IPBanEntry entry = new IPBanEntry(this.target, this.created, this.source, this.expiration, this.reason);
 
-        this.list.add(entry);
+        this.list.addEntry(entry);
 
         try {
-            this.list.save();
+            this.list.writeChanges();
         } catch (IOException ioexception) {
             Bukkit.getLogger().log(Level.SEVERE, "Failed to save banned-ips.json, {0}", ioexception.getMessage());
         }

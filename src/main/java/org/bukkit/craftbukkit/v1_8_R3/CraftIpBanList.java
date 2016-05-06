@@ -3,14 +3,11 @@ package org.bukkit.craftbukkit.v1_8_R3;
 import com.google.common.collect.ImmutableSet;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.Date;
 import java.util.Set;
 import java.util.logging.Level;
 
 import net.minecraft.server.management.IPBanEntry;
-import net.minecraft.server.v1_8_R3.IpBanEntry;
-import net.minecraft.server.v1_8_R3.IpBanList;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BanEntry;
@@ -34,12 +31,12 @@ public class CraftIpBanList implements BanList {
 
     public BanEntry addBan(String target, String reason, Date expires, String source) {
         Validate.notNull(target, "Ban target cannot be null");
-        IpBanEntry entry = new IpBanEntry(target, new Date(), StringUtils.isBlank(source) ? null : source, expires, StringUtils.isBlank(reason) ? null : reason);
+        IPBanEntry entry = new IPBanEntry(target, new Date(), StringUtils.isBlank(source) ? null : source, expires, StringUtils.isBlank(reason) ? null : reason);
 
-        this.list.add(entry);
+        this.list.addEntry(entry);
 
         try {
-            this.list.save();
+            this.list.writeChanges();
         } catch (IOException ioexception) {
             Bukkit.getLogger().log(Level.SEVERE, "Failed to save banned-ips.json, {0}", ioexception.getMessage());
         }
@@ -50,12 +47,12 @@ public class CraftIpBanList implements BanList {
     public Set getBanEntries() {
         ImmutableSet.Builder builder = ImmutableSet.builder();
         String[] astring;
-        int i = (astring = this.list.getEntries()).length;
+        int i = (astring = this.list.getKeys()).length;
 
         for (int j = 0; j < i; ++j) {
             String target = astring[j];
 
-            builder.add((Object) (new CraftIpBanEntry(target, (IpBanEntry) this.list.get((Object) target), this.list)));
+            builder.add((Object) (new CraftIpBanEntry(target, (IPBanEntry) this.list.getEntry(target), this.list)));
         }
 
         return builder.build();
@@ -68,6 +65,6 @@ public class CraftIpBanList implements BanList {
 
     public void pardon(String target) {
         Validate.notNull(target, "Target cannot be null");
-        this.list.remove(target);
+        this.list.removeEntry(target);
     }
 }

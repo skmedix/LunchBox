@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.v1_8_R3;
 
-import net.minecraft.server.v1_8_R3.BiomeBase;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.block.Biome;
@@ -18,7 +17,7 @@ public class CraftChunkSnapshot implements ChunkSnapshot {
     private final boolean[] empty;
     private final int[] hmap;
     private final long captureFulltime;
-    private final BiomeBase[] biome;
+    private final BiomeGenBase[] biome;
     private final double[] biomeTemp;
     private final double[] biomeRain;
 

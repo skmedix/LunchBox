@@ -7,9 +7,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.WorldNBTStorage;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.world.WorldSavedData;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,12 +30,12 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
 
     private final GameProfile profile;
     private final CraftServer server;
-    private final WorldNBTStorage storage;
+    private final WorldSavedData storage;
 
     protected CraftOfflinePlayer(CraftServer server, GameProfile profile) {
         this.server = server;
         this.profile = profile;
-        this.storage = (WorldNBTStorage) ((WorldServer) server.console.worlds.get(0)).getDataManager();
+        this.storage = (WorldSavedData) (server.console.worldServerForDimension(0)).getSaveHandler().getPlayerNBTManager();
     }
 
     public GameProfile getProfile() {
@@ -66,7 +69,7 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isOp() {
-        return this.server.getHandle().isOp(this.profile);
+        return this.server.getHandle().getOppedPlayers().func_183026_b(this.profile);
     }
 
     public void setOp(boolean value) {
@@ -96,14 +99,14 @@ public class CraftOfflinePlayer implements OfflinePlayer, ConfigurationSerializa
     }
 
     public boolean isWhitelisted() {
-        return this.server.getHandle().getWhitelist().isWhitelisted(this.profile);
+        return this.server.getHandle().getWhitelistedPlayers().isWhitelisted(this.profile);
     }
 
     public void setWhitelisted(boolean value) {
         if (value) {
-            this.server.getHandle().addWhitelist(this.profile);
+            this.server.getHandle().addWhitelistedPlayer(this.profile);
         } else {
-            this.server.getHandle().removeWhitelist(this.profile);
+            this.server.getHandle().removePlayerFromWhitelist(this.profile);
         }
 
     }

@@ -16,6 +16,7 @@ import net.minecraft.server.v1_8_R3.IBlockData;
 import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.TileEntitySkull;
+import net.minecraft.world.biome.BiomeGenBase;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -419,8 +420,8 @@ public class CraftBlock implements Block {
         this.getWorld().setBiome(this.x, this.z, bio);
     }
 
-    public static Biome biomeBaseToBiome(BiomeBase base) {
-        return base == null ? null : CraftBlock.BIOME_MAPPING[base.id];
+    public static Biome biomeBaseToBiome(BiomeGenBase base) {
+        return base == null ? null : CraftBlock.BIOME_MAPPING[base.biomeID];
     }
 
     public static BiomeBase biomeToBiomeBase(Biome bio) {
