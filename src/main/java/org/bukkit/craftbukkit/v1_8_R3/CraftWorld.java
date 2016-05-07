@@ -490,13 +490,13 @@ public class CraftWorld implements World {
         } else {
             //this.world.theChunkProviderServer.unloadQueue.remove(x, z);//TODO: removed this for now, need to find a method to replace it later.
             net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) this.world.theChunkProviderServer.loadedChunks.get((int) LongHash.toLong(x, z));
-
+            /* LunchBox - remove timings for now.
             if (chunk == null) {
                 this.world.timings.syncChunkLoadTimer.startTiming();
                 chunk = this.world.theChunkProviderServer.loadChunk(x, z);
                 this.chunkLoadPostProcess(chunk, x, z);
                 this.world.timings.syncChunkLoadTimer.stopTiming();
-            }
+            }*/
 
             return chunk != null;
         }
@@ -504,23 +504,23 @@ public class CraftWorld implements World {
 
     private void chunkLoadPostProcess(net.minecraft.world.chunk.Chunk chunk, int cx, int cz) {
         if (chunk != null) {
-            this.world.chunkProviderServer.chunks.put(LongHash.toLong(cx, cz), chunk);
-            chunk.addEntities();
+            this.world.theChunkProviderServer.loadedChunks.add(chunk);
+            //chunk.addEntities(); //LunchBox - remove for now.
 
             for (int x = -2; x < 3; ++x) {
                 for (int z = -2; z < 3; ++z) {
                     if (x != 0 || z != 0) {
-                        net.minecraft.server.v1_8_R3.Chunk neighbor = this.world.chunkProviderServer.getChunkIfLoaded(chunk.locX + x, chunk.locZ + z);
-
+                        net.minecraft.world.chunk.Chunk neighbor = this.world.theChunkProviderServer.provideChunk(chunk.xPosition + x, chunk.zPosition + z);
                         if (neighbor != null) {
-                            neighbor.setNeighborLoaded(-x, -z);
-                            chunk.setNeighborLoaded(x, z);
+                            //TODO: not sure if this is correct or not.
+                            neighbor.setChunkLoaded(true);
+                            chunk.setChunkLoaded(true);
                         }
                     }
                 }
             }
-
-            chunk.loadNearby(this.world.chunkProviderServer, this.world.chunkProviderServer, cx, cz);
+            //TODO: rework this.
+            chunk.loadNearby(this.world.theChunkProviderServer, this.world.theChunkProviderServer, cx, cz);
         }
 
     }
@@ -529,9 +529,8 @@ public class CraftWorld implements World {
         return this.isChunkLoaded(chunk.getX(), chunk.getZ());
     }
 
-    public void loadChunk(Chunk chunk) {
-        this.loadChunk(chunk.getX(), chunk.getZ());
-        ((CraftChunk) this.getChunkAt(chunk.getX(), chunk.getZ())).getHandle().bukkitChunk = chunk;
+    public void loadChunk(net.minecraft.world.chunk.Chunk chunk) {
+        this.loadChunk(chunk.xPosition, chunk.zPosition);
     }
 
     public WorldServer getHandle() {
