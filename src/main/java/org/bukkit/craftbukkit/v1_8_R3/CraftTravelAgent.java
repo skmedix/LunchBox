@@ -3,10 +3,13 @@ package org.bukkit.craftbukkit.v1_8_R3;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.PortalTravelAgent;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldServer;
 import org.bukkit.Location;
 import org.bukkit.TravelAgent;
 
-public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
+public class CraftTravelAgent extends Teleporter implements TravelAgent {
 
     public static TravelAgent DEFAULT = null;
     private int searchRadius = 128;
@@ -15,7 +18,7 @@ public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
 
     public CraftTravelAgent(WorldServer worldserver) {
         super(worldserver);
-        if (CraftTravelAgent.DEFAULT == null && worldserver.dimension == 0) {
+        if (CraftTravelAgent.DEFAULT == null && worldserver.provider.getDimensionId() == 0) {
             CraftTravelAgent.DEFAULT = this;
         }
 
@@ -23,9 +26,9 @@ public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
 
     public Location findOrCreate(Location target) {
         WorldServer worldServer = ((CraftWorld) target.getWorld()).getHandle();
-        boolean before = worldServer.chunkProviderServer.forceChunkLoad;
+        boolean before = worldServer.theChunkProviderServer.chunkLoadOverride;
 
-        worldServer.chunkProviderServer.forceChunkLoad = true;
+        worldServer.theChunkProviderServer.chunkLoadOverride = true;
         Location found = this.findPortal(target);
 
         if (found == null) {
@@ -36,21 +39,21 @@ public class CraftTravelAgent extends PortalTravelAgent implements TravelAgent {
             }
         }
 
-        worldServer.chunkProviderServer.forceChunkLoad = before;
+        worldServer.theChunkProviderServer.chunkLoadOverride = before;
         return found;
     }
 
     public Location findPortal(Location location) {
-        PortalTravelAgent pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
-        BlockPosition found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());
+        Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getDefaultTeleporter();
+        BlockPos found = pta.findPortal(location.getX(), location.getY(), location.getZ(), this.getSearchRadius());//TODO: need to find replacement for findPortal
 
         return found != null ? new Location(location.getWorld(), (double) found.getX(), (double) found.getY(), (double) found.getZ(), location.getYaw(), location.getPitch()) : null;
     }
 
     public boolean createPortal(Location location) {
-        PortalTravelAgent pta = ((CraftWorld) location.getWorld()).getHandle().getTravelAgent();
+        Teleporter pta = ((CraftWorld) location.getWorld()).getHandle().getDefaultTeleporter();
 
-        return pta.createPortal(location.getX(), location.getY(), location.getZ(), this.getCreationRadius());
+        return pta.createPortal(location.getX(), location.getY(), location.getZ(), this.getCreationRadius());//TODO: need to find replacement for createPortal
     }
 
     public TravelAgent setSearchRadius(int radius) {

@@ -116,7 +116,10 @@ import net.minecraft.server.v1_8_R3.WorldGenerator;
 import net.minecraft.server.v1_8_R3.WorldNBTStorage;
 import net.minecraft.server.v1_8_R3.WorldProvider;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.EmptyChunk;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
@@ -246,6 +249,7 @@ public class CraftWorld implements World {
     private int chunkLoadCount = 0;
     private int chunkGCTickCount;
     private static final Random rand = new Random();
+    /* LunchBox - Remove all spigot stuff for now.
     private final World.Spigot spigot = new World.Spigot() {
         public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius) {
             Validate.notNull(location, "Location cannot be null");
@@ -258,15 +262,15 @@ public class CraftWorld implements World {
                 distance = effect.getId();
                 packet = new PacketPlayOutWorldEvent(distance, new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()), id, false);
             } else {
-                EnumParticle enumparticle = null;
+                EnumParticleTypes enumparticle = null;
                 int[] player = null;
-                EnumParticle[] aenumparticle;
-                int i = (aenumparticle = EnumParticle.values()).length;
+                EnumParticleTypes[] aenumparticle;
+                int i = (aenumparticle = EnumParticleTypes.values()).length;
 
                 for (int j = 0; j < i; ++j) {
-                    EnumParticle p = aenumparticle[j];
+                    EnumParticleTypes p = aenumparticle[j];
 
-                    if (effect.getName().startsWith(p.b().replace("_", ""))) {
+                    if (effect.getName().startsWith(p.getParticleName().replace("_", ""))) {
                         enumparticle = p;
                         if (effect.getData() != null) {
                             if (effect.getData().equals(Material.class)) {
@@ -320,6 +324,7 @@ public class CraftWorld implements World {
             return new CraftLightningStrike(CraftWorld.this.server, lightning);
         }
     };
+    */
     private static int[] $SWITCH_TABLE$org$bukkit$TreeType;
 
     public CraftWorld(WorldServer world, ChunkGenerator gen, World.Environment env) {
@@ -337,7 +342,7 @@ public class CraftWorld implements World {
     }
 
     public int getBlockTypeIdAt(int x, int y, int z) {
-        return CraftMagicNumbers.getId(this.world.getType(new BlockPosition(x, y, z)).getBlock());
+        return CraftMagicNumbers.getId(this.world.getBlockState(new BlockPos(x, y, z)).getBlock());
     }
 
     public int getHighestBlockYAt(int x, int z) {
@@ -345,11 +350,11 @@ public class CraftWorld implements World {
             this.loadChunk(x >> 4, z >> 4);
         }
 
-        return this.world.getHighestBlockYAt(new BlockPosition(x, 0, z)).getY();
+        return this.world.getActualHeight();
     }
 
     public Location getSpawnLocation() {
-        BlockPosition spawn = this.world.getSpawn();
+        BlockPos spawn = this.world.getSpawnPoint();
 
         return new Location(this, (double) spawn.getX(), (double) spawn.getY(), (double) spawn.getZ());
     }
@@ -358,7 +363,7 @@ public class CraftWorld implements World {
         try {
             Location previousLocation = this.getSpawnLocation();
 
-            this.world.worldData.setSpawn(new BlockPosition(x, y, z));
+            this.world.getWorldInfo().setSpawn(new BlockPos(x, y, z));
             SpawnChangeEvent event = new SpawnChangeEvent(this, previousLocation);
 
             this.server.getPluginManager().callEvent(event);
@@ -369,7 +374,7 @@ public class CraftWorld implements World {
     }
 
     public Chunk getChunkAt(int x, int z) {
-        return this.world.chunkProviderServer.getChunkAt(x, z).bukkitChunk;
+        return (Chunk) this.world.theChunkProviderServer.provideChunk(x, z);
     }
 
     public Chunk getChunkAt(Block block) {
@@ -377,17 +382,17 @@ public class CraftWorld implements World {
     }
 
     public boolean isChunkLoaded(int x, int z) {
-        return this.world.chunkProviderServer.isChunkLoaded(x, z);
+        return this.world.theChunkProviderServer.chunkExists(x, z);
     }
 
     public Chunk[] getLoadedChunks() {
-        Object[] chunks = this.world.chunkProviderServer.chunks.values().toArray();
+        Object[] chunks = this.world.theChunkProviderServer.loadedChunks.toArray();
         CraftChunk[] craftChunks = new CraftChunk[chunks.length];
 
         for (int i = 0; i < chunks.length; ++i) {
-            net.minecraft.server.v1_8_R3.Chunk chunk = (net.minecraft.server.v1_8_R3.Chunk) chunks[i];
+            net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) chunks[i];
 
-            craftChunks[i] = chunk.bukkitChunk;
+            craftChunks[i] = new CraftChunk(chunk);
         }
 
         return craftChunks;
@@ -418,47 +423,37 @@ public class CraftWorld implements World {
         if (safe && this.isChunkInUse(x, z)) {
             return false;
         } else {
-            this.world.chunkProviderServer.queueUnload(x, z);
+            this.world.theChunkProviderServer.dropChunk(x, z);//TODO: not sure if drop chunk is the correct method for unloading chunks
             return true;
         }
     }
 
     public boolean unloadChunk(int x, int z, boolean save, boolean safe) {
-        AsyncCatcher.catchOp("chunk unload");
-        if (safe && this.isChunkInUse(x, z)) {
+        if (isChunkInUse(x, z)) {
             return false;
-        } else {
-            net.minecraft.server.v1_8_R3.Chunk chunk = this.world.chunkProviderServer.getOrCreateChunk(x, z);
-
-            if (chunk.mustSave) {
-                save = true;
-            }
-
-            chunk.removeEntities();
-            if (save && !(chunk instanceof EmptyChunk)) {
-                this.world.chunkProviderServer.saveChunk(chunk);
-                this.world.chunkProviderServer.saveChunkNOP(chunk);
-            }
-
-            this.world.chunkProviderServer.unloadQueue.remove(x, z);
-            this.world.chunkProviderServer.chunks.remove(LongHash.toLong(x, z));
+        }
+        if (world.theChunkProviderServer.loadedChunks.contains(getChunkAt(x, z))) {//TODO: not sure if there is a way to find chunks that are to be unloaded. Will look into later.
             return true;
         }
+        world.theChunkProviderServer.dropChunk(x, z);
+        return true;
     }
-
+    //TODO: Rework most of this method to work with forge.
     public boolean regenerateChunk(int x, int z) {
-        this.unloadChunk(x, z, false, false);
-        this.world.chunkProviderServer.unloadQueue.remove(x, z);
-        net.minecraft.server.v1_8_R3.Chunk chunk = null;
+        unloadChunk(x, z, false, false);
 
-        if (this.world.chunkProviderServer.chunkProvider == null) {
-            chunk = this.world.chunkProviderServer.emptyChunk;
+        net.minecraft.world.chunk.Chunk chunk = null;
+
+        if (world.theChunkProviderServer.serverChunkGenerator == null) {
+            chunk = world.theChunkProviderServer.defaultEmptyChunk;
         } else {
-            chunk = this.world.chunkProviderServer.chunkProvider.getOrCreateChunk(x, z);
+            chunk = world.theChunkProviderServer.serverChunkGenerator.provideChunk(x, z);
         }
 
-        this.chunkLoadPostProcess(chunk, x, z);
-        this.refreshChunk(x, z);
+        chunkLoadPostProcess(chunk, x, z);
+
+        refreshChunk(x, z);
+
         return chunk != null;
     }
 
@@ -469,32 +464,36 @@ public class CraftWorld implements World {
             int px = x << 4;
             int pz = z << 4;
             int height = this.getMaxHeight() / 16;
-
+            BlockPos pos;
             for (int idx = 0; idx < 64; ++idx) {
-                this.world.notify(new BlockPosition(px + idx / height, idx % height * 16, pz));
+                pos = new BlockPos((double) (px + idx / height), 0, (double) idx % height * 16);
+                this.world.markBlockForUpdate(pos);
             }
 
-            this.world.notify(new BlockPosition(px + 15, height * 16 - 1, pz + 15));
+            this.world.markBlockForUpdate(new BlockPos(px + 15, height * 16 - 1, pz + 15));
             return true;
         }
     }
 
     public boolean isChunkInUse(int x, int z) {
-        return this.world.getPlayerChunkMap().isChunkInUse(x, z);
+        if (world.theChunkProviderServer.chunkExists(x, z)) {
+            return true;
+        }
+        return false;
     }
 
     public boolean loadChunk(int x, int z, boolean generate) {
         AsyncCatcher.catchOp("chunk load");
         ++this.chunkLoadCount;
         if (generate) {
-            return this.world.chunkProviderServer.getChunkAt(x, z) != null;
+            return this.world.theChunkProviderServer.provideChunk(x, z) != null;
         } else {
-            this.world.chunkProviderServer.unloadQueue.remove(x, z);
-            net.minecraft.server.v1_8_R3.Chunk chunk = (net.minecraft.server.v1_8_R3.Chunk) this.world.chunkProviderServer.chunks.get(LongHash.toLong(x, z));
+            //this.world.theChunkProviderServer.unloadQueue.remove(x, z);//TODO: removed this for now, need to find a method to replace it later.
+            net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) this.world.theChunkProviderServer.loadedChunks.get((int) LongHash.toLong(x, z));
 
             if (chunk == null) {
                 this.world.timings.syncChunkLoadTimer.startTiming();
-                chunk = this.world.chunkProviderServer.loadChunk(x, z);
+                chunk = this.world.theChunkProviderServer.loadChunk(x, z);
                 this.chunkLoadPostProcess(chunk, x, z);
                 this.world.timings.syncChunkLoadTimer.stopTiming();
             }
@@ -503,7 +502,7 @@ public class CraftWorld implements World {
         }
     }
 
-    private void chunkLoadPostProcess(net.minecraft.server.v1_8_R3.Chunk chunk, int cx, int cz) {
+    private void chunkLoadPostProcess(net.minecraft.world.chunk.Chunk chunk, int cx, int cz) {
         if (chunk != null) {
             this.world.chunkProviderServer.chunks.put(LongHash.toLong(cx, cz), chunk);
             chunk.addEntities();

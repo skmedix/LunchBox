@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.Blocks;
 import net.minecraft.server.v1_8_R3.Item;
@@ -39,7 +42,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
     /** @deprecated */
     @Deprecated
     public static int getId(Block block) {
-        return Block.getId(block);
+        return Block.getStateId((IBlockState) block);
     }
 
     public static Material getMaterial(Block block) {
