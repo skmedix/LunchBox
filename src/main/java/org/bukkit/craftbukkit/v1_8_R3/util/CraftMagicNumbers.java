@@ -1,22 +1,15 @@
 package org.bukkit.craftbukkit.v1_8_R3.util;
 
-import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.Item;
-import net.minecraft.server.v1_8_R3.MinecraftKey;
-import net.minecraft.server.v1_8_R3.MojangsonParseException;
-import net.minecraft.server.v1_8_R3.MojangsonParser;
-import net.minecraft.server.v1_8_R3.StatisticList;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
 import org.bukkit.Achievement;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -47,7 +40,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
     }
 
     public static Material getMaterial(Block block) {
-        return Material.getMaterial(Block.getId(block));
+        return Material.getMaterial(Block.getIdFromBlock(block));
     }
 
     public static Item getItem(Material material) {
@@ -59,51 +52,45 @@ public final class CraftMagicNumbers implements UnsafeValues {
     /** @deprecated */
     @Deprecated
     public static Item getItem(int id) {
-        return Item.getById(id);
+        return Item.getItemById(id);
     }
 
     /** @deprecated */
     @Deprecated
     public static int getId(Item item) {
-        return Item.getId(item);
+        return Item.getIdFromItem(item);
     }
 
     public static Material getMaterial(Item item) {
-        Material material = Material.getMaterial(Item.getId(item));
+        Material material = Material.getMaterial(Item.getIdFromItem(item));
 
         return material == null ? Material.AIR : material;
     }
 
     public static Block getBlock(Material material) {
-        Block block = Block.getById(material.getId());
+        Block block = Block.getBlockById(material.getId());
 
-        return block == null ? Blocks.AIR : block;
+        return block == null ? Blocks.air : block;
     }
 
     public Material getMaterialFromInternalName(String name) {
-        return getMaterial((Item) Item.REGISTRY.get(new MinecraftKey(name)));
+        return getMaterial((net.minecraft.item.Item) net.minecraft.item.Item.itemRegistry.getObject(name));
     }
 
-    public List tabCompleteInternalMaterialName(String token, List completions) {
-        ArrayList results = Lists.newArrayList();
-        Iterator iterator = Item.REGISTRY.keySet().iterator();
-
-        while (iterator.hasNext()) {
-            MinecraftKey key = (MinecraftKey) iterator.next();
-
-            results.add(key.toString());
-        }
-
-        return (List) StringUtil.copyPartialMatches(token, results, completions);
+    public List<String> tabCompleteInternalMaterialName(String token, List completions) {
+        return (List) StringUtil.copyPartialMatches(token, Item.itemRegistry.getKeys(), completions);
     }
 
     public ItemStack modifyItemStack(ItemStack stack, String arguments) {
-        net.minecraft.server.v1_8_R3.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
+        net.minecraft.item.ItemStack nmsStack = CraftItemStack.asNMSCopy(stack);
 
-        try {
-            nmsStack.setTag(MojangsonParser.parse(arguments));
-        } catch (MojangsonParseException mojangsonparseexception) {
-            Logger.getLogger(CraftMagicNumbers.class.getName()).log(Level.SEVERE, (String) null, mojangsonparseexception);
+        try
+        {
+            nmsStack.setTagCompound((net.minecraft.nbt.NBTTagCompound) net.minecraft.nbt.JsonToNBT.getTagFromJson(arguments));
+        }
+        catch (net.minecraft.nbt.NBTException e)
+        {
+            e.printStackTrace();
         }
 
         stack.setItemMeta(CraftItemStack.getItemMeta(nmsStack));
@@ -120,10 +107,10 @@ public final class CraftMagicNumbers implements UnsafeValues {
 
     public List tabCompleteInternalStatisticOrAchievementName(String token, List completions) {
         ArrayList matches = new ArrayList();
-        Iterator iterator = StatisticList.stats.iterator();
+        Iterator iterator = StatList.allStats.iterator();
 
         while (iterator.hasNext()) {
-            String statistic = ((net.minecraft.server.v1_8_R3.Statistic) iterator.next()).name;
+            String statistic = ((StatBase) iterator.next()).getStatName().toString();
 
             if (statistic.startsWith(token)) {
                 matches.add(statistic);

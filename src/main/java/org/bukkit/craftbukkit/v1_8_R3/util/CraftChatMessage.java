@@ -7,60 +7,60 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.minecraft.server.v1_8_R3.ChatClickable;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.ChatMessage;
-import net.minecraft.server.v1_8_R3.ChatModifier;
-import net.minecraft.server.v1_8_R3.EnumChatFormat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+
+import net.minecraft.event.ClickEvent;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 
 public final class CraftChatMessage {
 
     private static final Pattern LINK_PATTERN = Pattern.compile("((?:(?:https?):\\/\\/)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[" + String.valueOf('§') + " \\n]|$))))");
 
-    public static IChatBaseComponent[] fromString(String message) {
+    public static IChatComponent[] fromString(String message) {
         return fromString(message, false);
     }
 
-    public static IChatBaseComponent[] fromString(String message, boolean keepNewlines) {
-        return (new CraftChatMessage.StringMessage(message, keepNewlines, (CraftChatMessage.StringMessage) null)).getOutput();
+    public static IChatComponent[] fromString(String message, boolean keepNewlines) {
+        return (new CraftChatMessage.StringMessage(message, keepNewlines,null)).getOutput();
     }
 
-    public static String fromComponent(IChatBaseComponent component) {
-        return fromComponent(component, EnumChatFormat.BLACK);
+    public static String fromComponent(IChatComponent component) {
+        return fromComponent(component, EnumChatFormatting.BLACK);
     }
 
-    public static String fromComponent(IChatBaseComponent component, EnumChatFormat defaultColor) {
+    public static String fromComponent(IChatComponent component, EnumChatFormatting defaultColor) {
         if (component == null) {
             return "";
         } else {
             StringBuilder out = new StringBuilder();
 
-            IChatBaseComponent c;
+            IChatComponent c;
 
-            for (Iterator iterator = component.iterator(); iterator.hasNext(); out.append(c.getText())) {
-                c = (IChatBaseComponent) iterator.next();
-                ChatModifier modi = c.getChatModifier();
+            for (Iterator iterator = component.iterator(); iterator.hasNext(); out.append(c.getUnformattedText())) {
+                c = (IChatComponent) iterator.next();
+                ChatStyle modi = c.getChatStyle();
 
                 out.append(modi.getColor() == null ? defaultColor : modi.getColor());
-                if (modi.isBold()) {
-                    out.append(EnumChatFormat.BOLD);
+                if (modi.getBold()) {
+                    out.append(EnumChatFormatting.BOLD);
                 }
 
-                if (modi.isItalic()) {
-                    out.append(EnumChatFormat.ITALIC);
+                if (modi.getItalic()) {
+                    out.append(EnumChatFormatting.ITALIC);
                 }
 
-                if (modi.isUnderlined()) {
-                    out.append(EnumChatFormat.UNDERLINE);
+                if (modi.getUnderlined()) {
+                    out.append(EnumChatFormatting.UNDERLINE);
                 }
 
-                if (modi.isStrikethrough()) {
-                    out.append(EnumChatFormat.STRIKETHROUGH);
+                if (modi.getStrikethrough()) {
+                    out.append(EnumChatFormatting.STRIKETHROUGH);
                 }
 
-                if (modi.isRandom()) {
-                    out.append(EnumChatFormat.OBFUSCATED);
+                if (modi.getObfuscated()) {
+                    out.append(EnumChatFormatting.OBFUSCATED);
                 }
             }
 
@@ -68,22 +68,22 @@ public final class CraftChatMessage {
         }
     }
 
-    public static IChatBaseComponent fixComponent(IChatBaseComponent component) {
+    public static IChatComponent fixComponent(IChatComponent component) {
         Matcher matcher = CraftChatMessage.LINK_PATTERN.matcher("");
 
         return fixComponent(component, matcher);
     }
 
-    private static IChatBaseComponent fixComponent(IChatBaseComponent component, Matcher matcher) {
+    private static IChatComponent fixComponent(IChatComponent component, Matcher matcher) {
         if (component instanceof ChatComponentText) {
             ChatComponentText extras = (ChatComponentText) component;
-            String subs = extras.g();
+            String subs = extras.getChatComponentText_TextValue();
 
             if (matcher.reset(subs).find()) {
                 matcher.reset();
-                ChatModifier i = extras.getChatModifier() != null ? extras.getChatModifier() : new ChatModifier();
+                ChatStyle i = extras.getChatStyle() != null ? extras.getChatStyle() : new ChatStyle();
                 ArrayList comp = new ArrayList();
-                ArrayList c = new ArrayList(extras.a());
+                ArrayList c = new ArrayList(extras.getSiblings());
 
                 component = extras = new ChatComponentText("");
 
@@ -98,52 +98,52 @@ public final class CraftChatMessage {
 
                     ChatComponentText c1 = new ChatComponentText(subs.substring(pos, matcher.start()));
 
-                    c1.setChatModifier(i);
+                    c1.setChatStyle(i);
                     comp.add(c1);
                     ChatComponentText link = new ChatComponentText(matcher.group());
-                    ChatModifier linkModi = i.clone();
+                    ChatStyle linkModi = i;
 
-                    linkModi.setChatClickable(new ChatClickable(ChatClickable.EnumClickAction.OPEN_URL, prev));
-                    link.setChatModifier(linkModi);
+                    linkModi.setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, prev));
+                    link.setChatStyle(linkModi);
                     comp.add(link);
                 }
 
                 ChatComponentText chatcomponenttext = new ChatComponentText(subs.substring(pos));
 
-                chatcomponenttext.setChatModifier(i);
+                chatcomponenttext.setChatStyle(i);
                 comp.add(chatcomponenttext);
                 comp.addAll(c);
                 Iterator iterator = comp.iterator();
 
                 while (iterator.hasNext()) {
-                    IChatBaseComponent ichatbasecomponent = (IChatBaseComponent) iterator.next();
+                    IChatComponent IChatComponent = (IChatComponent) iterator.next();
 
-                    extras.addSibling(ichatbasecomponent);
+                    extras.appendSibling(IChatComponent);
                 }
             }
         }
 
-        List list = ((IChatBaseComponent) component).a();
+        List list = ((IChatComponent) component).getSiblings();
 
         for (int i = 0; i < list.size(); ++i) {
-            IChatBaseComponent ichatbasecomponent1 = (IChatBaseComponent) list.get(i);
+            IChatComponent IChatComponent1 = (IChatComponent) list.get(i);
 
-            if (ichatbasecomponent1.getChatModifier() != null && ichatbasecomponent1.getChatModifier().h() == null) {
-                list.set(i, fixComponent(ichatbasecomponent1, matcher));
+            if (IChatComponent1.getChatStyle() != null && IChatComponent1.getChatStyle().getColor() == null) {
+                list.set(i, fixComponent(IChatComponent1, matcher));
             }
         }
 
-        if (component instanceof ChatMessage) {
-            Object[] aobject = ((ChatMessage) component).j();
+        if (component instanceof ChatComponentText) {
+            Object[] aobject = (component).getSiblings().toArray();
 
             for (int j = 0; j < aobject.length; ++j) {
                 Object object = aobject[j];
 
-                if (object instanceof IChatBaseComponent) {
-                    IChatBaseComponent ichatbasecomponent2 = (IChatBaseComponent) object;
+                if (object instanceof IChatComponent) {
+                    IChatComponent IChatComponent2 = (IChatComponent) object;
 
-                    if (ichatbasecomponent2.getChatModifier() != null && ichatbasecomponent2.getChatModifier().h() == null) {
-                        aobject[j] = fixComponent(ichatbasecomponent2, matcher);
+                    if (IChatComponent2.getChatStyle() != null && IChatComponent2.getChatStyle().getColor() == null) {
+                        aobject[j] = fixComponent(IChatComponent2, matcher);
                     }
                 } else if (object instanceof String && matcher.reset((String) object).find()) {
                     aobject[j] = fixComponent(new ChatComponentText((String) object), matcher);
@@ -151,7 +151,7 @@ public final class CraftChatMessage {
             }
         }
 
-        return (IChatBaseComponent) component;
+        return (IChatComponent) component;
     }
 
     private static class StringMessage {
@@ -159,20 +159,20 @@ public final class CraftChatMessage {
         private static final Map formatMap;
         private static final Pattern INCREMENTAL_PATTERN = Pattern.compile("(" + String.valueOf('§') + "[0-9a-fk-or])|(\\n)|((?:(?:https?):\\/\\/)?(?:[-\\w_\\.]{2,}\\.[a-z]{2,4}.*?(?=[\\.\\?!,;:]?(?:[" + '§' + " \\n]|$))))", 2);
         private final List list;
-        private IChatBaseComponent currentChatComponent;
-        private ChatModifier modifier;
-        private final IChatBaseComponent[] output;
+        private IChatComponent currentChatComponent;
+        private ChatStyle modifier;
+        private final IChatComponent[] output;
         private int currentIndex;
         private final String message;
         private static int[] $SWITCH_TABLE$net$minecraft$server$EnumChatFormat;
 
         static {
             ImmutableMap.Builder builder = ImmutableMap.builder();
-            EnumChatFormat[] aenumchatformat;
-            int i = (aenumchatformat = EnumChatFormat.values()).length;
+            EnumChatFormatting[] aenumchatformat;
+            int i = (aenumchatformat = EnumChatFormatting.values()).length;
 
             for (int j = 0; j < i; ++j) {
-                EnumChatFormat format = aenumchatformat[j];
+                EnumChatFormatting format = aenumchatformat[j];
 
                 builder.put(Character.valueOf(Character.toLowerCase(format.toString().charAt(1))), format);
             }
@@ -183,10 +183,10 @@ public final class CraftChatMessage {
         private StringMessage(String message, boolean keepNewlines) {
             this.list = new ArrayList();
             this.currentChatComponent = new ChatComponentText("");
-            this.modifier = new ChatModifier();
+            this.modifier = new ChatStyle();
             this.message = message;
             if (message == null) {
-                this.output = new IChatBaseComponent[] { this.currentChatComponent};
+                this.output = new IChatComponent[] { this.currentChatComponent};
             } else {
                 this.list.add(this.currentChatComponent);
                 Matcher matcher = CraftChatMessage.StringMessage.INCREMENTAL_PATTERN.matcher(message);
@@ -203,14 +203,14 @@ public final class CraftChatMessage {
                     this.appendNewComponent(matcher.start(groupId));
                     switch (groupId) {
                     case 1:
-                        EnumChatFormat format = (EnumChatFormat) CraftChatMessage.StringMessage.formatMap.get(Character.valueOf(match.toLowerCase().charAt(1)));
+                        EnumChatFormatting format = (EnumChatFormatting) CraftChatMessage.StringMessage.formatMap.get(Character.valueOf(match.toLowerCase().charAt(1)));
 
-                        if (format == EnumChatFormat.RESET) {
-                            this.modifier = new ChatModifier();
-                        } else if (format.isFormat()) {
+                        if (format == EnumChatFormatting.RESET) {
+                            this.modifier = new ChatStyle();
+                        } else if (format.isFancyStyling()) {
                             switch ($SWITCH_TABLE$net$minecraft$server$EnumChatFormat()[format.ordinal()]) {
                             case 17:
-                                this.modifier.setRandom(Boolean.TRUE);
+                                this.modifier.setObfuscated(Boolean.TRUE);
                                 break;
 
                             case 18:
@@ -222,7 +222,7 @@ public final class CraftChatMessage {
                                 break;
 
                             case 20:
-                                this.modifier.setUnderline(Boolean.TRUE);
+                                this.modifier.setUnderlined(Boolean.TRUE);
                                 break;
 
                             case 21:
@@ -233,13 +233,13 @@ public final class CraftChatMessage {
                                 throw new AssertionError("Unexpected message format");
                             }
                         } else {
-                            this.modifier = (new ChatModifier()).setColor(format);
+                            this.modifier = (new ChatStyle()).setColor(format);
                         }
                         break;
 
                     case 2:
                         if (keepNewlines) {
-                            this.currentChatComponent.addSibling(new ChatComponentText("\n"));
+                            this.currentChatComponent.appendSibling(new ChatComponentText("\n"));
                         } else {
                             this.currentChatComponent = null;
                         }
@@ -250,9 +250,9 @@ public final class CraftChatMessage {
                             match = "http://" + match;
                         }
 
-                        this.modifier.setChatClickable(new ChatClickable(ChatClickable.EnumClickAction.OPEN_URL, match));
+                        this.modifier.setChatClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, match));
                         this.appendNewComponent(matcher.end(groupId));
-                        this.modifier.setChatClickable((ChatClickable) null);
+                        this.modifier.setChatClickEvent((ClickEvent) null);
                     }
                 }
 
@@ -260,26 +260,26 @@ public final class CraftChatMessage {
                     this.appendNewComponent(message.length());
                 }
 
-                this.output = (IChatBaseComponent[]) this.list.toArray(new IChatBaseComponent[this.list.size()]);
+                this.output = (IChatComponent[]) this.list.toArray(new IChatComponent[this.list.size()]);
             }
         }
 
         private void appendNewComponent(int index) {
             if (index > this.currentIndex) {
-                IChatBaseComponent addition = (new ChatComponentText(this.message.substring(this.currentIndex, index))).setChatModifier(this.modifier);
+                IChatComponent addition = (new ChatComponentText(this.message.substring(this.currentIndex, index))).setChatStyle(this.modifier);
 
                 this.currentIndex = index;
-                this.modifier = this.modifier.clone();
+                this.modifier = this.modifier.createDeepCopy();
                 if (this.currentChatComponent == null) {
                     this.currentChatComponent = new ChatComponentText("");
                     this.list.add(this.currentChatComponent);
                 }
 
-                this.currentChatComponent.addSibling(addition);
+                this.currentChatComponent.appendSibling(addition);
             }
         }
 
-        private IChatBaseComponent[] getOutput() {
+        private IChatComponent[] getOutput() {
             return this.output;
         }
 
@@ -289,136 +289,135 @@ public final class CraftChatMessage {
             if (CraftChatMessage.StringMessage.$SWITCH_TABLE$net$minecraft$server$EnumChatFormat != null) {
                 return aint;
             } else {
-                int[] aint1 = new int[EnumChatFormat.values().length];
-
+                int[] aint1 = new int[EnumChatFormatting.values().length];
                 try {
-                    aint1[EnumChatFormat.AQUA.ordinal()] = 12;
+                    aint1[EnumChatFormatting.AQUA.ordinal()] = 12;
                 } catch (NoSuchFieldError nosuchfielderror) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.BLACK.ordinal()] = 1;
+                    aint1[EnumChatFormatting.BLACK.ordinal()] = 1;
                 } catch (NoSuchFieldError nosuchfielderror1) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.BLUE.ordinal()] = 10;
+                    aint1[EnumChatFormatting.BLUE.ordinal()] = 10;
                 } catch (NoSuchFieldError nosuchfielderror2) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.BOLD.ordinal()] = 18;
+                    aint1[EnumChatFormatting.BOLD.ordinal()] = 18;
                 } catch (NoSuchFieldError nosuchfielderror3) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.DARK_AQUA.ordinal()] = 4;
+                    aint1[EnumChatFormatting.DARK_AQUA.ordinal()] = 4;
                 } catch (NoSuchFieldError nosuchfielderror4) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.DARK_BLUE.ordinal()] = 2;
+                    aint1[EnumChatFormatting.DARK_BLUE.ordinal()] = 2;
                 } catch (NoSuchFieldError nosuchfielderror5) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.DARK_GRAY.ordinal()] = 9;
+                    aint1[EnumChatFormatting.DARK_GRAY.ordinal()] = 9;
                 } catch (NoSuchFieldError nosuchfielderror6) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.DARK_GREEN.ordinal()] = 3;
+                    aint1[EnumChatFormatting.DARK_GREEN.ordinal()] = 3;
                 } catch (NoSuchFieldError nosuchfielderror7) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.DARK_PURPLE.ordinal()] = 6;
+                    aint1[EnumChatFormatting.DARK_PURPLE.ordinal()] = 6;
                 } catch (NoSuchFieldError nosuchfielderror8) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.DARK_RED.ordinal()] = 5;
+                    aint1[EnumChatFormatting.DARK_RED.ordinal()] = 5;
                 } catch (NoSuchFieldError nosuchfielderror9) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.GOLD.ordinal()] = 7;
+                    aint1[EnumChatFormatting.GOLD.ordinal()] = 7;
                 } catch (NoSuchFieldError nosuchfielderror10) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.GRAY.ordinal()] = 8;
+                    aint1[EnumChatFormatting.GRAY.ordinal()] = 8;
                 } catch (NoSuchFieldError nosuchfielderror11) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.GREEN.ordinal()] = 11;
+                    aint1[EnumChatFormatting.GREEN.ordinal()] = 11;
                 } catch (NoSuchFieldError nosuchfielderror12) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.ITALIC.ordinal()] = 21;
+                    aint1[EnumChatFormatting.ITALIC.ordinal()] = 21;
                 } catch (NoSuchFieldError nosuchfielderror13) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.LIGHT_PURPLE.ordinal()] = 14;
+                    aint1[EnumChatFormatting.LIGHT_PURPLE.ordinal()] = 14;
                 } catch (NoSuchFieldError nosuchfielderror14) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.OBFUSCATED.ordinal()] = 17;
+                    aint1[EnumChatFormatting.OBFUSCATED.ordinal()] = 17;
                 } catch (NoSuchFieldError nosuchfielderror15) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.RED.ordinal()] = 13;
+                    aint1[EnumChatFormatting.RED.ordinal()] = 13;
                 } catch (NoSuchFieldError nosuchfielderror16) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.RESET.ordinal()] = 22;
+                    aint1[EnumChatFormatting.RESET.ordinal()] = 22;
                 } catch (NoSuchFieldError nosuchfielderror17) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.STRIKETHROUGH.ordinal()] = 19;
+                    aint1[EnumChatFormatting.STRIKETHROUGH.ordinal()] = 19;
                 } catch (NoSuchFieldError nosuchfielderror18) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.UNDERLINE.ordinal()] = 20;
+                    aint1[EnumChatFormatting.UNDERLINE.ordinal()] = 20;
                 } catch (NoSuchFieldError nosuchfielderror19) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.WHITE.ordinal()] = 16;
+                    aint1[EnumChatFormatting.WHITE.ordinal()] = 16;
                 } catch (NoSuchFieldError nosuchfielderror20) {
                     ;
                 }
 
                 try {
-                    aint1[EnumChatFormat.YELLOW.ordinal()] = 15;
+                    aint1[EnumChatFormatting.YELLOW.ordinal()] = 15;
                 } catch (NoSuchFieldError nosuchfielderror21) {
                     ;
                 }

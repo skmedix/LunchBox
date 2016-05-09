@@ -12,10 +12,7 @@ import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagList;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
@@ -142,19 +139,19 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
                 Iterator iterator = this.pages.iterator();
 
                 while (iterator.hasNext()) {
-                    IChatBaseComponent page = (IChatBaseComponent) iterator.next();
+                    IChatComponent page = (IChatComponent) iterator.next();
 
-                    list.add(new NBTTagString(CraftChatMessage.fromComponent(page)));
+                    list.appendTag(new NBTTagString(CraftChatMessage.fromComponent(page)));
                 }
 
-                itemData.set(CraftMetaBook.BOOK_PAGES.NBT, list);
+                itemData.setTag(CraftMetaBook.BOOK_PAGES.NBT, list);
             }
 
-            itemData.remove(CraftMetaBook.RESOLVED.NBT);
+            itemData.removeTag(CraftMetaBook.RESOLVED.NBT);
         }
 
         if (this.generation != null) {
-            itemData.setInt(CraftMetaBook.GENERATION.NBT, this.generation.intValue());
+            itemData.setInteger(CraftMetaBook.GENERATION.NBT, this.generation.intValue());
         }
 
     }
@@ -216,7 +213,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
     public String getPage(int page) {
         Validate.isTrue(this.isValidPage(page), "Invalid page number");
-        return CraftChatMessage.fromComponent((IChatBaseComponent) this.pages.get(page - 1));
+        return CraftChatMessage.fromComponent((IChatComponent) this.pages.get(page - 1));
     }
 
     public void setPage(int page, String text) {
@@ -261,7 +258,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
 
         return new AbstractList() {
             public String get(int index) {
-                return CraftChatMessage.fromComponent((IChatBaseComponent) copy.get(index));
+                return CraftChatMessage.fromComponent((IChatComponent) copy.get(index));
             }
 
             public int size() {
@@ -367,7 +364,7 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
             Iterator iterator = this.pages.iterator();
 
             while (iterator.hasNext()) {
-                IChatBaseComponent comp = (IChatBaseComponent) iterator.next();
+                IChatComponent comp = (IChatComponent) iterator.next();
 
                 pagesString.add(CraftChatMessage.fromComponent(comp));
             }

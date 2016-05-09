@@ -31,17 +31,11 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.server.v1_8_R3.GenericAttributes;
-import net.minecraft.server.v1_8_R3.IAttribute;
-import net.minecraft.server.v1_8_R3.NBTBase;
-import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagList;
-import net.minecraft.server.v1_8_R3.NBTTagString;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
@@ -115,14 +109,14 @@ class CraftMetaItem implements ItemMeta, Repairable {
         NBTTagList key;
 
         if (tag.hasKey(CraftMetaItem.DISPLAY.NBT)) {
-            NBTTagCompound keys = tag.getCompound(CraftMetaItem.DISPLAY.NBT);
+            NBTTagCompound keys = tag.getCompoundTag(CraftMetaItem.DISPLAY.NBT);
 
             if (keys.hasKey(CraftMetaItem.NAME.NBT)) {
                 this.displayName = ValidateUtils.limit(keys.getString(CraftMetaItem.NAME.NBT), 1024);
             }
 
             if (keys.hasKey(CraftMetaItem.LORE.NBT)) {
-                key = keys.getList(CraftMetaItem.LORE.NBT, 8);
+                key = keys.getTagList(CraftMetaItem.LORE.NBT, 8);
                 this.lore = new ArrayList(key.size());
 
                 for (int attributeTracker = 0; attributeTracker < key.size(); ++attributeTracker) {
@@ -135,21 +129,22 @@ class CraftMetaItem implements ItemMeta, Repairable {
 
         this.enchantments = buildEnchantments(tag, CraftMetaItem.ENCHANTMENTS);
         if (tag.hasKey(CraftMetaItem.REPAIR.NBT)) {
-            this.repairCost = tag.getInt(CraftMetaItem.REPAIR.NBT);
+            this.repairCost = tag.getInteger(CraftMetaItem.REPAIR.NBT);
         }
 
         if (tag.hasKey(CraftMetaItem.HIDEFLAGS.NBT)) {
-            this.hideFlag = tag.getInt(CraftMetaItem.HIDEFLAGS.NBT);
+            this.hideFlag = tag.getInteger(CraftMetaItem.HIDEFLAGS.NBT);
         }
 
-        if (tag.get(CraftMetaItem.ATTRIBUTES.NBT) instanceof NBTTagList) {
+        if (tag.getTag(CraftMetaItem.ATTRIBUTES.NBT) instanceof NBTTagList) {
             NBTTagList nbttaglist = null;
 
-            key = tag.getList(CraftMetaItem.ATTRIBUTES.NBT, 10);
+            key = tag.getTagList(CraftMetaItem.ATTRIBUTES.NBT, 10);
             TObjectDoubleHashMap tobjectdoublehashmap = new TObjectDoubleHashMap();
             TObjectDoubleHashMap tobjectdoublehashmap1 = new TObjectDoubleHashMap();
             HashMap attributesByName = new HashMap();
 
+            //todo: am not sure what GenericAttributes is in forge.
             tobjectdoublehashmap.put("generic.maxHealth", 20.0D);
             attributesByName.put("generic.maxHealth", GenericAttributes.maxHealth);
             tobjectdoublehashmap.put("generic.followRange", 32.0D);
@@ -171,9 +166,9 @@ class CraftMetaItem implements ItemMeta, Repairable {
             NBTTagCompound nbttagcompound;
 
             for (i = 0; i < oldList.size(); ++i) {
-                nbttagcompound = oldList.get(i);
-                if (nbttagcompound != null && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT, 99) && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT, 99) && nbttagcompound.get(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT) instanceof NBTTagString && CraftItemFactory.KNOWN_NBT_ATTRIBUTE_NAMES.contains(nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT)) && nbttagcompound.get(CraftMetaItem.ATTRIBUTES_NAME.NBT) instanceof NBTTagString && !nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_NAME.NBT).isEmpty() && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_VALUE.NBT, 99) && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_TYPE.NBT, 99) && nbttagcompound.getInt(CraftMetaItem.ATTRIBUTES_TYPE.NBT) >= 0 && nbttagcompound.getInt(CraftMetaItem.ATTRIBUTES_TYPE.NBT) <= 2) {
-                    switch (nbttagcompound.getInt(CraftMetaItem.ATTRIBUTES_TYPE.NBT)) {
+                nbttagcompound = (NBTTagCompound) oldList.get(i);
+                if (nbttagcompound != null && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT, 99) && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT, 99) && nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT) instanceof NBTTagString && CraftItemFactory.KNOWN_NBT_ATTRIBUTE_NAMES.contains(nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT)) && nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_NAME.NBT) instanceof NBTTagString && !nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_NAME.NBT).isEmpty() && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_VALUE.NBT, 99) && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_TYPE.NBT, 99) && nbttagcompound.getInteger(CraftMetaItem.ATTRIBUTES_TYPE.NBT) >= 0 && nbttagcompound.getInteger(CraftMetaItem.ATTRIBUTES_TYPE.NBT) <= 2) {
+                    switch (nbttagcompound.getInteger(CraftMetaItem.ATTRIBUTES_TYPE.NBT)) {
                     case 0:
                         op0.add(nbttagcompound);
                         break;
@@ -192,7 +187,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
 
             String entry;
             double val;
-            NBTTagCompound nbttagcompound;
+            //NBTTagCompound nbttagcompound;
 
             while (iterator.hasNext()) {
                 nbttagcompound = (NBTTagCompound) iterator.next();
@@ -207,7 +202,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
                     tobjectdoublehashmap.put(entry, val);
                 }
 
-                key.add(nbttagcompound);
+                key.appendTag(nbttagcompound);
             }
 
             iterator = tobjectdoublehashmap.keySet().iterator();
@@ -228,14 +223,14 @@ class CraftMetaItem implements ItemMeta, Repairable {
                     double valX = tobjectdoublehashmap1.get(entry);
 
                     val += valX * nbttagcompound.getDouble(CraftMetaItem.ATTRIBUTES_VALUE.NBT);
-                    if (val != ((IAttribute) attributesByName.get(entry)).a(val)) {
+                    if (val != ((IAttribute) attributesByName.get(entry)).clampValue(val)) {
                         continue;
                     }
 
                     tobjectdoublehashmap.put(entry, val);
                 }
 
-                key.add(nbttagcompound);
+                key.appendTag(nbttagcompound);
             }
 
             iterator = op2.iterator();
@@ -246,33 +241,33 @@ class CraftMetaItem implements ItemMeta, Repairable {
                 if (tobjectdoublehashmap.containsKey(entry)) {
                     val = tobjectdoublehashmap.get(entry);
                     val += val * nbttagcompound.getDouble(CraftMetaItem.ATTRIBUTES_VALUE.NBT);
-                    if (val != ((IAttribute) attributesByName.get(entry)).a(val)) {
+                    if (val != ((IAttribute) attributesByName.get(entry)).clampValue(val)) {
                         continue;
                     }
 
                     tobjectdoublehashmap.put(entry, val);
                 }
 
-                key.add(nbttagcompound);
+                key.appendTag(nbttagcompound);
             }
 
             for (i = 0; i < key.size(); ++i) {
                 if (key.get(i) instanceof NBTTagCompound) {
-                    nbttagcompound = key.get(i);
-                    if (nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT, 99) && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT, 99) && nbttagcompound.get(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT) instanceof NBTTagString && CraftItemFactory.KNOWN_NBT_ATTRIBUTE_NAMES.contains(nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT)) && nbttagcompound.get(CraftMetaItem.ATTRIBUTES_NAME.NBT) instanceof NBTTagString && !nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_NAME.NBT).isEmpty() && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_VALUE.NBT, 99) && nbttagcompound.hasKeyOfType(CraftMetaItem.ATTRIBUTES_TYPE.NBT, 99) && nbttagcompound.getInt(CraftMetaItem.ATTRIBUTES_TYPE.NBT) >= 0 && nbttagcompound.getInt(CraftMetaItem.ATTRIBUTES_TYPE.NBT) <= 2) {
+                    nbttagcompound = (NBTTagCompound) key.get(i);
+                    if (nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT, 99) && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT, 99) && nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT) instanceof NBTTagString && CraftItemFactory.KNOWN_NBT_ATTRIBUTE_NAMES.contains(nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT)) && nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_NAME.NBT) instanceof NBTTagString && !nbttagcompound.getString(CraftMetaItem.ATTRIBUTES_NAME.NBT).isEmpty() && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_VALUE.NBT, 99) && nbttagcompound.hasKey(CraftMetaItem.ATTRIBUTES_TYPE.NBT, 99) && nbttagcompound.getInteger(CraftMetaItem.ATTRIBUTES_TYPE.NBT) >= 0 && nbttagcompound.getInteger(CraftMetaItem.ATTRIBUTES_TYPE.NBT) <= 2) {
                         if (nbttaglist == null) {
                             nbttaglist = new NBTTagList();
                         }
 
                         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
 
-                        nbttagcompound1.set(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT, nbttagcompound.get(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT));
-                        nbttagcompound1.set(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT, nbttagcompound.get(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT));
-                        nbttagcompound1.set(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT, nbttagcompound.get(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT));
-                        nbttagcompound1.set(CraftMetaItem.ATTRIBUTES_NAME.NBT, nbttagcompound.get(CraftMetaItem.ATTRIBUTES_NAME.NBT));
-                        nbttagcompound1.set(CraftMetaItem.ATTRIBUTES_VALUE.NBT, nbttagcompound.get(CraftMetaItem.ATTRIBUTES_VALUE.NBT));
-                        nbttagcompound1.set(CraftMetaItem.ATTRIBUTES_TYPE.NBT, nbttagcompound.get(CraftMetaItem.ATTRIBUTES_TYPE.NBT));
-                        nbttaglist.add(nbttagcompound1);
+                        nbttagcompound1.setTag(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT, nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_UUID_HIGH.NBT));
+                        nbttagcompound1.setTag(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT, nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_UUID_LOW.NBT));
+                        nbttagcompound1.setTag(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT, nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_IDENTIFIER.NBT));
+                        nbttagcompound1.setTag(CraftMetaItem.ATTRIBUTES_NAME.NBT, nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_NAME.NBT));
+                        nbttagcompound1.setTag(CraftMetaItem.ATTRIBUTES_VALUE.NBT, nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_VALUE.NBT));
+                        nbttagcompound1.setTag(CraftMetaItem.ATTRIBUTES_TYPE.NBT, nbttagcompound.getTag(CraftMetaItem.ATTRIBUTES_TYPE.NBT));
+                        nbttaglist.appendTag(nbttagcompound1);
                     }
                 }
             }
