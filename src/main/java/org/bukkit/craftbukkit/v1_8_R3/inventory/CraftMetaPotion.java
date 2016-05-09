@@ -7,8 +7,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagList;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -43,16 +44,16 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
     CraftMetaPotion(NBTTagCompound tag) {
         super(tag);
         if (tag.hasKey(CraftMetaPotion.POTION_EFFECTS.NBT)) {
-            NBTTagList list = tag.getList(CraftMetaPotion.POTION_EFFECTS.NBT, 10);
-            int length = list.size();
+            NBTTagList list = tag.getTagList(CraftMetaPotion.POTION_EFFECTS.NBT, 10);
+            int length = list.size();//todo: need to figure out how to get the size.
 
             this.customEffects = new ArrayList(length);
 
             for (int i = 0; i < length; ++i) {
-                NBTTagCompound effect = list.get(i);
+                NBTTagCompound effect = (NBTTagCompound) list.get(i);
                 PotionEffectType type = PotionEffectType.getById(effect.getByte(CraftMetaPotion.ID.NBT));
                 byte amp = effect.getByte(CraftMetaPotion.AMPLIFIER.NBT);
-                int duration = effect.getInt(CraftMetaPotion.DURATION.NBT);
+                int duration = effect.getInteger(CraftMetaPotion.DURATION.NBT);
                 boolean ambient = effect.getBoolean(CraftMetaPotion.AMBIENT.NBT);
                 boolean particles = effect.getBoolean(CraftMetaPotion.SHOW_PARTICLES.NBT);
 
@@ -87,7 +88,7 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
         if (this.customEffects != null) {
             NBTTagList effectList = new NBTTagList();
 
-            tag.set(CraftMetaPotion.POTION_EFFECTS.NBT, effectList);
+            tag.setTag(CraftMetaPotion.POTION_EFFECTS.NBT, effectList);
             Iterator iterator = this.customEffects.iterator();
 
             while (iterator.hasNext()) {
@@ -96,10 +97,10 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
 
                 effectData.setByte(CraftMetaPotion.ID.NBT, (byte) effect.getType().getId());
                 effectData.setByte(CraftMetaPotion.AMPLIFIER.NBT, (byte) effect.getAmplifier());
-                effectData.setInt(CraftMetaPotion.DURATION.NBT, effect.getDuration());
+                effectData.setInteger(CraftMetaPotion.DURATION.NBT, effect.getDuration());
                 effectData.setBoolean(CraftMetaPotion.AMBIENT.NBT, effect.isAmbient());
                 effectData.setBoolean(CraftMetaPotion.SHOW_PARTICLES.NBT, effect.hasParticles());
-                effectList.add(effectData);
+                effectList.appendTag(effectData);
             }
         }
 

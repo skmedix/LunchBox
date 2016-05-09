@@ -30,6 +30,11 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.v1_8_R3.GenericAttributes;
 import net.minecraft.server.v1_8_R3.IAttribute;
 import net.minecraft.server.v1_8_R3.NBTBase;
@@ -282,7 +287,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
             String s1 = (String) iterator1.next();
 
             if (!getHandledTags().contains(s1)) {
-                this.unhandledTags.put(s1, tag.get(s1));
+                this.unhandledTags.put(s1, tag.getString(s1));
             }
         }
 
@@ -296,7 +301,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
         if (!tag.hasKey(key.NBT)) {
             return null;
         } else {
-            NBTTagList ench = tag.getList(key.NBT, 10);
+            NBTTagList ench = tag.getTagList(key.NBT, 10);
             HashMap enchantments = new HashMap(ench.size());
 
             for (int i = 0; i < ench.size(); ++i) {
@@ -369,7 +374,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
                     String key = (String) iterator.next();
 
                     if (!getHandledTags().contains(key)) {
-                        this.unhandledTags.put(key, ex1.get(key));
+                        this.unhandledTags.put(key, ex1.getString(key));
                     }
                 }
             } catch (IOException ioexception) {
@@ -414,7 +419,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
         }
 
         if (this.hideFlag != 0) {
-            itemTag.setInt(CraftMetaItem.HIDEFLAGS.NBT, this.hideFlag);
+            itemTag.setInteger(CraftMetaItem.HIDEFLAGS.NBT, this.hideFlag);
         }
 
         applyEnchantments(this.enchantments, itemTag, CraftMetaItem.ENCHANTMENTS);
@@ -423,7 +428,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
         }
 
         if (this.hasRepairCost()) {
-            itemTag.setInt(CraftMetaItem.REPAIR.NBT, this.repairCost);
+            itemTag.setInteger(CraftMetaItem.REPAIR.NBT, this.repairCost);
         }
 
         Iterator iterator = this.unhandledTags.entrySet().iterator();
@@ -431,7 +436,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
         while (iterator.hasNext()) {
             Entry e = (Entry) iterator.next();
 
-            itemTag.set((String) e.getKey(), (NBTBase) e.getValue());
+            itemTag.setTag((String) e.getKey(), (NBTBase) e.getValue());
         }
 
     }
@@ -444,7 +449,7 @@ class CraftMetaItem implements ItemMeta, Repairable {
             while (iterator.hasNext()) {
                 String value = (String) iterator.next();
 
-                tagList.add(new NBTTagString(value));
+                tagList.appendTag(new NBTTagString(value));
             }
 
             return tagList;
@@ -464,21 +469,21 @@ class CraftMetaItem implements ItemMeta, Repairable {
 
                 subtag.setShort(CraftMetaItem.ENCHANTMENTS_ID.NBT, (short) ((Enchantment) entry.getKey()).getId());
                 subtag.setShort(CraftMetaItem.ENCHANTMENTS_LVL.NBT, ((Integer) entry.getValue()).shortValue());
-                list.add(subtag);
+                list.appendTag(subtag);
             }
 
-            tag.set(key.NBT, list);
+            tag.setTag(key.NBT, list);
         }
     }
 
     void setDisplayTag(NBTTagCompound tag, String key, NBTBase value) {
-        NBTTagCompound display = tag.getCompound(CraftMetaItem.DISPLAY.NBT);
+        NBTTagCompound display = tag.getCompoundTag(CraftMetaItem.DISPLAY.NBT);
 
         if (!tag.hasKey(CraftMetaItem.DISPLAY.NBT)) {
-            tag.set(CraftMetaItem.DISPLAY.NBT, display);
+            tag.setTag(CraftMetaItem.DISPLAY.NBT, display);
         }
 
-        display.set(key, value);
+        display.setTag(key, value);
     }
 
     @Overridden

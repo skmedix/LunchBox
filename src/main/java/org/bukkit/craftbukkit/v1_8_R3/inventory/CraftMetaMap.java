@@ -2,7 +2,8 @@ package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
+
+import net.minecraft.nbt.NBTTagCompound;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.MapMeta;

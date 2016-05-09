@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+
+import com.kookykraftmc.lunchbox.LunchBox;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.BiomeBase;
 import net.minecraft.server.v1_8_R3.BlockDiodeAbstract;
@@ -542,9 +545,9 @@ public class CraftWorld implements World {
         Validate.isTrue(item.getTypeId() != 0, "Cannot drop AIR.");
         EntityItem entity = new EntityItem(this.world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
 
-        entity.pickupDelay = 10;
-        this.world.addEntity(entity);
-        return new CraftItem(this.world.getServer(), entity);
+        entity.setPickupDelay(10);
+        this.world.spawnEntityInWorld(entity);
+        return new CraftItem(LunchBox.getServer(), entity);
     }
 
     private static void randomLocationWithinBlock(Location loc, double xs, double ys, double zs) {

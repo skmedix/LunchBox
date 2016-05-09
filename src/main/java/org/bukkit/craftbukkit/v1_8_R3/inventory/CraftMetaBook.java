@@ -9,10 +9,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagList;
 import net.minecraft.server.v1_8_R3.NBTTagString;
+import net.minecraft.util.IChatComponent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -72,18 +76,18 @@ public class CraftMetaBook extends CraftMetaItem implements BookMeta {
         }
 
         if (tag.hasKey(CraftMetaBook.GENERATION.NBT)) {
-            this.generation = Integer.valueOf(tag.getInt(CraftMetaBook.GENERATION.NBT));
+            this.generation = Integer.valueOf(tag.getInteger(CraftMetaBook.GENERATION.NBT));
         }
 
         if (tag.hasKey(CraftMetaBook.BOOK_PAGES.NBT) && handlePages) {
-            NBTTagList pages = tag.getList(CraftMetaBook.BOOK_PAGES.NBT, 8);
-
+            NBTTagList pages = tag.getTagList(CraftMetaBook.BOOK_PAGES.NBT, 8);
+            //todo: need to figure out how to get the size.
             for (int i = 0; i < pages.size(); ++i) {
-                String page = pages.getString(i);
+                String page = pages.getStringTagAt(i);
 
                 if (resolved) {
                     try {
-                        this.pages.add(IChatBaseComponent.ChatSerializer.a(page));
+                        this.pages.add(IChatComponent.Serializer.jsonToComponent(page));
                         continue;
                     } catch (Exception exception) {
                         ;

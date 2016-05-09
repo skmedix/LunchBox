@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.entity;
 
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityItem;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.EntityType;
@@ -22,19 +22,19 @@ public class CraftItem extends CraftEntity implements Item {
     }
 
     public ItemStack getItemStack() {
-        return CraftItemStack.asCraftMirror(this.item.getItemStack());
+        return CraftItemStack.asCraftMirror(this.item.getEntityItem());
     }
 
     public void setItemStack(ItemStack stack) {
-        this.item.setItemStack(CraftItemStack.asNMSCopy(stack));
+        this.item.setEntityItemStack(CraftItemStack.asNMSCopy(stack));
     }
 
     public int getPickupDelay() {
-        return this.item.pickupDelay;
+        return this.item.getEntityItem().animationsToGo;//todo: need to find a field/method that returns the item's pickup delay
     }
 
     public void setPickupDelay(int delay) {
-        this.item.pickupDelay = Math.min(delay, 32767);
+        this.item.setPickupDelay(delay);
     }
 
     public String toString() {

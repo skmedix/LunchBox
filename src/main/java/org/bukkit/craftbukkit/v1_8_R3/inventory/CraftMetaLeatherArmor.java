@@ -2,6 +2,8 @@ package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.NBTTagInt;
 import org.bukkit.Color;
@@ -30,10 +32,10 @@ class CraftMetaLeatherArmor extends CraftMetaItem implements LeatherArmorMeta {
         super(tag);
         this.color = CraftItemFactory.DEFAULT_LEATHER_COLOR;
         if (tag.hasKey(CraftMetaLeatherArmor.DISPLAY.NBT)) {
-            NBTTagCompound display = tag.getCompound(CraftMetaLeatherArmor.DISPLAY.NBT);
+            NBTTagCompound display = tag.getCompoundTag(CraftMetaLeatherArmor.DISPLAY.NBT);
 
             if (display.hasKey(CraftMetaLeatherArmor.COLOR.NBT)) {
-                this.color = Color.fromRGB(display.getInt(CraftMetaLeatherArmor.COLOR.NBT));
+                this.color = Color.fromRGB(display.getInteger(CraftMetaLeatherArmor.COLOR.NBT));
             }
         }
 
