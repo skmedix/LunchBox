@@ -14,7 +14,13 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.kookykraftmc.lunchbox.LunchBox;
+import net.minecraft.block.BlockLog;
+import net.minecraft.block.BlockOldLog;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.Blocks;
 import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.BiomeBase;
 import net.minecraft.server.v1_8_R3.BlockDiodeAbstract;
@@ -123,6 +129,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.world.gen.feature.*;
 import org.apache.commons.lang.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
@@ -583,9 +590,9 @@ public class CraftWorld implements World {
     }
 
     public Item dropItemNaturally(Location loc, ItemStack item) {
-        double xs = (double) (this.world.random.nextFloat() * 0.7F) - 0.35D;
-        double ys = (double) (this.world.random.nextFloat() * 0.7F) - 0.35D;
-        double zs = (double) (this.world.random.nextFloat() * 0.7F) - 0.35D;
+        double xs = (double) (this.world.rand.nextFloat() * 0.7F) - 0.35D;
+        double ys = (double) (this.world.rand.nextFloat() * 0.7F) - 0.35D;
+        double zs = (double) (this.world.rand.nextFloat() * 0.7F) - 0.35D;
 
         loc = loc.clone();
         randomLocationWithinBlock(loc, xs, ys, zs);
@@ -597,10 +604,11 @@ public class CraftWorld implements World {
         Validate.notNull(velocity, "Can not spawn arrow with a null velocity");
         EntityArrow arrow = new EntityArrow(this.world);
 
-        arrow.setPositionRotation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
-        arrow.shoot(velocity.getX(), velocity.getY(), velocity.getZ(), speed, spread);
-        this.world.addEntity(arrow);
-        return (Arrow) arrow.getBukkitEntity();
+        arrow.setPositionAndRotation(loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch());
+        arrow.setVelocity(velocity.getX(), velocity.getY(), velocity.getZ());
+
+        this.world.spawnEntityInWorld(arrow);
+        return (Arrow) CraftEntity.getEntity(this.server, arrow);
     }
 
     /** @deprecated */
@@ -621,23 +629,23 @@ public class CraftWorld implements World {
     }
 
     public LightningStrike strikeLightning(Location loc) {
-        EntityLightning lightning = new EntityLightning(this.world, loc.getX(), loc.getY(), loc.getZ());
+        EntityLightningBolt lightning = new EntityLightningBolt(this.world, loc.getX(), loc.getY(), loc.getZ());
 
-        this.world.strikeLightning(lightning);
+        this.world.spawnEntityInWorld(lightning);
         return new CraftLightningStrike(this.server, lightning);
     }
 
     public LightningStrike strikeLightningEffect(Location loc) {
-        EntityLightning lightning = new EntityLightning(this.world, loc.getX(), loc.getY(), loc.getZ(), true);
+        EntityLightningBolt lightning = new EntityLightningBolt(this.world, loc.getX(), loc.getY(), loc.getZ());
 
-        this.world.strikeLightning(lightning);
+        this.world.spawnEntityInWorld(lightning);
         return new CraftLightningStrike(this.server, lightning);
     }
 
     public boolean generateTree(Location loc, TreeType type) {
         Object gen;
-        IBlockData iblockdata1;
-        IBlockData iblockdata2;
+        IBlockState iblockdata1;
+        IBlockState iblockdata2;
 
         switch ($SWITCH_TABLE$org$bukkit$TreeType()[type.ordinal()]) {
         case 1:
@@ -662,9 +670,10 @@ public class CraftWorld implements World {
             break;
 
         case 6:
+            //TODO: get wood types.
             iblockdata1 = Blocks.LOG.getBlockData().set(BlockLog1.VARIANT, BlockWood.EnumLogVariant.JUNGLE);
             iblockdata2 = Blocks.LEAVES.getBlockData().set(BlockLeaves1.VARIANT, BlockWood.EnumLogVariant.JUNGLE).set(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-            gen = new WorldGenJungleTree(true, 10, 20, iblockdata1, iblockdata2);
+            gen = new WorldGenTrees(true, 4 + CraftWorld.rand.nextInt(7), iblockdata1, iblockdata2, false);
             break;
 
         case 7:

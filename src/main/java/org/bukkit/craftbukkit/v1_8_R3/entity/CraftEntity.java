@@ -620,7 +620,7 @@ public abstract class CraftEntity implements Entity {
         }
     }
 
-    public net.minecraft.server.v1_8_R3.Entity getHandle() {
+    public net.minecraft.entity.Entity getHandle() {
         return this.entity;
     }
 

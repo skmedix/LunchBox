@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.entity;
 
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.server.v1_8_R3.EntityLightning;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.entity.EntityType;
@@ -9,20 +10,20 @@ public class CraftLightningStrike extends CraftEntity implements LightningStrike
 
     private final LightningStrike.Spigot spigot = new LightningStrike.Spigot() {
         public boolean isSilent() {
-            return CraftLightningStrike.this.getHandle().isSilent;
+            return CraftLightningStrike.this.getHandle().isSilent();
         }
     };
 
-    public CraftLightningStrike(CraftServer server, EntityLightning entity) {
+    public CraftLightningStrike(CraftServer server, EntityLightningBolt entity) {
         super(server, entity);
     }
 
     public boolean isEffect() {
-        return ((EntityLightning) super.getHandle()).isEffect;
+        return ((EntityLightningBolt) super.getHandle()).isEffect();
     }
 
-    public EntityLightning getHandle() {
-        return (EntityLightning) this.entity;
+    public EntityLightningBolt getHandle() {
+        return (EntityLightningBolt) this.entity;
     }
 
     public String toString() {
