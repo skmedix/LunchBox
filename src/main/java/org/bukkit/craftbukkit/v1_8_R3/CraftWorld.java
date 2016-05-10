@@ -695,34 +695,34 @@ public class CraftWorld implements World {
             break;
 
         case 10:
-            gen = new WorldGenHugeMushroom(Blocks.RED_MUSHROOM_BLOCK);
+            gen = new WorldGenBigMushroom(Blocks.red_mushroom_block);
             break;
 
         case 11:
-            gen = new WorldGenHugeMushroom(Blocks.BROWN_MUSHROOM_BLOCK);
+            gen = new WorldGenBigMushroom(Blocks.brown_mushroom_block);
             break;
 
         case 12:
-            gen = new WorldGenSwampTree();
+            gen = new WorldGenSwamp();//todo: not sure if this is worldGenSwampTrees
             break;
 
         case 13:
-            gen = new WorldGenAcaciaTree(true);
+            gen = new WorldGenSavannaTree(true);
             break;
 
         case 14:
-            gen = new WorldGenForestTree(true);
+            gen = new WorldGenTrees(true);
             break;
 
         case 15:
-            gen = new WorldGenMegaTree(false, CraftWorld.rand.nextBoolean());
+            gen = new WorldGenBigTree(CraftWorld.rand.nextBoolean());
             break;
 
         case 16:
             gen = new WorldGenForest(true, true);
         }
 
-        return ((WorldGenerator) gen).generate(this.world, CraftWorld.rand, new BlockPosition(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
+        return ((WorldGenerator) gen).generate(this.world, CraftWorld.rand, new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
 
     public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate) {
