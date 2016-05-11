@@ -6,6 +6,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.ai.attributes.IAttribute;
+import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.v1_8_R3.DamageSource;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.EntityArrow;
@@ -28,7 +36,9 @@ import net.minecraft.server.v1_8_R3.GenericAttributes;
 import net.minecraft.server.v1_8_R3.MobEffect;
 import net.minecraft.server.v1_8_R3.MobEffectList;
 import net.minecraft.server.v1_8_R3.WorldServer;
-import org.apache.commons.lang.Validate;
+import net.minecraft.util.DamageSource;
+
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -52,6 +62,7 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.entity.ThrownExpBottle;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.entity.WitherSkull;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
@@ -64,13 +75,13 @@ import org.bukkit.util.Vector;
 public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     private CraftEntityEquipment equipment;
+    private IAttribute attributes;
 
     public CraftLivingEntity(CraftServer server, EntityLiving entity) {
         super(server, entity);
-        if (entity instanceof EntityInsentient || entity instanceof EntityArmorStand) {
+        if (/*entity instanceof EntityInsentient ||*/(net.minecraft.entity.Entity) entity instanceof EntityArmorStand) {//LunchBox - remove for now
             this.equipment = new CraftEntityEquipment(this);
         }
-
     }
 
     public double getHealth() {
@@ -80,7 +91,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     public void setHealth(double health) {
         if (health >= 0.0D && health <= this.getMaxHealth()) {
             if (this.entity instanceof EntityPlayer && health == 0.0D) {
-                ((EntityPlayer) this.entity).die(DamageSource.GENERIC);
+                ((EntityPlayer) this.entity).onDeath(DamageSource.generic);
             }
 
             this.getHandle().setHealth((float) health);
@@ -95,7 +106,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
 
     public void setMaxHealth(double amount) {
         Validate.isTrue(amount > 0.0D, "Max health must be greater than 0");
-        this.getHandle().getAttributeInstance(GenericAttributes.maxHealth).setValue(amount);
+        this.getHandle().getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(amount);
         if (this.getHealth() > amount) {
             this.setHealth(amount);
         }
@@ -119,7 +130,7 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public double getEyeHeight() {
-        return (double) this.getHandle().getHeadHeight();
+        return (double) this.getHandle().getEyeHeight();
     }
 
     public double getEyeHeight(boolean ignoreSneaking) {
@@ -221,19 +232,19 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public int getRemainingAir() {
-        return this.getHandle().getAirTicks();
+        return this.getHandle().getAir();
     }
 
     public void setRemainingAir(int ticks) {
-        this.getHandle().setAirTicks(ticks);
+        this.getHandle().setAir(ticks);
     }
 
     public int getMaximumAir() {
-        return this.getHandle().maxAirTicks;
+        return this.getHandle().getAir();
     }
 
     public void setMaximumAir(int ticks) {
-        this.getHandle().maxAirTicks = ticks;
+        this.getHandle().setAir(ticks);
     }
 
     public void damage(double amount) {
@@ -241,15 +252,15 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public void damage(double amount, Entity source) {
-        DamageSource reason = DamageSource.GENERIC;
+        DamageSource reason = DamageSource.generic;
 
         if (source instanceof HumanEntity) {
-            reason = DamageSource.playerAttack(((CraftHumanEntity) source).getHandle());
+            reason = DamageSource.causePlayerDamage(((CraftHumanEntity) source).getHandle());
         } else if (source instanceof LivingEntity) {
-            reason = DamageSource.mobAttack(((CraftLivingEntity) source).getHandle());
+            reason = DamageSource.causeMobDamage(((CraftLivingEntity) source).getHandle());
         }
 
-        this.entity.damageEntity(reason, (float) amount);
+        this.entity.attackEntityFrom(reason, (float) amount);
     }
 
     public Location getEyeLocation() {
@@ -260,19 +271,19 @@ public class CraftLivingEntity extends CraftEntity implements LivingEntity {
     }
 
     public int getMaximumNoDamageTicks() {
-        return this.getHandle().maxNoDamageTicks;
+        return this.getHandle().maxHurtResistantTime;
     }
 
     public void setMaximumNoDamageTicks(int ticks) {
-        this.getHandle().maxNoDamageTicks = ticks;
+        this.getHandle().maxHurtResistantTime = ticks;
     }
 
     public double getLastDamage() {
-        return (double) this.getHandle().lastDamage;
+        return (double) this.getHandle().getLastAttackerTime();
     }
 
     public void setLastDamage(double damage) {
-        this.getHandle().lastDamage = (float) damage;
+        this.getHandle(). = (float) damage;
     }
 
     public int getNoDamageTicks() {

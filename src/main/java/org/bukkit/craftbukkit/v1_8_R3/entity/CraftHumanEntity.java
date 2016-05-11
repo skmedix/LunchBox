@@ -1,6 +1,9 @@
 package org.bukkit.craftbukkit.v1_8_R3.entity;
 
 import java.util.Set;
+
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.v1_8_R3.BlockAnvil;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.BlockWorkbench;
@@ -54,7 +57,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     private GameMode mode;
     private static int[] $SWITCH_TABLE$org$bukkit$event$inventory$InventoryType;
 
-    public CraftHumanEntity(CraftServer server, EntityHuman entity) {
+    public CraftHumanEntity(CraftServer server, EntityPlayer entity) {
         super(server, (EntityLiving) entity);
         this.mode = server.getDefaultGameMode();
         this.inventory = new CraftInventoryPlayer(entity.inventory);
@@ -90,9 +93,9 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     public void setItemOnCursor(ItemStack item) {
-        net.minecraft.server.v1_8_R3.ItemStack stack = CraftItemStack.asNMSCopy(item);
+        net.minecraft.item.ItemStack stack = CraftItemStack.asNMSCopy(item);
 
-        this.getHandle().inventory.setCarried(stack);
+        this.getHandle().setCurrentItemOrArmor(this.getHandle(),).setCarried(stack);
         if (this instanceof CraftPlayer) {
             ((EntityPlayer) this.getHandle()).broadcastCarriedItem();
         }
@@ -172,8 +175,8 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         }
     }
 
-    public EntityHuman getHandle() {
-        return (EntityHuman) this.entity;
+    public EntityLiving getHandle() {
+        return (EntityLiving) this.entity;
     }
 
     public void setHandle(EntityHuman entity) {

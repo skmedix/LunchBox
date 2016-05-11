@@ -125,6 +125,7 @@ import net.minecraft.server.v1_8_R3.WorldGenerator;
 import net.minecraft.server.v1_8_R3.WorldNBTStorage;
 import net.minecraft.server.v1_8_R3.WorldProvider;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
@@ -724,7 +725,7 @@ public class CraftWorld implements World {
 
         return ((WorldGenerator) gen).generate(this.world, CraftWorld.rand, new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
-
+    //TODO: rework this.
     public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate) {
         this.world.captureTreeGeneration = true;
         this.world.captureBlockStates = true;
@@ -743,39 +744,39 @@ public class CraftWorld implements World {
                 int x = blockstate.getX();
                 int y = blockstate.getY();
                 int z = blockstate.getZ();
-                BlockPosition position = new BlockPosition(x, y, z);
-                net.minecraft.server.v1_8_R3.Block oldBlock = this.world.getType(position).getBlock();
+                BlockPos position = new BlockPos(x, y, z);
+                net.minecraft.block.Block oldBlock = this.world.getBlockState(position).getBlock();
                 int typeId = blockstate.getTypeId();
                 byte data = blockstate.getRawData();
                 int flag = ((CraftBlockState) blockstate).getFlag();
 
                 delegate.setTypeIdAndData(x, y, z, typeId, data);
-                net.minecraft.server.v1_8_R3.Block newBlock = this.world.getType(position).getBlock();
+                net.minecraft.block.Block newBlock = this.world.getBlockState(position).getBlock();
 
-                this.world.notifyAndUpdatePhysics(position, (net.minecraft.server.v1_8_R3.Chunk) null, oldBlock, newBlock, flag);
+                this.world.markAndNotifyBlock(position, (net.minecraft.server.v1_8_R3.Chunk) null, oldBlock, newBlock, flag);
             }
 
-            this.world.capturedBlockStates.clear();
+            //this.world.capturedBlockStates.clear();
             return true;
         }
     }
 
     public TileEntity getTileEntityAt(int x, int y, int z) {
-        return this.world.getTileEntity(new BlockPosition(x, y, z));
+        return this.world.getTileEntity(new BlockPos(x, y, z));
     }
 
     public String getName() {
-        return this.world.worldData.getName();
+        return this.world.getWorldInfo().getWorldName();
     }
 
     /** @deprecated */
     @Deprecated
     public long getId() {
-        return this.world.worldData.getSeed();
+        return this.world.getWorldInfo().getSeed();
     }
 
     public UUID getUID() {
-        return this.world.getDataManager().getUUID();
+        return this.world.getDataManager().getUUID();//todo: rework this.
     }
 
     public String toString() {
@@ -803,18 +804,18 @@ public class CraftWorld implements World {
     }
 
     public long getFullTime() {
-        return this.world.getDayTime();
+        return this.world.getWorldTime();
     }
 
     public void setFullTime(long time) {
-        this.world.setDayTime(time);
+        this.world.setWorldTime(time);
         Iterator iterator = this.getPlayers().iterator();
 
         while (iterator.hasNext()) {
             Player p = (Player) iterator.next();
             CraftPlayer cp = (CraftPlayer) p;
 
-            if (cp.getHandle().playerConnection != null) {
+            if (cp.getHandle() != null) {
                 cp.getHandle().playerConnection.sendPacket(new PacketPlayOutUpdateTime(cp.getHandle().world.getTime(), cp.getHandle().getPlayerTime(), cp.getHandle().world.getGameRules().getBoolean("doDaylightCycle")));
             }
         }

@@ -628,7 +628,7 @@ public abstract class CraftEntity implements Entity {
         this.getHandle().world.broadcastEntityEffect(this.getHandle(), type.getData());
     }
 
-    public void setHandle(net.minecraft.server.v1_8_R3.Entity entity) {
+    public void setHandle(net.minecraft.entity.Entity entity) {
         this.entity = entity;
     }
 

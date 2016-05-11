@@ -22,6 +22,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.v1_8_R3.AttributeInstance;
 import net.minecraft.server.v1_8_R3.AttributeMapServer;
 import net.minecraft.server.v1_8_R3.AttributeModifiable;
@@ -119,7 +121,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     private double healthScale = 20.0D;
     private final Player.Spigot spigot = new Player.Spigot() {
         public InetSocketAddress getRawAddress() {
-            return (InetSocketAddress) CraftPlayer.this.getHandle().playerConnection.networkManager.getRawAddress();
+            return (InetSocketAddress) CraftPlayer.this.getHandle();
         }
 
         public boolean getCollidesWithEntities() {
@@ -988,7 +990,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         return this;
     }
 
-    public EntityPlayer getHandle() {
+    public EntityLiving getHandle() {
         return (EntityPlayer) this.entity;
     }
 
