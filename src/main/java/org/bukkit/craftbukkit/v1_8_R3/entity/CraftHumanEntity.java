@@ -4,26 +4,7 @@ import java.util.Set;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.v1_8_R3.BlockAnvil;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.BlockWorkbench;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.Container;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityMinecartHopper;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.IInventory;
-import net.minecraft.server.v1_8_R3.ITileEntityContainer;
-import net.minecraft.server.v1_8_R3.PacketPlayInCloseWindow;
-import net.minecraft.server.v1_8_R3.PacketPlayOutOpenWindow;
-import net.minecraft.server.v1_8_R3.TileEntityBeacon;
-import net.minecraft.server.v1_8_R3.TileEntityBrewingStand;
-import net.minecraft.server.v1_8_R3.TileEntityDispenser;
-import net.minecraft.server.v1_8_R3.TileEntityDropper;
-import net.minecraft.server.v1_8_R3.TileEntityEnchantTable;
-import net.minecraft.server.v1_8_R3.TileEntityFurnace;
-import net.minecraft.server.v1_8_R3.TileEntityHopper;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -61,7 +42,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         super(server, (EntityLiving) entity);
         this.mode = server.getDefaultGameMode();
         this.inventory = new CraftInventoryPlayer(entity.inventory);
-        this.enderChest = new CraftInventory(entity.getEnderChest());
+        this.enderChest = new CraftInventory(entity.getInventoryEnderChest());
     }
 
     public String getName() {
@@ -89,21 +70,21 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     }
 
     public ItemStack getItemOnCursor() {
-        return CraftItemStack.asCraftMirror(this.getHandle().inventory.getCarried());
+        return CraftItemStack.asCraftMirror(this.getHandle().getHeldItem());
     }
 
     public void setItemOnCursor(ItemStack item) {
         net.minecraft.item.ItemStack stack = CraftItemStack.asNMSCopy(item);
 
-        this.getHandle().setCurrentItemOrArmor(this.getHandle(),).setCarried(stack);
+        ((EntityPlayer) this.getHandle()).getCurrentEquippedItem().setItem(stack);
         if (this instanceof CraftPlayer) {
-            ((EntityPlayer) this.getHandle()).broadcastCarriedItem();
+            ((this.getHandle()).getHeldItem().setItem(item));
         }
 
     }
 
     public boolean isSleeping() {
-        return this.getHandle().sleeping;
+        return this.getHandle().isPlayerSleeping();
     }
 
     public int getSleepTicks() {
