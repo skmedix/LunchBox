@@ -1,9 +1,16 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutHeldItemSlot;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSetSlot;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.EntityEquipment;
@@ -12,12 +19,12 @@ import org.bukkit.inventory.PlayerInventory;
 
 public class CraftInventoryPlayer extends CraftInventory implements PlayerInventory, EntityEquipment {
 
-    public CraftInventoryPlayer(net.minecraft.server.v1_8_R3.PlayerInventory inventory) {
+    public CraftInventoryPlayer(InventoryPlayer inventory) {
         super(inventory);
     }
 
-    public net.minecraft.server.v1_8_R3.PlayerInventory getInventory() {
-        return (net.minecraft.server.v1_8_R3.PlayerInventory) this.inventory;
+    public InventoryPlayer getInventory() {
+        return (InventoryPlayer) this.inventory;
     }
 
     public int getSize() {
@@ -25,7 +32,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public ItemStack getItemInHand() {
-        return CraftItemStack.asCraftMirror(this.getInventory().getItemInHand());
+        return CraftItemStack.asCraftMirror(this.getInventory().getCurrentItem());
     }
 
     public void setItemInHand(ItemStack stack) {
@@ -35,27 +42,27 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     public void setItem(int index, ItemStack item) {
         super.setItem(index, item);
         if (this.getHolder() != null) {
-            EntityPlayer player = ((CraftPlayer) this.getHolder()).getHandle();
+            EntityPlayerMP player = this.getHolder().getHandle();
 
-            if (player.playerConnection != null) {
-                if (index < net.minecraft.server.v1_8_R3.PlayerInventory.getHotbarSize()) {
+            if (player.playerNetServerHandler != null) {
+                if (index < InventoryPlayer.getHotbarSize()) {
                     index += 36;
                 } else if (index > 35) {
                     index = 8 - (index - 36);
                 }
 
-                player.playerConnection.sendPacket(new PacketPlayOutSetSlot(player.defaultContainer.windowId, index, CraftItemStack.asNMSCopy(item)));
+                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.inventoryContainer.windowId, index, CraftItemStack.asNMSCopy(item)));
             }
         }
     }
 
     public int getHeldItemSlot() {
-        return this.getInventory().itemInHandIndex;
+        return this.getInventory().currentItem;
     }
 
     public void setHeldItemSlot(int slot) {
-        Validate.isTrue(slot >= 0 && slot < net.minecraft.server.v1_8_R3.PlayerInventory.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
-        this.getInventory().itemInHandIndex = slot;
+        Validate.isTrue(slot >= 0 && slot < InventoryPlayer.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
+        this.getInventory().currentItem = slot;
         ((CraftPlayer) this.getHolder()).getHandle().playerConnection.sendPacket(new PacketPlayOutHeldItemSlot(slot));
     }
 
@@ -92,7 +99,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public ItemStack[] getArmorContents() {
-        net.minecraft.server.v1_8_R3.ItemStack[] mcItems = this.getInventory().getArmorContents();
+        net.minecraft.item.ItemStack[] mcItems = this.getInventory().armorInventory;
         ItemStack[] ret = new ItemStack[mcItems.length];
 
         for (int i = 0; i < mcItems.length; ++i) {

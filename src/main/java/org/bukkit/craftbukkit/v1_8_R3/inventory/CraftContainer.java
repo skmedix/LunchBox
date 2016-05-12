@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.server.v1_8_R3.ChatComponentText;
 import net.minecraft.server.v1_8_R3.Container;
 import net.minecraft.server.v1_8_R3.EntityHuman;
@@ -60,7 +63,7 @@ public class CraftContainer extends Container {
         return this.view.getTopInventory().getSize();
     }
 
-    public boolean c(EntityHuman entityhuman) {
+    public boolean c(HumanEntity entityhuman) {
         if (this.cachedType == this.view.getType() && this.cachedSize == this.getSize() && this.cachedTitle.equals(this.view.getTitle())) {
             return true;
         } else {
@@ -422,5 +425,10 @@ public class CraftContainer extends Container {
             CraftContainer.$SWITCH_TABLE$org$bukkit$event$inventory$InventoryType = aint1;
             return aint1;
         }
+    }
+
+    @Override
+    public boolean canInteractWith(EntityPlayer playerIn) {
+        return true;
     }
 }

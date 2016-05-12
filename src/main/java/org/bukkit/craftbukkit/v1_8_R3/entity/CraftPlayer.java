@@ -22,8 +22,15 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.server.v1_8_R3.AttributeInstance;
 import net.minecraft.server.v1_8_R3.AttributeMapServer;
 import net.minecraft.server.v1_8_R3.AttributeModifiable;
@@ -61,6 +68,7 @@ import net.minecraft.server.v1_8_R3.WorldServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Achievement;
 import org.bukkit.BanList;
 import org.bukkit.Effect;
@@ -991,7 +999,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public EntityLiving getHandle() {
-        return (EntityPlayer) this.entity;
+        return (EntityLiving) this.entity;
     }
 
     public void setHandle(EntityPlayer entity) {
@@ -1029,7 +1037,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void readExtraData(NBTTagCompound nbttagcompound) {
         this.hasPlayedBefore = true;
         if (nbttagcompound.hasKey("bukkit")) {
-            NBTTagCompound data = nbttagcompound.getCompound("bukkit");
+            NBTTagCompound data = nbttagcompound.getCompoundTag("bukkit");
 
             if (data.hasKey("firstPlayed")) {
                 this.firstPlayed = data.getLong("firstPlayed");
@@ -1037,13 +1045,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             }
 
             if (data.hasKey("newExp")) {
-                EntityPlayer handle = this.getHandle();
+                EntityPlayer handle = (EntityPlayer) (EntityLivingBase) this.getHandle();
 
-                handle.newExp = data.getInt("newExp");
-                handle.newTotalExp = data.getInt("newTotalExp");
-                handle.newLevel = data.getInt("newLevel");
-                handle.expToDrop = data.getInt("expToDrop");
-                handle.keepLevel = data.getBoolean("keepLevel");
+                handle.experience = data.getInteger("newExp");
+                handle.experienceTotal = data.getInteger("newTotalExp");
+                handle.experienceLevel = data.getInteger("newLevel");
+                handle.expToDrop = data.getInteger("expToDrop");
+                handle.captureDrops = data.getBoolean("keepLevel");
             }
         }
 
@@ -1051,17 +1059,17 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void setExtraData(NBTTagCompound nbttagcompound) {
         if (!nbttagcompound.hasKey("bukkit")) {
-            nbttagcompound.set("bukkit", new NBTTagCompound());
+            nbttagcompound.setTag("bukkit", new NBTTagCompound());
         }
 
-        NBTTagCompound data = nbttagcompound.getCompound("bukkit");
-        EntityPlayer handle = this.getHandle();
+        NBTTagCompound data = nbttagcompound.getCompoundTag("bukkit");
+        EntityPlayer handle = (EntityPlayer) (EntityLivingBase) this.getHandle();
 
-        data.setInt("newExp", handle.newExp);
-        data.setInt("newTotalExp", handle.newTotalExp);
-        data.setInt("newLevel", handle.newLevel);
-        data.setInt("expToDrop", handle.expToDrop);
-        data.setBoolean("keepLevel", handle.keepLevel);
+        data.setInteger("newExp", (int) handle.experience);
+        data.setInteger("newTotalExp", handle.experienceTotal);
+        data.setInteger("newLevel", handle.experienceLevel);
+        data.setInteger("expToDrop", handle.expToDrop);
+        data.setBoolean("keepLevel", handle.captureDrops);
         data.setLong("firstPlayed", this.getFirstPlayed());
         data.setLong("lastPlayed", System.currentTimeMillis());
         data.setString("lastKnownName", handle.getName());
@@ -1089,11 +1097,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void sendPluginMessage(Plugin source, String channel, byte[] message) {
         StandardMessenger.validatePluginMessage(this.server.getMessenger(), source, channel, message);
-        if (this.getHandle().playerConnection != null) {
+        if (((EntityPlayerMP) (EntityLivingBase) this.getHandle()).playerNetServerHandler != null) {
             if (this.channels.contains(channel)) {
-                PacketPlayOutCustomPayload packet = new PacketPlayOutCustomPayload(channel, new PacketDataSerializer(Unpooled.wrappedBuffer(message)));
+                S3FPacketCustomPayload packet = new S3FPacketCustomPayload(channel, new PacketBuffer(Unpooled.wrappedBuffer(message)));
 
-                this.getHandle().playerConnection.sendPacket(packet);
+                ((EntityPlayerMP) (EntityLivingBase) this.getHandle()).playerNetServerHandler.sendPacket(packet);
             }
 
         }
@@ -1105,7 +1113,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void setResourcePack(String url) {
         Validate.notNull(url, "Resource pack URL cannot be null");
-        this.getHandle().setResourcePack(url, "null");
+        ((EntityPlayerMP) (EntityLivingBase) this.getHandle()).loadResourcePack(url, "null");
     }
 
     public void addChannel(String channel) {
@@ -1128,7 +1136,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendSupportedChannels() {
-        if (this.getHandle().playerConnection != null) {
+        if (((EntityPlayerMP) (EntityLivingBase) this.getHandle()).playerNetServerHandler != null) {
             Set listening = this.server.getMessenger().getIncomingChannels();
 
             if (!listening.isEmpty()) {
@@ -1146,7 +1154,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                     }
                 }
 
-                this.getHandle().playerConnection.sendPacket(new PacketPlayOutCustomPayload("REGISTER", new PacketDataSerializer(Unpooled.wrappedBuffer(stream.toByteArray()))));
+                ((EntityPlayerMP) (EntityLivingBase) this.getHandle()).playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("REGISTER", new PacketBuffer(Unpooled.wrappedBuffer(stream.toByteArray()))));
             }
 
         }
@@ -1173,12 +1181,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean setWindowProperty(InventoryView.Property prop, int value) {
-        Container container = this.getHandle().activeContainer;
+        Container container = ((EntityPlayerMP) (EntityLivingBase) this.getHandle()).openContainer;
 
         if (container.getBukkitView().getType() != prop.getType()) {
             return false;
         } else {
-            this.getHandle().setContainerData(container, prop.getId(), value);
+            ((EntityPlayerMP) (EntityLivingBase) this.getHandle()).setContainerData(container, prop.getId(), value);
             return true;
         }
     }
