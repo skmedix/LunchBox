@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.TileEntityChest;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -55,22 +55,22 @@ public class CraftChest extends CraftBlockState implements Chest {
             CraftInventory right;
 
             if (this.world.getBlockTypeIdAt(x - 1, y, z) == id) {
-                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPosition(x - 1, y, z)));
+                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPos(x - 1, y, z)));
                 inventory = new CraftInventoryDoubleChest(right, (CraftInventory) inventory);
             }
 
             if (this.world.getBlockTypeIdAt(x + 1, y, z) == id) {
-                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPosition(x + 1, y, z)));
+                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPos(x + 1, y, z)));
                 inventory = new CraftInventoryDoubleChest((CraftInventory) inventory, right);
             }
 
             if (this.world.getBlockTypeIdAt(x, y, z - 1) == id) {
-                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPosition(x, y, z - 1)));
+                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPos(x, y, z - 1)));
                 inventory = new CraftInventoryDoubleChest(right, (CraftInventory) inventory);
             }
 
             if (this.world.getBlockTypeIdAt(x, y, z + 1) == id) {
-                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPosition(x, y, z + 1)));
+                right = new CraftInventory((TileEntityChest) this.world.getHandle().getTileEntity(new BlockPos(x, y, z + 1)));
                 inventory = new CraftInventoryDoubleChest((CraftInventory) inventory, right);
             }
 

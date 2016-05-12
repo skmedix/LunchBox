@@ -1,7 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.TileEntityNote;
+import net.minecraft.tileentity.TileEntityNote;
+import net.minecraft.util.BlockPos;
 import org.bukkit.Instrument;
 import org.bukkit.Material;
 import org.bukkit.Note;
@@ -47,7 +47,7 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
         Block block = this.getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            this.note.play(this.world.getHandle(), new BlockPosition(this.getX(), this.getY(), this.getZ()));
+            this.note.triggerNote(this.world.getHandle(), new BlockPos(this.getX(), this.getY(), this.getZ()));
             return true;
         } else {
             return false;
@@ -58,7 +58,8 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
         Block block = this.getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            this.world.getHandle().playBlockAction(new BlockPosition(this.getX(), this.getY(), this.getZ()), CraftMagicNumbers.getBlock(block), instrument, note);
+            //todo: is the correct way to play a note?
+            this.world.getHandle().addBlockEvent(new BlockPos(this.getX(), this.getY(), this.getZ()), CraftMagicNumbers.getBlock(block), instrument, note);
             return true;
         } else {
             return false;
@@ -69,7 +70,8 @@ public class CraftNoteBlock extends CraftBlockState implements NoteBlock {
         Block block = this.getBlock();
 
         if (block.getType() == Material.NOTE_BLOCK) {
-            this.world.getHandle().playBlockAction(new BlockPosition(this.getX(), this.getY(), this.getZ()), CraftMagicNumbers.getBlock(block), instrument.getType(), note.getId());
+            //todo: is the correct way to play a note?
+            this.world.getHandle().addBlockEvent(new BlockPos(this.getX(), this.getY(), this.getZ()), CraftMagicNumbers.getBlock(block), instrument.getType(), note.getId());
             return true;
         } else {
             return false;

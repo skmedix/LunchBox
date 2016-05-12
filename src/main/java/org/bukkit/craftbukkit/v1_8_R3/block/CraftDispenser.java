@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
-import net.minecraft.server.v1_8_R3.BlockDispenser;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.TileEntityDispenser;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntityDispenser;
+import net.minecraft.util.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dispenser;
@@ -42,11 +42,11 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
 
     public boolean dispense() {
         Block block = this.getBlock();
-
+        //todo: redo this.
         if (block.getType() == Material.DISPENSER) {
-            BlockDispenser dispense = (BlockDispenser) Blocks.DISPENSER;
+            BlockDispenser dispense = (BlockDispenser) Blocks.dispenser;
 
-            dispense.dispense(this.world.getHandle(), new BlockPosition(this.getX(), this.getY(), this.getZ()));
+            dispense.dispense(this.world.getHandle(), new BlockPos(this.getX(), this.getY(), this.getZ()));
             return true;
         } else {
             return false;
@@ -57,7 +57,7 @@ public class CraftDispenser extends CraftBlockState implements Dispenser {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            this.dispenser.update();
+            this.dispenser.updateContainingBlockInfo();
         }
 
         return result;

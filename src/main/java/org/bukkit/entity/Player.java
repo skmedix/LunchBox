@@ -2,7 +2,7 @@ package org.bukkit.entity;
 
 import java.net.InetSocketAddress;
 import java.util.Set;
-import net.md_5.bungee.api.chat.BaseComponent;
+//import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Achievement;
 import org.bukkit.Effect;
 import org.bukkit.Instrument;
@@ -241,7 +241,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     @Deprecated
     void resetTitle();
 
-    Player.Spigot spigot();
+    /*Player.Spigot spigot();
 
     public static class Spigot extends Entity.Spigot {
 
@@ -280,5 +280,5 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
         public void sendMessage(BaseComponent... components) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
-    }
+    }*/
 }

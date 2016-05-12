@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
 import net.minecraft.server.v1_8_R3.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityFurnace;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
@@ -35,7 +36,7 @@ public class CraftFurnace extends CraftBlockState implements Furnace {
 
         return result;
     }
-
+    //todo
     public short getBurnTime() {
         return (short) this.furnace.burnTime;
     }

@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
 import java.util.List;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.TileEntity;
-import net.minecraft.server.v1_8_R3.World;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -53,11 +53,11 @@ public class CraftBlockState implements BlockState {
     }
 
     public static CraftBlockState getBlockState(World world, int x, int y, int z) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z));
+        return new CraftBlockState((Block) world.getBlockState(new BlockPos(x, y, z)));
     }
 
     public static CraftBlockState getBlockState(World world, int x, int y, int z, int flag) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z), flag);
+        return new CraftBlockState((Block) world.getBlockState(new BlockPos(x, y, z)), flag);
     }
 
     public org.bukkit.World getWorld() {
@@ -155,7 +155,7 @@ public class CraftBlockState implements BlockState {
             return false;
         } else {
             block.setTypeIdAndData(this.getTypeId(), this.getRawData(), applyPhysics);
-            this.world.getHandle().notify(new BlockPosition(this.x, this.y, this.z));
+            this.world.getHandle().notifyLightSet(new BlockPos(this.x, this.y, this.z));
             return true;
         }
     }

@@ -1,14 +1,19 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.server.v1_8_R3.ChatComponentText;
 import net.minecraft.server.v1_8_R3.Container;
 import net.minecraft.server.v1_8_R3.EntityHuman;
 import net.minecraft.server.v1_8_R3.IInventory;
 import net.minecraft.server.v1_8_R3.PacketPlayOutOpenWindow;
 import net.minecraft.server.v1_8_R3.Slot;
+import net.minecraft.util.ChatComponentText;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
@@ -85,7 +90,7 @@ public class CraftContainer extends Container {
 
                 int size = this.getSize();
 
-                player.getHandle().playerConnection.sendPacket(new PacketPlayOutOpenWindow(this.windowId, type, new ChatComponentText(this.cachedTitle), size));
+                ((EntityPlayerMP) (EntityLivingBase) player.getHandle()).playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(this.windowId, type, new ChatComponentText(this.cachedTitle), size));
                 player.updateInventory();
             }
 
@@ -173,7 +178,7 @@ public class CraftContainer extends Container {
     }
 
     private void setupChest(IInventory top, IInventory bottom) {
-        int rows = top.getSize() / 9;
+        int rows = top.getSizeInventory() / 9;
         int i = (rows - 4) * 18;
 
         int row;
@@ -320,7 +325,7 @@ public class CraftContainer extends Container {
 
     }
 
-    public boolean a(EntityHuman entity) {
+    public boolean a(EntityPlayerMP entity) {
         return true;
     }
 

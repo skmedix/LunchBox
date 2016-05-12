@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.TileEntitySkull;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntitySkull;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.block.Block;
@@ -25,17 +25,17 @@ public class CraftSkull extends CraftBlockState implements Skull {
         CraftWorld world = (CraftWorld) block.getWorld();
 
         this.skull = (TileEntitySkull) world.getTileEntityAt(this.getX(), this.getY(), this.getZ());
-        this.profile = this.skull.getGameProfile();
+        this.profile = this.skull.getPlayerProfile();
         this.skullType = getSkullType(this.skull.getSkullType());
-        this.rotation = (byte) this.skull.getRotation();
+        this.rotation = (byte) this.skull.getSkullRotation();
     }
 
     public CraftSkull(Material material, TileEntitySkull te) {
         super(material);
         this.skull = te;
-        this.profile = this.skull.getGameProfile();
+        this.profile = this.skull.getPlayerProfile();
         this.skullType = getSkullType(this.skull.getSkullType());
-        this.rotation = (byte) this.skull.getRotation();
+        this.rotation = (byte) this.skull.getSkullRotation();
     }
 
     static SkullType getSkullType(int id) {
@@ -200,7 +200,7 @@ public class CraftSkull extends CraftBlockState implements Skull {
 
     public boolean setOwner(String name) {
         if (name != null && name.length() <= 16) {
-            GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(name);
+            GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(name);
 
             if (profile == null) {
                 return false;
@@ -242,13 +242,13 @@ public class CraftSkull extends CraftBlockState implements Skull {
 
         if (result) {
             if (this.skullType == SkullType.PLAYER) {
-                this.skull.setGameProfile(this.profile);
+                this.skull.setPlayerProfile(this.profile);
             } else {
-                this.skull.setSkullType(getSkullType(this.skullType));
+                this.skull.setType(getSkullType(this.skullType));
             }
 
-            this.skull.setRotation(this.rotation);
-            this.skull.update();
+            this.skull.setSkullRotation(this.rotation);
+            this.skull.updateContainingBlockInfo();
         }
 
         return result;

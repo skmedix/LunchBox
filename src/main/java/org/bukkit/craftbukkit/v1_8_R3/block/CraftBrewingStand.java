@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
 import net.minecraft.server.v1_8_R3.TileEntityBrewingStand;
+import net.minecraft.tileentity.TileEntityBrewingStand;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BrewingStand;
@@ -35,7 +36,7 @@ public class CraftBrewingStand extends CraftBlockState implements BrewingStand {
 
         return result;
     }
-
+    //todo
     public int getBrewingTime() {
         return this.brewingStand.brewTime;
     }

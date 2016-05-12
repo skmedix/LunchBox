@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.TileEntitySign;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -22,16 +22,16 @@ public class CraftSign extends CraftBlockState implements Sign {
         if (this.sign == null) {
             this.lines = new String[] { "", "", "", ""};
         } else {
-            this.lines = new String[this.sign.lines.length];
-            System.arraycopy(revertComponents(this.sign.lines), 0, this.lines, 0, this.lines.length);
+            this.lines = new String[sign.signText.length];
+            System.arraycopy(revertComponents(this.sign.signText), 0, this.lines, 0, this.lines.length);
         }
     }
 
     public CraftSign(Material material, TileEntitySign te) {
         super(material);
         this.sign = te;
-        this.lines = new String[this.sign.lines.length];
-        System.arraycopy(revertComponents(this.sign.lines), 0, this.lines, 0, this.lines.length);
+        this.lines = new String[this.sign.signText.length];
+        System.arraycopy(revertComponents(this.sign.signText), 0, this.lines, 0, this.lines.length);
     }
 
     public String[] getLines() {
@@ -50,17 +50,17 @@ public class CraftSign extends CraftBlockState implements Sign {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            IChatBaseComponent[] newLines = sanitizeLines(this.lines);
+            IChatComponent[] newLines = sanitizeLines(this.lines);
 
-            System.arraycopy(newLines, 0, this.sign.lines, 0, 4);
-            this.sign.update();
+            System.arraycopy(newLines, 0, this.sign.signText, 0, 4);
+            this.sign.updateContainingBlockInfo();
         }
 
         return result;
     }
 
-    public static IChatBaseComponent[] sanitizeLines(String[] lines) {
-        IChatBaseComponent[] components = new IChatBaseComponent[4];
+    public static IChatComponent[] sanitizeLines(String[] lines) {
+        IChatComponent[] components = new IChatComponent[4];
 
         for (int i = 0; i < 4; ++i) {
             if (i < lines.length && lines[i] != null) {
@@ -73,7 +73,7 @@ public class CraftSign extends CraftBlockState implements Sign {
         return components;
     }
 
-    public static String[] revertComponents(IChatBaseComponent[] components) {
+    public static String[] revertComponents(IChatComponent[] components) {
         String[] lines = new String[components.length];
 
         for (int i = 0; i < lines.length; ++i) {
@@ -83,7 +83,7 @@ public class CraftSign extends CraftBlockState implements Sign {
         return lines;
     }
 
-    private static String revertComponent(IChatBaseComponent component) {
+    private static String revertComponent(IChatComponent component) {
         return CraftChatMessage.fromComponent(component);
     }
 

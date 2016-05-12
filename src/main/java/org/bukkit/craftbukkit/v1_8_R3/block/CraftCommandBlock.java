@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
-import net.minecraft.server.v1_8_R3.TileEntityCommand;
+import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CommandBlock;
@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 
 public class CraftCommandBlock extends CraftBlockState implements CommandBlock {
 
-    private final TileEntityCommand commandBlock;
+    private final TileEntityCommandBlock commandBlock;
     private String command;
     private String name;
 
@@ -16,16 +16,16 @@ public class CraftCommandBlock extends CraftBlockState implements CommandBlock {
         super(block);
         CraftWorld world = (CraftWorld) block.getWorld();
 
-        this.commandBlock = (TileEntityCommand) world.getTileEntityAt(this.getX(), this.getY(), this.getZ());
-        this.command = this.commandBlock.getCommandBlock().getCommand();
-        this.name = this.commandBlock.getCommandBlock().getName();
+        this.commandBlock = (TileEntityCommandBlock) world.getTileEntityAt(this.getX(), this.getY(), this.getZ());
+        this.command = this.commandBlock.getCommandBlockLogic().getCommand();
+        this.name = this.commandBlock.getCommandBlockLogic().getName();
     }
 
-    public CraftCommandBlock(Material material, TileEntityCommand te) {
+    public CraftCommandBlock(Material material, TileEntityCommandBlock te) {
         super(material);
         this.commandBlock = te;
-        this.command = this.commandBlock.getCommandBlock().getCommand();
-        this.name = this.commandBlock.getCommandBlock().getName();
+        this.command = this.commandBlock.getCommandBlockLogic().getCommand();
+        this.name = this.commandBlock.getCommandBlockLogic().getName();
     }
 
     public String getCommand() {
@@ -48,14 +48,14 @@ public class CraftCommandBlock extends CraftBlockState implements CommandBlock {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            this.commandBlock.getCommandBlock().setCommand(this.command);
-            this.commandBlock.getCommandBlock().setName(this.name);
+            this.commandBlock.getCommandBlockLogic().setCommand(this.command);
+            this.commandBlock.getCommandBlockLogic().setName(this.name);
         }
 
         return result;
     }
 
-    public TileEntityCommand getTileEntity() {
+    public TileEntityCommandBlock getTileEntity() {
         return this.commandBlock;
     }
 }

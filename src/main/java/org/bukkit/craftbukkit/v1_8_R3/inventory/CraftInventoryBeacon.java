@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.TileEntityBeacon;
+import net.minecraft.tileentity.TileEntityBeacon;
 import org.bukkit.inventory.BeaconInventory;
 import org.bukkit.inventory.ItemStack;
 

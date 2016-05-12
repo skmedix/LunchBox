@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
 import net.minecraft.server.v1_8_R3.TileEntityHopper;
+import net.minecraft.tileentity.TileEntityHopper;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Hopper;

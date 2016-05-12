@@ -1,9 +1,9 @@
 package org.bukkit.craftbukkit.v1_8_R3.block;
 
-import net.minecraft.server.v1_8_R3.BlockDropper;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.TileEntityDropper;
+import net.minecraft.block.BlockDropper;
+import net.minecraft.init.Blocks;
+import net.minecraft.tileentity.TileEntityDropper;
+import net.minecraft.util.BlockPos;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Dropper;
@@ -36,9 +36,9 @@ public class CraftDropper extends CraftBlockState implements Dropper {
         Block block = this.getBlock();
 
         if (block.getType() == Material.DROPPER) {
-            BlockDropper drop = (BlockDropper) Blocks.DROPPER;
-
-            drop.dispense(this.world.getHandle(), new BlockPosition(this.getX(), this.getY(), this.getZ()));
+            BlockDropper drop = (BlockDropper) Blocks.dropper;
+            //todo
+            drop.dispense(this.world.getHandle(), new BlockPos(this.getX(), this.getY(), this.getZ()));
         }
 
     }
@@ -47,7 +47,7 @@ public class CraftDropper extends CraftBlockState implements Dropper {
         boolean result = super.update(force, applyPhysics);
 
         if (result) {
-            this.dropper.update();
+            this.dropper.updateContainingBlockInfo();
         }
 
         return result;
