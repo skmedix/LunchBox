@@ -12,13 +12,12 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C01PacketChatMessage;
@@ -59,10 +58,13 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import net.minecraft.server.v1_8_R3.PlayerConnection;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
+import net.minecraft.stats.StatBase;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldSettings;
+import net.minecraftforge.common.DimensionManager;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.NotImplementedException;
@@ -602,26 +604,26 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setSprinting(boolean sprinting) {
         this.getHandle().setSprinting(sprinting);
     }
-
+    //todo: need to come back and rework loadData nad saveData.
     public void loadData() {
-        this.server.getHandle().playerFileData.load(this.getHandle());
+        this.server.getHandle().readPlayerDataFromFile(this.getMPPlayer());
     }
 
     public void saveData() {
-        this.server.getHandle().playerFileData.save(this.getHandle());
+        this.server.getHandle().getPlayerData().save(this.getHandle());
     }
 
     /** @deprecated */
     @Deprecated
     public void updateInventory() {
-        this.getHandle().updateInventory(this.getHandle().activeContainer);
+        this.getMPPlayer().updateHeldItem();
     }
-
+    //todo
     public void setSleepingIgnored(boolean isSleeping) {
         this.getHandle().fauxSleeping = isSleeping;
-        ((CraftWorld) this.getWorld()).getHandle().checkSleepStatus();
+        ((CraftWorld) this.getWorld()).getHandle().areAllPlayersAsleep();
     }
-
+    //todo
     public boolean isSleepingIgnored() {
         return this.getHandle().fauxSleeping;
     }
@@ -632,8 +634,8 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             this.awardAchievement(achievement.getParent());
         }
 
-        this.getHandle().getStatisticManager().setStatistic(this.getHandle(), CraftStatistic.getNMSAchievement(achievement), 1);
-        this.getHandle().getStatisticManager().updateStatistics(this.getHandle());
+        this.getMPPlayer().getStatFile().unlockAchievement(this.getMPPlayer(), CraftStatistic.getNMSAchievement(achievement), 1);
+        this.getMPPlayer().getStatFile().func_150876_a(this.getMPPlayer());//LunchBox - not sure if this is correct todo
     }
 
     public void removeAchievement(Achievement achievement) {
@@ -649,12 +651,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             }
         }
 
-        this.getHandle().getStatisticManager().setStatistic(this.getHandle(), CraftStatistic.getNMSAchievement(achievement), 0);
+        this.getMPPlayer().getStatFile().unlockAchievement(this.getMPPlayer(), CraftStatistic.getNMSAchievement(achievement), 0);
     }
 
     public boolean hasAchievement(Achievement achievement) {
         Validate.notNull(achievement, "Achievement cannot be null");
-        return this.getHandle().getStatisticManager().hasAchievement(CraftStatistic.getNMSAchievement(achievement));
+        return this.getMPPlayer().getStatFile().hasAchievementUnlocked(CraftStatistic.getNMSAchievement(achievement));
     }
 
     public void incrementStatistic(Statistic statistic) {
@@ -668,7 +670,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public int getStatistic(Statistic statistic) {
         Validate.notNull(statistic, "Statistic cannot be null");
         Validate.isTrue(statistic.getType() == Statistic.Type.UNTYPED, "Must supply additional paramater for this statistic");
-        return this.getHandle().getStatisticManager().getStatisticValue(CraftStatistic.getNMSStatistic(statistic));
+        return this.getMPPlayer().getStatFile().readStat(CraftStatistic.getNMSStatistic(statistic));
     }
 
     public void incrementStatistic(Statistic statistic, int amount) {
@@ -685,9 +687,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(statistic, "Statistic cannot be null");
         Validate.isTrue(statistic.getType() == Statistic.Type.UNTYPED, "Must supply additional paramater for this statistic");
         Validate.isTrue(newValue >= 0, "Value must be greater than or equal to 0");
-        net.minecraft.server.v1_8_R3.Statistic nmsStatistic = CraftStatistic.getNMSStatistic(statistic);
+        StatBase nmsStatistic = CraftStatistic.getNMSStatistic(statistic);
 
-        this.getHandle().getStatisticManager().setStatistic(this.getHandle(), nmsStatistic, newValue);
+        this.getMPPlayer().getStatFile().unlockAchievement(this.getMPPlayer(), nmsStatistic, newValue);
     }
 
     public void incrementStatistic(Statistic statistic, Material material) {
@@ -702,10 +704,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(statistic, "Statistic cannot be null");
         Validate.notNull(material, "Material cannot be null");
         Validate.isTrue(statistic.getType() == Statistic.Type.BLOCK || statistic.getType() == Statistic.Type.ITEM, "This statistic does not take a Material parameter");
-        net.minecraft.server.v1_8_R3.Statistic nmsStatistic = CraftStatistic.getMaterialStatistic(statistic, material);
+        StatBase nmsStatistic = CraftStatistic.getMaterialStatistic(statistic, material);
 
         Validate.notNull(nmsStatistic, "The supplied Material does not have a corresponding statistic");
-        return this.getHandle().getStatisticManager().getStatisticValue(nmsStatistic);
+        return this.getMPPlayer().getStatFile().readStat(nmsStatistic);
     }
 
     public void incrementStatistic(Statistic statistic, Material material, int amount) {
@@ -723,10 +725,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(material, "Material cannot be null");
         Validate.isTrue(newValue >= 0, "Value must be greater than or equal to 0");
         Validate.isTrue(statistic.getType() == Statistic.Type.BLOCK || statistic.getType() == Statistic.Type.ITEM, "This statistic does not take a Material parameter");
-        net.minecraft.server.v1_8_R3.Statistic nmsStatistic = CraftStatistic.getMaterialStatistic(statistic, material);
+        StatBase nmsStatistic = CraftStatistic.getMaterialStatistic(statistic, material);
 
         Validate.notNull(nmsStatistic, "The supplied Material does not have a corresponding statistic");
-        this.getHandle().getStatisticManager().setStatistic(this.getHandle(), nmsStatistic, newValue);
+        this.getMPPlayer().getStatFile().unlockAchievement(this.getMPPlayer(), nmsStatistic, newValue);
     }
 
     public void incrementStatistic(Statistic statistic, EntityType entityType) {
@@ -741,10 +743,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(statistic, "Statistic cannot be null");
         Validate.notNull(entityType, "EntityType cannot be null");
         Validate.isTrue(statistic.getType() == Statistic.Type.ENTITY, "This statistic does not take an EntityType parameter");
-        net.minecraft.server.v1_8_R3.Statistic nmsStatistic = CraftStatistic.getEntityStatistic(statistic, entityType);
+        StatBase nmsStatistic = CraftStatistic.getEntityStatistic(statistic, entityType);
 
         Validate.notNull(nmsStatistic, "The supplied EntityType does not have a corresponding statistic");
-        return this.getHandle().getStatisticManager().getStatisticValue(nmsStatistic);
+        return this.getMPPlayer().getStatFile().readStat(nmsStatistic);
     }
 
     public void incrementStatistic(Statistic statistic, EntityType entityType, int amount) {
@@ -762,14 +764,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(entityType, "EntityType cannot be null");
         Validate.isTrue(newValue >= 0, "Value must be greater than or equal to 0");
         Validate.isTrue(statistic.getType() == Statistic.Type.ENTITY, "This statistic does not take an EntityType parameter");
-        net.minecraft.server.v1_8_R3.Statistic nmsStatistic = CraftStatistic.getEntityStatistic(statistic, entityType);
+        StatBase nmsStatistic = CraftStatistic.getEntityStatistic(statistic, entityType);
 
         Validate.notNull(nmsStatistic, "The supplied EntityType does not have a corresponding statistic");
-        this.getHandle().getStatisticManager().setStatistic(this.getHandle(), nmsStatistic, newValue);
+        this.getMPPlayer().getStatFile().unlockAchievement(this.getMPPlayer(), nmsStatistic, newValue);
     }
-
+    //todo - redo the time and weather methods
     public void setPlayerTime(long time, boolean relative) {
-        this.getHandle().timeOffset = time;
+        this.getMPPlayer().time = time;
         this.getHandle().relativeTime = relative;
     }
 
@@ -778,7 +780,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public long getPlayerTime() {
-        return this.getHandle().getPlayerTime();
+        return this.getMPPlayer().getLastActiveTime();
     }
 
     public boolean isPlayerTimeRelative() {
@@ -815,14 +817,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean isWhitelisted() {
-        return this.server.getHandle().getWhitelist().isWhitelisted(this.getProfile());
+        return this.server.getHandle().getWhitelistedPlayers().isWhitelisted(this.getProfile());
     }
 
     public void setWhitelisted(boolean value) {
         if (value) {
-            this.server.getHandle().addWhitelist(this.getProfile());
+            this.server.getHandle().addWhitelistedPlayer(this.getProfile());
         } else {
-            this.server.getHandle().removeWhitelist(this.getProfile());
+            this.server.getHandle().removePlayerFromWhitelist(this.getProfile());
         }
 
     }
@@ -840,10 +842,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                         return;
                     }
 
-                    this.getHandle().setSpectatorTarget(this.getHandle());
-                    this.getHandle().playerInteractManager.setGameMode(WorldSettings.EnumGamemode.getById(mode.getValue()));
+                    this.getMPPlayer().setSpectatingEntity(this.getHandle());
+                    this.getMPPlayer().setGameType(WorldSettings.GameType.getByID(mode.getValue()));
                     this.getHandle().fallDistance = 0.0F;
-                    this.getMPPlayer().playerNetServerHandler.sendPacket(new PacketPlayOutGameStateChange(3, (float) mode.getValue()));
+                    this.getMPPlayer().playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(3, (float) mode.getValue()));
                 }
 
             }
@@ -855,69 +857,69 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void giveExp(int exp) {
-        this.getHandle().giveExp(exp);
+        this.getMPPlayer().addExperience(exp);
     }
 
     public void giveExpLevels(int levels) {
-        this.getHandle().levelDown(levels);
+        this.getMPPlayer().addExperienceLevel(levels);
     }
 
     public float getExp() {
-        return this.getHandle().exp;
+        return this.getMPPlayer().experience;
     }
 
     public void setExp(float exp) {
-        this.getHandle().exp = exp;
-        this.getHandle().lastSentExp = -1;
+        this.getMPPlayer().experience = exp;
+        //his.getHandle().lastSentExp = -1;//LunchBox
     }
 
     public int getLevel() {
-        return this.getHandle().expLevel;
+        return this.getMPPlayer().experienceLevel;
     }
 
     public void setLevel(int level) {
-        this.getHandle().expLevel = level;
-        this.getHandle().lastSentExp = -1;
+        this.getMPPlayer().experienceLevel = level;
+        //his.getHandle().lastSentExp = -1;//LunchBox
     }
 
     public int getTotalExperience() {
-        return this.getHandle().expTotal;
+        return this.getMPPlayer().experienceTotal;
     }
 
     public void setTotalExperience(int exp) {
-        this.getHandle().expTotal = exp;
+        this.getMPPlayer().experienceTotal = exp;
     }
 
     public float getExhaustion() {
-        return this.getHandle().getFoodData().exhaustionLevel;
+        return this.getMPPlayer().getEntityData().getFloat("foodExhaustionLevel");
     }
 
     public void setExhaustion(float value) {
-        this.getHandle().getFoodData().exhaustionLevel = value;
+        this.getMPPlayer().getEntityData().setFloat("foodExhaustionLevel", value);
     }
 
     public float getSaturation() {
-        return this.getHandle().getFoodData().saturationLevel;
+        return this.getMPPlayer().getFoodStats().getSaturationLevel();
     }
 
     public void setSaturation(float value) {
-        this.getHandle().getFoodData().saturationLevel = value;
+        this.getMPPlayer().getFoodStats().setFoodSaturationLevel(value);
     }
 
     public int getFoodLevel() {
-        return this.getHandle().getFoodData().foodLevel;
+        return this.getMPPlayer().getFoodStats().getFoodLevel();
     }
 
     public void setFoodLevel(int value) {
-        this.getHandle().getFoodData().foodLevel = value;
+        this.getMPPlayer().getFoodStats().setFoodLevel(value);
     }
 
     public Location getBedSpawnLocation() {
-        World world = this.getServer().getWorld(this.getHandle().spawnWorld);
-        BlockPosition bed = this.getHandle().getBed();
+        World world = (World) DimensionManager.getWorld(0);
+        BlockPos bed = this.getMPPlayer().getBedLocation();
 
         if (world != null && bed != null) {
-            bed = EntityHuman.getBed(((CraftWorld) world).getHandle(), bed, this.getHandle().isRespawnForced());
+            bed = this.getMPPlayer().getBedLocation();
             if (bed != null) {
                 return new Location(world, (double) bed.getX(), (double) bed.getY(), (double) bed.getZ());
             }
@@ -932,29 +934,29 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void setBedSpawnLocation(Location location, boolean override) {
         if (location == null) {
-            this.getHandle().setRespawnPosition((BlockPosition) null, override);
+            this.getMPPlayer().setSpawnPoint((BlockPos) null, override);
         } else {
-            this.getHandle().setRespawnPosition(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()), override);
-            this.getHandle().spawnWorld = location.getWorld().getName();
+            this.getMPPlayer().setSpawnPoint(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()), override);
+            //this.getMPPlayer().spawnWorld = location.getWorld().getName();
         }
 
     }
-
+    //todo: redo hidePlayer for Forge.
     public void hidePlayer(Player player) {
         Validate.notNull(player, "hidden player cannot be null");
         if (this.getMPPlayer().playerNetServerHandler != null) {
             if (!this.equals(player)) {
                 if (!this.hiddenPlayers.contains(player.getUniqueId())) {
                     this.hiddenPlayers.add(player.getUniqueId());
-                    EntityTracker tracker = ((WorldServer) this.entity.world).tracker;
-                    EntityPlayer other = ((CraftPlayer) player).getHandle();
-                    EntityTrackerEntry entry = (EntityTrackerEntry) tracker.trackedEntities.get(other.getId());
+                    EntityTracker tracker = ((WorldServer) this.entity.getEntityWorld()).getEntityTracker();
+                    EntityPlayer other = ((CraftPlayer) player).getMPPlayer();
+                    EntityTrackerEntry entry = (EntityTrackerEntry) tracker.getTrackingPlayers(other);
 
                     if (entry != null) {
-                        entry.clear(this.getHandle());
+                        entry.removeFromTrackedPlayers(this.getMPPlayer());
                     }
 
-                    this.getMPPlayer().playerNetServerHandler.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new EntityPlayer[] { other}));
+                    this.getMPPlayer().playerNetServerHandler.sendPacket(new S19PacketEntityStatus(S19PacketEntityStatus..REMOVE_PLAYER, new EntityPlayer[] { other})
                 }
             }
         }
@@ -966,14 +968,14 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             if (!this.equals(player)) {
                 if (this.hiddenPlayers.contains(player.getUniqueId())) {
                     this.hiddenPlayers.remove(player.getUniqueId());
-                    EntityTracker tracker = ((WorldServer) this.entity.world).tracker;
-                    EntityPlayer other = ((CraftPlayer) player).getHandle();
-
+                    EntityTracker tracker = ((WorldServer) this.entity.worldObj).getEntityTracker();
+                    EntityPlayer other = ((CraftPlayer) player).getMPPlayer();
+                    //todo
                     this.getMPPlayer().playerNetServerHandler.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new EntityPlayer[] { other}));
-                    EntityTrackerEntry entry = (EntityTrackerEntry) tracker.trackedEntities.get(other.getId());
+                    EntityTrackerEntry entry = (EntityTrackerEntry) tracker.getTrackingPlayers(other);
 
-                    if (entry != null && !entry.trackedPlayers.contains(this.getHandle())) {
-                        entry.updatePlayer(this.getHandle());
+                    if (entry != null && !entry.trackingPlayers.contains(this.getHandle())) {
+                        entry.updatePlayerEntity(this.getMPPlayer());
                     }
 
                 }
@@ -1005,7 +1007,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void setHandle(EntityPlayer entity) {
-        super.setHandle((EntityHuman) entity);
+        super.setHandle((EntityPlayerMP) (entity));
     }
 
     public String toString() {
@@ -1199,57 +1201,57 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean isFlying() {
-        return this.getHandle().abilities.isFlying;
+        return this.getMPPlayer().capabilities.isFlying;
     }
 
     public void setFlying(boolean value) {
         if (!this.getAllowFlight() && value) {
             throw new IllegalArgumentException("Cannot make player fly if getAllowFlight() is false");
         } else {
-            this.getHandle().abilities.isFlying = value;
-            this.getHandle().updateAbilities();
+            this.getMPPlayer().capabilities.isFlying = value;
+            this.getMPPlayer().updateHeldItem();
         }
     }
 
     public boolean getAllowFlight() {
-        return this.getHandle().abilities.canFly;
+        return this.getMPPlayer().capabilities.allowFlying;
     }
 
     public void setAllowFlight(boolean value) {
         if (this.isFlying() && !value) {
-            this.getHandle().abilities.isFlying = false;
+            this.getMPPlayer().capabilities.isFlying = false;
         }
 
-        this.getHandle().abilities.canFly = value;
-        this.getHandle().updateAbilities();
+        this.getMPPlayer().capabilities.allowFlying = value;
+        this.getMPPlayer().updateHeldItem();
     }
 
     public int getNoDamageTicks() {
-        return this.getHandle().invulnerableTicks > 0 ? Math.max(this.getHandle().invulnerableTicks, this.getHandle().noDamageTicks) : this.getHandle().noDamageTicks;
+        return this.getMPPlayer().getLastAttackerTime() > 0 ? Math.max(this.getMPPlayer().getLastAttackerTime(), this.getMPPlayer().getLastAttackerTime()) : this.getMPPlayer().getLastAttackerTime();
     }
 
     public void setFlySpeed(float value) {
         this.validateSpeed(value);
-        EntityPlayer player = this.getHandle();
+        EntityPlayer player = this.getMPPlayer();
 
-        player.abilities.flySpeed = Math.max(value, 1.0E-4F) / 2.0F;
-        player.updateAbilities();
+        player.capabilities.setFlySpeed(Math.max(value, 1.0E-4F) / 2.0F);
+        player.updateRidden();
     }
 
     public void setWalkSpeed(float value) {
         this.validateSpeed(value);
-        EntityPlayer player = this.getHandle();
+        EntityPlayer player = this.getMPPlayer();
 
-        player.abilities.walkSpeed = Math.max(value, 1.0E-4F) / 2.0F;
-        player.updateAbilities();
+        player.capabilities.setPlayerWalkSpeed(Math.max(value, 1.0E-4F) / 2.0F);
+        player.updateRidden();
     }
 
     public float getFlySpeed() {
-        return this.getHandle().abilities.flySpeed * 2.0F;
+        return this.getMPPlayer().capabilities.getFlySpeed() * 2.0F;
     }
 
     public float getWalkSpeed() {
-        return this.getHandle().abilities.walkSpeed * 2.0F;
+        return this.getMPPlayer().capabilities.getWalkSpeed() * 2.0F;
     }
 
     private void validateSpeed(float value) {
@@ -1262,7 +1264,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         }
 
     }
-
+    //todo: redo setMaxHealth and resetMaxHealth
     public void setMaxHealth(double amount) {
         super.setMaxHealth(amount);
         this.health = Math.min(this.health, this.health);
@@ -1280,12 +1282,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
     public void setScoreboard(Scoreboard scoreboard) {
         Validate.notNull(scoreboard, "Scoreboard cannot be null");
-        PlayerConnection playerConnection = this.getMPPlayer().playerNetServerHandler;
+        NetHandlerPlayServer playerConnection = this.getMPPlayer().playerNetServerHandler;
 
         if (playerConnection == null) {
             throw new IllegalStateException("Cannot set scoreboard yet");
         } else {
-            playerConnection.isDisconnected();
+            playerConnection.netManager.checkDisconnected();
             this.server.getScoreboardManager().setPlayerBoard(this, scoreboard);
         }
     }
@@ -1323,7 +1325,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setRealHealth(double health) {
         this.health = health;
     }
-
+    //todo
     public void updateScaledHealth() {
         AttributeMapServer attributemapserver = (AttributeMapServer) this.getHandle().getAttributeMap();
         Set set = attributemapserver.getAttributes();
@@ -1373,22 +1375,22 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public void sendTitle(String title, String subtitle) {
-        PacketPlayOutTitle packetSubtitle;
+        S45PacketTitle packetSubtitle;
 
         if (title != null) {
-            packetSubtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.TITLE, CraftChatMessage.fromString(title)[0]);
+            packetSubtitle = new S45PacketTitle(S45PacketTitle.Type.TITLE, CraftChatMessage.fromString(title)[0]);
             this.getMPPlayer().playerNetServerHandler.sendPacket(packetSubtitle);
         }
 
         if (subtitle != null) {
-            packetSubtitle = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.SUBTITLE, CraftChatMessage.fromString(subtitle)[0]);
+            packetSubtitle = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, CraftChatMessage.fromString(subtitle)[0]);
             this.getMPPlayer().playerNetServerHandler.sendPacket(packetSubtitle);
         }
 
     }
 
     public void resetTitle() {
-        PacketPlayOutTitle packetReset = new PacketPlayOutTitle(PacketPlayOutTitle.EnumTitleAction.RESET, (IChatBaseComponent) null);
+        S45PacketTitle packetReset = new S45PacketTitle(S45PacketTitle.Type.RESET, (IChatComponent) null);
 
         this.getMPPlayer().playerNetServerHandler.sendPacket(packetReset);
     }

@@ -100,6 +100,7 @@ import net.minecraft.world.storage.SaveHandler;
 import net.minecraftforge.common.DimensionManager;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.*;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -759,13 +760,13 @@ public final class CraftServer implements Server {
         this.loadIcon();
         // TODO: fix/remove this?
         try {
-            this.playerList.getBannedIPs().load();
+            this.playerList.getBannedIPs().writeChanges();
         } catch (IOException ioexception) {
             this.logger.log(Level.WARNING, "Failed to load banned-ips.json, " + ioexception.getMessage());
         }
 
         try {
-            this.playerList.getBannedPlayers().load();
+            this.playerList.getBannedPlayers().writeChanges();
         } catch (IOException ioexception1) {
             this.logger.log(Level.WARNING, "Failed to load banned-players.json, " + ioexception1.getMessage());
         }
