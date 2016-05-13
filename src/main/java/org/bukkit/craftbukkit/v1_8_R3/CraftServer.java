@@ -502,13 +502,13 @@ public final class CraftServer implements Server {
         return this.bukkitVersion;
     }
 
+    public List getOnlinePlayers() {
+        return this.playerView;
+    }
+
     @Deprecated
     public Player[] getOnlinePlayers() {
         return (Player[]) this.getOnlinePlayers().toArray(CraftServer.EMPTY_PLAYER_ARRAY);
-    }
-
-    public List getOnlinePlayers() {
-        return this.playerView;
     }
 
     /** @deprecated */
@@ -650,7 +650,7 @@ public final class CraftServer implements Server {
     }
 
     private int getConfigInt(String s, int defaultValue) {
-        return ;
+        return this.pManager.getIntProperty(s, defaultValue);
     }
 
     private boolean getConfigBoolean(String s, boolean defaultValue) {
