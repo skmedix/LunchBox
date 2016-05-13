@@ -11,62 +11,22 @@ import java.net.SocketAddress;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.*;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.server.*;
-import net.minecraft.server.v1_8_R3.AttributeInstance;
-import net.minecraft.server.v1_8_R3.AttributeMapServer;
-import net.minecraft.server.v1_8_R3.AttributeModifiable;
-import net.minecraft.server.v1_8_R3.AttributeRanged;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.Container;
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.EntityTracker;
-import net.minecraft.server.v1_8_R3.EntityTrackerEntry;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.IAttribute;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.MapIcon;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketDataSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutBlockChange;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.PacketPlayOutCustomPayload;
-import net.minecraft.server.v1_8_R3.PacketPlayOutGameStateChange;
-import net.minecraft.server.v1_8_R3.PacketPlayOutMap;
-import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnPosition;
-import net.minecraft.server.v1_8_R3.PacketPlayOutTitle;
-import net.minecraft.server.v1_8_R3.PacketPlayOutUpdateAttributes;
-import net.minecraft.server.v1_8_R3.PacketPlayOutUpdateHealth;
-import net.minecraft.server.v1_8_R3.PacketPlayOutUpdateSign;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldEvent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
-import net.minecraft.server.v1_8_R3.PlayerConnection;
-import net.minecraft.server.v1_8_R3.WorldServer;
-import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraftforge.common.DimensionManager;
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Achievement;
@@ -1327,15 +1287,16 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
     //todo
     public void updateScaledHealth() {
-        AttributeMapServer attributemapserver = (AttributeMapServer) this.getHandle().getAttributeMap();
-        Set set = attributemapserver.getAttributes();
+
+        BaseAttributeMap attributemapserver = (BaseAttributeMap) this.getHandle().getAttributeMap();
+        Set set = (Set) attributemapserver.getAllAttributes();
 
         this.injectScaledMaxHealth(set, true);
-        this.getHandle().getDataWatcher().watch(6, Float.valueOf(this.getScaledHealth()));
-        this.getMPPlayer().playerNetServerHandler.sendPacket(new PacketPlayOutUpdateHealth(this.getScaledHealth(), this.getHandle().getFoodData().getFoodLevel(), this.getHandle().getFoodData().getSaturationLevel()));
-        this.getMPPlayer().playerNetServerHandler.sendPacket(new PacketPlayOutUpdateAttributes(this.getHandle().getId(), set));
+        this.getHandle().getDataWatcher().addObject(6, Float.valueOf(this.getScaledHealth()));
+        this.getMPPlayer().playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(this.getScaledHealth(), this.getMPPlayer().getFoodStats().getFoodLevel(), this.getMPPlayer().getFoodStats().getSaturationLevel()));
+        this.getMPPlayer().playerNetServerHandler.sendPacket(new S20PacketEntityProperties(this.getMPPlayer().getEntityId(), set));
         set.clear();
-        this.getHandle().maxHealthCache = this.getMaxHealth();
+        this.getMPPlayer().setPlayerHealthUpdated();
     }
 
     public void injectScaledMaxHealth(Collection collection, boolean force) {
@@ -1344,9 +1305,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
 
             while (iterator.hasNext()) {
                 Object genericInstance = iterator.next();
-                IAttribute attribute = ((AttributeInstance) genericInstance).getAttribute();
+                IAttribute attribute = ((BaseAttribute) genericInstance);
 
-                if (attribute.getName().equals("generic.maxHealth")) {
+                if (attribute.getAttributeUnlocalizedName().equals("generic.maxHealth")) {
                     collection.remove(genericInstance);
                     break;
                 }
@@ -1359,19 +1320,19 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                 this.getServer().getLogger().warning(this.getName() + " tried to crash the server with a large health attribute");
             }
 
-            collection.add(new AttributeModifiable(this.getHandle().getAttributeMap(), (new AttributeRanged((IAttribute) null, "generic.maxHealth", healthMod, 0.0D, 3.4028234663852886E38D)).a("Max Health").a(true)));
+            collection.add(new ModifiableAttributeInstance(this.getHandle().getAttributeMap(), (new RangedAttribute((IAttribute) null, "generic.maxHealth", healthMod, 0.0D, 3.4028234663852886E38D)).setDescription("Max Health").setShouldWatch(true)));
         }
     }
 
     public org.bukkit.entity.Entity getSpectatorTarget() {
-        Entity followed = this.getHandle().C();
+        Entity followed = this.getMPPlayer().getSpectatingEntity();
 
-        return followed == this.getHandle() ? null : followed.getBukkitEntity();
+        return followed == this.getHandle() ? null : CraftEntity.getEntity(this.server, followed);
     }
 
     public void setSpectatorTarget(org.bukkit.entity.Entity entity) {
         Preconditions.checkArgument(this.getGameMode() == GameMode.SPECTATOR, "Player must be in spectator mode");
-        this.getHandle().setSpectatorTarget(entity == null ? null : ((CraftEntity) entity).getHandle());
+        this.getMPPlayer().setSpectatingEntity(entity == null ? null : ((CraftEntity) entity).getHandle());
     }
 
     public void sendTitle(String title, String subtitle) {

@@ -68,12 +68,12 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
     void playSound(Location location, Sound sound, float f, float f1);
 
     void playSound(Location location, String s, float f, float f1);
+    //LunchBox - remove for now
+    ///** @deprecated */
+    //@Deprecated
+    //void playEffect(Location location, Effect effect, int i);
 
-    /** @deprecated */
-    @Deprecated
-    void playEffect(Location location, Effect effect, int i);
-
-    void playEffect(Location location, Effect effect, Object object);
+    //void playEffect(Location location, Effect effect, Object object);
 
     /** @deprecated */
     @Deprecated
