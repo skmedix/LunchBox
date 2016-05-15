@@ -1,15 +1,9 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutHeldItemSlot;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSetSlot;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -42,7 +36,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     public void setItem(int index, ItemStack item) {
         super.setItem(index, item);
         if (this.getHolder() != null) {
-            EntityPlayerMP player = this.getHolder().getHandle();
+            EntityPlayerMP player = (EntityPlayerMP) this.getHolder();
 
             if (player.playerNetServerHandler != null) {
                 if (index < InventoryPlayer.getHotbarSize()) {
@@ -63,7 +57,7 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     public void setHeldItemSlot(int slot) {
         Validate.isTrue(slot >= 0 && slot < InventoryPlayer.getHotbarSize(), "Slot is not between 0 and 8 inclusive");
         this.getInventory().currentItem = slot;
-        ((CraftPlayer) this.getHolder()).getHandle().playerConnection.sendPacket(new PacketPlayOutHeldItemSlot(slot));
+        ((CraftPlayer) this.getHolder()).getMPPlayer().playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(slot));
     }
 
     public ItemStack getHelmet() {
@@ -162,7 +156,8 @@ public class CraftInventoryPlayer extends CraftInventory implements PlayerInvent
     }
 
     public HumanEntity getHolder() {
-        return (HumanEntity) this.inventory.getOwner();
+        //return (HumanEntity) this.inventory.getOwner();
+        return null;
     }
 
     public float getItemInHandDropChance() {

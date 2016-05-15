@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.RecipesFurnace;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,6 +18,6 @@ public class CraftFurnaceRecipe extends FurnaceRecipe implements CraftRecipe {
         ItemStack result = this.getResult();
         ItemStack input = this.getInput();
 
-        RecipesFurnace.getInstance().registerRecipe(CraftItemStack.asNMSCopy(input), CraftItemStack.asNMSCopy(result));
+        FurnaceRecipes.instance().addSmeltingRecipe(CraftItemStack.asNMSCopy(input), CraftItemStack.asNMSCopy(result), 0);
     }
 }

@@ -1,5 +1,8 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCraftResult;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.server.v1_8_R3.IInventory;
 import net.minecraft.server.v1_8_R3.IRecipe;
 import net.minecraft.server.v1_8_R3.InventoryCrafting;
@@ -7,12 +10,12 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.util.Java15Compat;
-
+//todo: come back to this later.
 public class CraftInventoryCrafting extends CraftInventory implements CraftingInventory {
 
     private final IInventory resultInventory;
 
-    public CraftInventoryCrafting(InventoryCrafting inventory, IInventory resultInventory) {
+    public CraftInventoryCrafting(InventoryCrafting inventory, InventoryCraftResult resultInventory) {
         super(inventory);
         this.resultInventory = resultInventory;
     }
@@ -26,7 +29,7 @@ public class CraftInventoryCrafting extends CraftInventory implements CraftingIn
     }
 
     public int getSize() {
-        return this.getResultInventory().getSize() + this.getMatrixInventory().getSize();
+        return this.getResultInventory().getSizeInventory() + this.getMatrixInventory().getSizeInventory();
     }
 
     public void setContents(ItemStack[] items) {

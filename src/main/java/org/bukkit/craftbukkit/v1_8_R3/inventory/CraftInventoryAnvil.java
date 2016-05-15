@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.IInventory;
+import net.minecraft.inventory.IInventory;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,27 +22,27 @@ public class CraftInventoryAnvil extends CraftInventory implements AnvilInventor
     }
 
     public ItemStack getItem(int slot) {
-        net.minecraft.server.v1_8_R3.ItemStack item;
+        net.minecraft.item.ItemStack item;
 
-        if (slot < this.getIngredientsInventory().getSize()) {
-            item = this.getIngredientsInventory().getItem(slot);
+        if (slot < this.getIngredientsInventory().getSizeInventory()) {
+            item = this.getIngredientsInventory().getStackInSlot(slot);
             return item == null ? null : CraftItemStack.asCraftMirror(item);
         } else {
-            item = this.getResultInventory().getItem(slot - this.getIngredientsInventory().getSize());
+            item = this.getResultInventory().getStackInSlot(slot - this.getIngredientsInventory().getSizeInventory());
             return item == null ? null : CraftItemStack.asCraftMirror(item);
         }
     }
 
     public void setItem(int index, ItemStack item) {
-        if (index < this.getIngredientsInventory().getSize()) {
-            this.getIngredientsInventory().setItem(index, item == null ? null : CraftItemStack.asNMSCopy(item));
+        if (index < this.getIngredientsInventory().getSizeInventory()) {
+            this.getIngredientsInventory().setInventorySlotContents(index, item == null ? null : CraftItemStack.asNMSCopy(item));
         } else {
-            this.getResultInventory().setItem(index - this.getIngredientsInventory().getSize(), item == null ? null : CraftItemStack.asNMSCopy(item));
+            this.getResultInventory().setInventorySlotContents(index - this.getIngredientsInventory().getSizeInventory(), item == null ? null : CraftItemStack.asNMSCopy(item));
         }
 
     }
 
     public int getSize() {
-        return this.getResultInventory().getSize() + this.getIngredientsInventory().getSize();
+        return this.getResultInventory().getSizeInventory() + this.getIngredientsInventory().getSizeInventory();
     }
 }

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.EntityInsentient;
+import net.minecraft.entity.EntityLiving;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.EntityEquipment;
@@ -80,11 +80,11 @@ public class CraftEntityEquipment implements EntityEquipment {
     }
 
     private ItemStack getEquipment(int slot) {
-        return CraftItemStack.asBukkitCopy(this.entity.getHandle().getEquipment(slot));
+        return CraftItemStack.asBukkitCopy(this.entity.getHandle().getEquipmentInSlot(slot));
     }
 
     private void setEquipment(int slot, ItemStack stack) {
-        this.entity.getHandle().setEquipment(slot, CraftItemStack.asNMSCopy(stack));
+        this.entity.getHandle().setCurrentItemOrArmor(slot, CraftItemStack.asNMSCopy(stack));
     }
 
     public void clear() {
@@ -139,10 +139,10 @@ public class CraftEntityEquipment implements EntityEquipment {
     }
 
     private void setDropChance(int slot, float chance) {
-        ((EntityInsentient) this.entity.getHandle()).dropChances[slot] = chance - 0.1F;
+        ((EntityLiving) this.entity.getHandle()).setEquipmentDropChance(slot, chance - 0.1F);
     }
 
     private float getDropChance(int slot) {
-        return ((EntityInsentient) this.entity.getHandle()).dropChances[slot] + 0.1F;
+        return ((EntityLiving) this.entity.getHandle()).dropChances[slot] + 0.1F;//todo: needs reworking.
     }
 }

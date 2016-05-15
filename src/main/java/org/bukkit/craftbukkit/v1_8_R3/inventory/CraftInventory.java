@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryEnderChest;
+import net.minecraft.inventory.InventoryMerchant;
 import net.minecraft.tileentity.*;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.Material;
@@ -112,9 +114,9 @@ public class CraftInventory implements Inventory {
             int i = (aitemstack = this.getContents()).length;
 
             for (int j = 0; j < i; ++j) {
-                ItemStack i = aitemstack[j];
+                ItemStack c = aitemstack[j];
 
-                if (item.equals(i)) {
+                if (item.equals(c)) {
                     return true;
                 }
             }
@@ -157,9 +159,9 @@ public class CraftInventory implements Inventory {
             int i = (aitemstack = this.getContents()).length;
 
             for (int j = 0; j < i; ++j) {
-                ItemStack i = aitemstack[j];
+                ItemStack c = aitemstack[j];
 
-                if (item.equals(i)) {
+                if (item.equals(c)) {
                     --amount;
                     if (amount <= 0) {
                         return true;
@@ -181,9 +183,9 @@ public class CraftInventory implements Inventory {
             int i = (aitemstack = this.getContents()).length;
 
             for (int j = 0; j < i; ++j) {
-                ItemStack i = aitemstack[j];
+                ItemStack c = aitemstack[j];
 
-                if (item.isSimilar(i) && (amount -= i.getAmount()) <= 0) {
+                if (item.isSimilar(c) && (amount -= c.getAmount()) <= 0) {
                     return true;
                 }
             }
@@ -360,18 +362,18 @@ public class CraftInventory implements Inventory {
                     }
                 } else {
                     ItemStack itemstack = this.getItem(firstPartial);
-                    int i = item.getAmount();
+                    int amount = item.getAmount();
                     int partialAmount = itemstack.getAmount();
                     int maxAmount = itemstack.getMaxStackSize();
 
-                    if (i + partialAmount > maxAmount) {
+                    if (amount + partialAmount > maxAmount) {
                         itemstack.setAmount(maxAmount);
                         this.setItem(firstPartial, itemstack);
-                        item.setAmount(i + partialAmount - maxAmount);
+                        item.setAmount(amount + partialAmount - maxAmount);
                         continue;
                     }
 
-                    itemstack.setAmount(i + partialAmount);
+                    itemstack.setAmount(amount + partialAmount);
                     this.setItem(firstPartial, itemstack);
                 }
 
@@ -477,9 +479,10 @@ public class CraftInventory implements Inventory {
 
         return new InventoryIterator(this, index);
     }
-
+    //todo: getViewers(), getHolder(), setMaxStackSize()
     public List getViewers() {
-        return this.inventory.getViewers();
+        return null;
+        //return this.inventory.getViewers();
     }
 
     public String getTitle() {
@@ -491,7 +494,8 @@ public class CraftInventory implements Inventory {
     }
 
     public InventoryHolder getHolder() {
-        return this.inventory.getOwner();
+        return null;
+        //return this.inventory.getHolder();
     }
 
     public int getMaxStackSize() {
@@ -499,7 +503,7 @@ public class CraftInventory implements Inventory {
     }
 
     public void setMaxStackSize(int size) {
-        this.inventory.setMaxStackSize(size);
+        //this.inventory.setMaxStackSize(size);
     }
 
     public int hashCode() {
