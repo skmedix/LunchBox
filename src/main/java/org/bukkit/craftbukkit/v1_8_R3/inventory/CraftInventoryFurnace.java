@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
 import net.minecraft.server.v1_8_R3.TileEntityFurnace;
+import net.minecraft.tileentity.TileEntityFurnace;
 import org.bukkit.block.Furnace;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.ItemStack;
@@ -34,7 +35,7 @@ public class CraftInventoryFurnace extends CraftInventory implements FurnaceInve
     public void setSmelting(ItemStack stack) {
         this.setItem(0, stack);
     }
-
+    //todo
     public Furnace getHolder() {
         return (Furnace) this.inventory.getOwner();
     }

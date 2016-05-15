@@ -2,12 +2,13 @@ package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.IInventory;
-import net.minecraft.server.v1_8_R3.ItemStack;
-import org.apache.commons.lang.Validate;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.InventoryHolder;
@@ -80,12 +81,12 @@ public class CraftInventoryCustom extends CraftInventory {
             } else {
                 ItemStack result;
 
-                if (stack.count <= j) {
+                if (stack.stackSize <= j) {
                     this.setItem(i, (ItemStack) null);
                     result = stack;
                 } else {
                     result = CraftItemStack.copyNMSStack(stack, j);
-                    stack.count -= j;
+                    stack.stackSize -= j;
                 }
 
                 this.update();
@@ -101,12 +102,12 @@ public class CraftInventoryCustom extends CraftInventory {
             } else {
                 ItemStack result;
 
-                if (stack.count <= 1) {
+                if (stack.stackSize <= 1) {
                     this.setItem(i, (ItemStack) null);
                     result = stack;
                 } else {
                     result = CraftItemStack.copyNMSStack(stack, 1);
-                    --stack.count;
+                    --stack.stackSize;
                 }
 
                 return result;
@@ -115,8 +116,8 @@ public class CraftInventoryCustom extends CraftInventory {
 
         public void setItem(int i, ItemStack itemstack) {
             this.items[i] = itemstack;
-            if (itemstack != null && this.getMaxStackSize() > 0 && itemstack.count > this.getMaxStackSize()) {
-                itemstack.count = this.getMaxStackSize();
+            if (itemstack != null && this.getMaxStackSize() > 0 && itemstack.stackSize > this.getMaxStackSize()) {
+                itemstack.stackSize = this.getMaxStackSize();
             }
 
         }
@@ -131,7 +132,7 @@ public class CraftInventoryCustom extends CraftInventory {
 
         public void update() {}
 
-        public boolean a(EntityHuman entityhuman) {
+        public boolean a(EntityPlayer entityhuman) {
             return true;
         }
 
@@ -163,9 +164,9 @@ public class CraftInventoryCustom extends CraftInventory {
             return true;
         }
 
-        public void startOpen(EntityHuman entityHuman) {}
+        public void startOpen(EntityPlayer entityHuman) {}
 
-        public void closeContainer(EntityHuman entityHuman) {}
+        public void closeContainer(EntityPlayer entityHuman) {}
 
         public int getProperty(int i) {
             return 0;
@@ -187,8 +188,65 @@ public class CraftInventoryCustom extends CraftInventory {
             return this.title != null;
         }
 
-        public IChatBaseComponent getScoreboardDisplayName() {
+        public IChatComponent getDisplayName() {
+            return null;
+        }
+
+        public IChatComponent getScoreboardDisplayName() {
             return new ChatComponentText(this.title);
         }
+
+        public int getSizeInventory() {
+            return type.getDefaultSize();
+        }
+
+        public ItemStack getStackInSlot(int index) {
+            return items[index];
+        }
+
+        public ItemStack decrStackSize(int index, int count) {
+            return null;
+        }
+
+        public ItemStack removeStackFromSlot(int index) {
+            return null;
+        }
+
+        public void setInventorySlotContents(int index, ItemStack stack) {
+            items[index] = stack;
+            if (stack != null && this.getInventoryStackLimit() > 0 && stack.stackSize > this.getInventoryStackLimit()) {
+                stack.stackSize = this.getInventoryStackLimit();
+            }
+        }
+
+        public int getInventoryStackLimit() {
+            return maxStack;
+        }
+
+        public void markDirty() {}
+
+        public boolean isUseableByPlayer(EntityPlayer player) {
+            return true;
+        }
+
+        public void openInventory(EntityPlayer player) {}
+
+        public void closeInventory(EntityPlayer player) {}
+
+        public boolean isItemValidForSlot(int index, ItemStack stack) {
+            return false;
+        }
+
+        public int getField(int id) {
+            return 0;
+        }
+
+        public void setField(int id, int value) {}
+
+        public int getFieldCount() {
+            return 0;
+        }
+
+        public void clear() {}
     }
 }

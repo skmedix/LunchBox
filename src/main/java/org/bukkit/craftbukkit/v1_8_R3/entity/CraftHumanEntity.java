@@ -3,7 +3,6 @@ package org.bukkit.craftbukkit.v1_8_R3.entity;
 import java.util.Set;
 
 import net.minecraft.block.BlockAnvil;
-import net.minecraft.block.BlockWorkbench;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -12,11 +11,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerWorkbench;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.network.play.server.S2EPacketCloseWindow;
 import net.minecraft.tileentity.*;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.ILockableContainer;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -88,9 +89,9 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     public void setItemOnCursor(ItemStack item) {
         net.minecraft.item.ItemStack stack = CraftItemStack.asNMSCopy(item);
 
-        ((EntityPlayer) this.getHandle()).getCurrentEquippedItem().setItem(stack);
+        this.getMPPlayer().getCurrentEquippedItem().setItem(stack.getItem());
         if (this instanceof CraftPlayer) {
-            ((this.getHandle()).getHeldItem().setItem(item));
+            (this.getMPPlayer()).getHeldItem().setItem(CraftItemStack.asNMSCopy(item).getItem());
         }
 
     }
@@ -172,7 +173,13 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         return (EntityLiving) this.entity;
     }
 
-    public void setHandle(EntityPlayer entity) {
+    //LunchBox - Start
+    public EntityPlayerMP getMPPlayer() {
+        return (EntityPlayerMP) this.entity;
+    }
+    //LunchBox - end
+
+    public void setHandle(EntityPlayerMP entity) {
         super.setHandle(entity);
         this.inventory = new CraftInventoryPlayer(entity.inventory);
     }
@@ -249,7 +256,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
                 break;
 
             case 13:
-                if (iinventory instanceof BlockAnvil.TileEntityContainerAnvil) {
+                if (iinventory instanceof BlockAnvil.Anvil) {
                     ((EntityPlayer) (EntityLivingBase) this.getHandle()).openContainer = (Container) iinventory;
                 } else {
                     this.openCustomInventory(inventory, player, "minecraft:anvil");
@@ -339,34 +346,35 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
             location = this.getLocation();
         }
 
-        Object container1 = this.getHandle().world.getTileEntity(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
+        Object container1 = this.getHandle().worldObj.getTileEntity(new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
 
         if (container1 == null && force) {
-            container1 = new TileEntityEnchantTable();
+            container1 = new TileEntityEnchantmentTable();
         }
 
-        this.getHandle().openTileEntity((ITileEntityContainer) container1);
+        this.getMPPlayer().displayGui((IInteractionObject) container1);
         if (force) {
-            this.getHandle().activeContainer.checkReachable = false;
+            //this.getMPPlayer().openContainer.checkReachable = false;
         }
 
-        return this.getHandle().activeContainer.getBukkitView();
+        //return this.getMPPlayer().openContainer.getBukkitView();
+        return null;
     }
 
     public void openInventory(InventoryView inventory) {
-        if (this.getHandle() instanceof EntityPlayer) {
-            if (((EntityPlayer) this.getHandle()).playerConnection != null) {
-                if (this.getHandle().activeContainer != this.getHandle().defaultContainer) {
-                    ((EntityPlayer) this.getHandle()).playerConnection.a(new PacketPlayInCloseWindow(this.getHandle().activeContainer.windowId));
+        if (this.getMPPlayer() instanceof EntityPlayer) {
+            if ((this.getMPPlayer().playerNetServerHandler != null)) {
+                if ((this.getMPPlayer()).openContainer != (this.getMPPlayer()).inventoryContainer) {
+                    (this.getMPPlayer()).playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(((EntityPlayer) this.getMPPlayer()).openContainer.windowId));
                 }
 
-                EntityPlayer player = (EntityPlayer) this.getHandle();
+                EntityPlayerMP player = this.getMPPlayer();
                 Object container;
 
                 if (inventory instanceof CraftInventoryView) {
                     container = ((CraftInventoryView) inventory).getHandle();
                 } else {
-                    container = new CraftContainer(inventory, player.nextContainerCounter());
+                    container = new CraftContainer(inventory, (player.currentWindowId % 100 + 1));
                 }
 
                 Container container1 = CraftEventFactory.callInventoryOpenEvent(player, (Container) container);
@@ -377,28 +385,28 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
                     String title = inventory.getTitle();
                     int size = inventory.getTopInventory().getSize();
 
-                    player.playerConnection.sendPacket(new PacketPlayOutOpenWindow(container1.windowId, windowType, new ChatComponentText(title), size));
-                    player.activeContainer = container1;
-                    player.activeContainer.addSlotListener(player);
+                    player.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(container1.windowId, windowType, new ChatComponentText(title), size));
+                    player.openContainer = container1;
+                    //player.openContainer.addSlotListener(player);
                 }
             }
         }
     }
 
     public void closeInventory() {
-        this.getHandle().closeInventory();
+        this.getMPPlayer().closeContainer();
     }
 
     public boolean isBlocking() {
-        return this.getHandle().isBlocking();
+        return this.getMPPlayer().isBlocking();
     }
 
     public boolean setWindowProperty(InventoryView.Property prop, int value) {
         return false;
     }
-
+    //todo
     public int getExpToLevel() {
-        return this.getHandle().getExpToLevel();
+        return this.getMPPlayer().experienceLevel;
     }
 
     static int[] $SWITCH_TABLE$org$bukkit$event$inventory$InventoryType() {

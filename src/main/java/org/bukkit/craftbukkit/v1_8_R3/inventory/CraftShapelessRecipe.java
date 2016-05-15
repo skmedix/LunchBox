@@ -2,8 +2,9 @@ package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.CraftingManager;
-import net.minecraft.server.v1_8_R3.ShapelessRecipes;
+
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.ShapelessRecipes;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -48,9 +49,9 @@ public class CraftShapelessRecipe extends ShapelessRecipe implements CraftRecipe
             int id = mdata.getTypeId();
             short dmg = mdata.getDurability();
 
-            data[i] = new net.minecraft.server.v1_8_R3.ItemStack(CraftMagicNumbers.getItem(id), 1, dmg);
+            data[i] = new net.minecraft.item.ItemStack(CraftMagicNumbers.getItem(id), 1, dmg);
         }
 
-        CraftingManager.getInstance().registerShapelessRecipe(CraftItemStack.asNMSCopy(this.getResult()), data);
+        CraftingManager.getInstance().addShapelessRecipe(CraftItemStack.asNMSCopy(this.getResult()), data);
     }
 }

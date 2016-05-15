@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.Container;
+import net.minecraft.inventory.Container;
 import org.bukkit.GameMode;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.entity.HumanEntity;
@@ -41,18 +41,18 @@ public class CraftInventoryView extends InventoryView {
     }
 
     public void setItem(int slot, ItemStack item) {
-        net.minecraft.server.v1_8_R3.ItemStack stack = CraftItemStack.asNMSCopy(item);
+        net.minecraft.item.ItemStack stack = CraftItemStack.asNMSCopy(item);
 
         if (slot != -999) {
-            this.container.getSlot(slot).set(stack);
+            this.container.getSlot(slot).putStack(stack);
         } else {
-            this.player.getHandle().drop(stack, false);
+            this.player.getMPPlayer().dropPlayerItemWithRandomChoice(stack, false);
         }
 
     }
 
     public ItemStack getItem(int slot) {
-        return slot == -999 ? null : CraftItemStack.asCraftMirror(this.container.getSlot(slot).getItem());
+        return slot == -999 ? null : CraftItemStack.asCraftMirror(this.container.getSlot(slot).getStack());
     }
 
     public boolean isInTop(int rawSlot) {

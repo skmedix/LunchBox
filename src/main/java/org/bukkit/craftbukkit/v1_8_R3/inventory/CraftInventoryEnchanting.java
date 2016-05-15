@@ -1,13 +1,14 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.InventorySubcontainer;
+import net.minecraft.inventory.ContainerEnchantment;
+import net.minecraft.inventory.IInventory;
 import org.bukkit.inventory.EnchantingInventory;
 import org.bukkit.inventory.ItemStack;
 
 public class CraftInventoryEnchanting extends CraftInventory implements EnchantingInventory {
 
-    public CraftInventoryEnchanting(InventorySubcontainer inventory) {
-        super(inventory);
+    public CraftInventoryEnchanting(ContainerEnchantment inventory) {
+        super((IInventory) inventory);
     }
 
     public void setItem(ItemStack item) {
@@ -18,8 +19,8 @@ public class CraftInventoryEnchanting extends CraftInventory implements Enchanti
         return this.getItem(0);
     }
 
-    public InventorySubcontainer getInventory() {
-        return (InventorySubcontainer) this.inventory;
+    public IInventory getInventory() {
+        return this.inventory;
     }
 
     public void setSecondary(ItemStack item) {

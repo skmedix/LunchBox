@@ -63,4 +63,8 @@ public class InventoryIterator implements ListIterator {
     public void remove() {
         throw new UnsupportedOperationException("Can\'t change the size of an inventory!");
     }
+
+    public void set(Object o) {}
+
+    public void add(Object o) {}
 }

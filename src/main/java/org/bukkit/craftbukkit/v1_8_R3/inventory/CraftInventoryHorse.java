@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
-import net.minecraft.server.v1_8_R3.IInventory;
+import net.minecraft.inventory.IInventory;
 import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.ItemStack;
 

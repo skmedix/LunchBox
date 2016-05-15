@@ -1,19 +1,22 @@
 package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.server.v1_8_R3.ITileInventory;
 import net.minecraft.server.v1_8_R3.InventoryLargeChest;
+import net.minecraft.world.ILockableContainer;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
+//todo: come back to this later.
 public class CraftInventoryDoubleChest extends CraftInventory implements DoubleChestInventory {
 
     private final CraftInventory left;
     private final CraftInventory right;
 
     public CraftInventoryDoubleChest(CraftInventory left, CraftInventory right) {
-        super(new InventoryLargeChest("Large chest", (ITileInventory) left.getInventory(), (ITileInventory) right.getInventory()));
+        super(new InventoryLargeChest("Large chest", (ILockableContainer) left.getInventory(), (ILockableContainer) right.getInventory()));
         this.left = left;
         this.right = right;
     }
