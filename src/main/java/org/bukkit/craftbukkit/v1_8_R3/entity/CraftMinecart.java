@@ -1,5 +1,7 @@
 package org.bukkit.craftbukkit.v1_8_R3.entity;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.server.v1_8_R3.Blocks;
 import net.minecraft.server.v1_8_R3.EntityMinecartAbstract;
 import net.minecraft.server.v1_8_R3.IBlockData;
@@ -12,7 +14,7 @@ import org.bukkit.util.Vector;
 
 public abstract class CraftMinecart extends CraftVehicle implements Minecart {
 
-    public CraftMinecart(CraftServer server, EntityMinecartAbstract entity) {
+    public CraftMinecart(CraftServer server, EntityMinecart entity) {
         super(server, entity);
     }
 
@@ -25,16 +27,16 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
     }
 
     public double getMaxSpeed() {
-        return this.getHandle().maxSpeed;
+        return this.getHandle().getMaxCartSpeedOnRail();
     }
 
     public void setMaxSpeed(double speed) {
         if (speed >= 0.0D) {
-            this.getHandle().maxSpeed = speed;
+            this.getHandle().setCurrentCartSpeedCapOnRail((float) speed);
         }
 
     }
-
+    //todo
     public boolean isSlowWhenEmpty() {
         return this.getHandle().slowWhenEmpty;
     }
@@ -59,8 +61,8 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
         this.getHandle().setDerailedVelocityMod(derailed);
     }
 
-    public EntityMinecartAbstract getHandle() {
-        return (EntityMinecartAbstract) this.entity;
+    public EntityMinecart getHandle() {
+        return (EntityMinecart) this.entity;
     }
 
     /** @deprecated */
@@ -77,8 +79,8 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
 
     public void setDisplayBlock(MaterialData material) {
         if (material != null) {
-            IBlockData block = CraftMagicNumbers.getBlock(material.getItemTypeId()).fromLegacyData(material.getData());
-
+            IBlockState block = CraftMagicNumbers.getBlock(material.getItemTypeId()).getStateFromMeta(material.getData());
+            //todo
             this.getHandle().setDisplayBlock(block);
         } else {
             this.getHandle().setDisplayBlock(Blocks.AIR.getBlockData());
@@ -88,16 +90,16 @@ public abstract class CraftMinecart extends CraftVehicle implements Minecart {
     }
 
     public MaterialData getDisplayBlock() {
-        IBlockData blockData = this.getHandle().getDisplayBlock();
+        IBlockState blockData = this.getHandle().getDisplayTile();
 
         return CraftMagicNumbers.getMaterial(blockData.getBlock()).getNewData((byte) blockData.getBlock().toLegacyData(blockData));
     }
 
     public void setDisplayBlockOffset(int offset) {
-        this.getHandle().SetDisplayBlockOffset(offset);
+        this.getHandle().setDisplayTileOffset(offset);
     }
 
     public int getDisplayBlockOffset() {
-        return this.getHandle().getDisplayBlockOffset();
+        return this.getHandle().getDisplayTileOffset();
     }
 }

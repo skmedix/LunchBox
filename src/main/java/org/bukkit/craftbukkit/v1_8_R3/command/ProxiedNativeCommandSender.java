@@ -1,7 +1,8 @@
 package org.bukkit.craftbukkit.v1_8_R3.command;
 
 import java.util.Set;
-import net.minecraft.server.v1_8_R3.ICommandListener;
+
+import net.minecraft.command.ICommandSender;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ProxiedCommandSender;
@@ -11,17 +12,17 @@ import org.bukkit.plugin.Plugin;
 
 public class ProxiedNativeCommandSender implements ProxiedCommandSender {
 
-    private final ICommandListener orig;
+    private final ICommandSender orig;
     private final CommandSender caller;
     private final CommandSender callee;
 
-    public ProxiedNativeCommandSender(ICommandListener orig, CommandSender caller, CommandSender callee) {
+    public ProxiedNativeCommandSender(ICommandSender orig, CommandSender caller, CommandSender callee) {
         this.orig = orig;
         this.caller = caller;
         this.callee = callee;
     }
 
-    public ICommandListener getHandle() {
+    public ICommandSender getHandle() {
         return this.orig;
     }
 

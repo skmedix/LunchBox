@@ -22,7 +22,7 @@ public class ConsoleCommandCompleter implements Completer {
             }
         };
 
-        this.server.getServer().processQueue.add(waitable);
+        //this.server.getServer().processQueue.add(waitable); LunchBox - remove
 
         try {
             List e = (List) waitable.get();

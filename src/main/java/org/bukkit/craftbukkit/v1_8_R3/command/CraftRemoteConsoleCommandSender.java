@@ -1,14 +1,14 @@
 package org.bukkit.craftbukkit.v1_8_R3.command;
 
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.RemoteControlCommandListener;
+import net.minecraft.network.rcon.RConConsoleSource;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
 import org.bukkit.command.RemoteConsoleCommandSender;
 
 public class CraftRemoteConsoleCommandSender extends ServerCommandSender implements RemoteConsoleCommandSender {
 
     public void sendMessage(String message) {
-        RemoteControlCommandListener.getInstance().sendMessage((IChatBaseComponent) (new ChatComponentText(message + "\n")));
+        RConConsoleSource.getInstance().addChatMessage((IChatComponent) (new ChatComponentText(message + "\n")));
     }
 
     public void sendMessage(String[] messages) {
