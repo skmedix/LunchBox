@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3.enchantments;
 
-import net.minecraft.server.v1_8_R3.EnchantmentSlotType;
+import net.minecraft.enchantment.EnumEnchantmentType;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -9,11 +9,11 @@ import org.bukkit.inventory.ItemStack;
 
 public class CraftEnchantment extends Enchantment {
 
-    private final net.minecraft.server.v1_8_R3.Enchantment target;
+    private final net.minecraft.enchantment.Enchantment target;
     private static int[] $SWITCH_TABLE$net$minecraft$server$EnchantmentSlotType;
 
-    public CraftEnchantment(net.minecraft.server.v1_8_R3.Enchantment target) {
-        super(target.id);
+    public CraftEnchantment(net.minecraft.enchantment.Enchantment target) {
+        super(target.effectId);
         this.target = target;
     }
 
@@ -22,11 +22,11 @@ public class CraftEnchantment extends Enchantment {
     }
 
     public int getStartLevel() {
-        return this.target.getStartLevel();
+        return this.target.getMinLevel();
     }
 
     public EnchantmentTarget getItemTarget() {
-        switch ($SWITCH_TABLE$net$minecraft$server$EnchantmentSlotType()[this.target.slot.ordinal()]) {
+        switch ($SWITCH_TABLE$net$minecraft$server$EnchantmentSlotType()[this.target.type.ordinal()]) {
         case 1:
             return EnchantmentTarget.ALL;
 
@@ -64,11 +64,11 @@ public class CraftEnchantment extends Enchantment {
     }
 
     public boolean canEnchantItem(ItemStack item) {
-        return this.target.canEnchant(CraftItemStack.asNMSCopy(item));
+        return this.target.canApply(CraftItemStack.asNMSCopy(item));
     }
 
     public String getName() {
-        switch (this.target.id) {
+        switch (this.target.effectId) {
         case 0:
             return "PROTECTION_ENVIRONMENTAL";
 
@@ -145,11 +145,11 @@ public class CraftEnchantment extends Enchantment {
             return "LURE";
 
         default:
-            return "UNKNOWN_ENCHANT_" + this.target.id;
+            return "UNKNOWN_ENCHANT_" + this.target.effectId;
         }
     }
 
-    public static net.minecraft.server.v1_8_R3.Enchantment getRaw(Enchantment enchantment) {
+    public static net.minecraft.enchantment.Enchantment getRaw(Enchantment enchantment) {
         if (enchantment instanceof EnchantmentWrapper) {
             enchantment = ((EnchantmentWrapper) enchantment).getEnchantment();
         }
@@ -167,7 +167,7 @@ public class CraftEnchantment extends Enchantment {
         } else {
             CraftEnchantment ench = (CraftEnchantment) other;
 
-            return !this.target.a(ench.target);
+            return !this.target.canApplyTogether(ench.target);
         }
     }
 
@@ -177,70 +177,70 @@ public class CraftEnchantment extends Enchantment {
         if (CraftEnchantment.$SWITCH_TABLE$net$minecraft$server$EnchantmentSlotType != null) {
             return aint;
         } else {
-            int[] aint1 = new int[EnchantmentSlotType.values().length];
+            int[] aint1 = new int[EnumEnchantmentType.values().length];
 
             try {
-                aint1[EnchantmentSlotType.ALL.ordinal()] = 1;
+                aint1[EnumEnchantmentType.ALL.ordinal()] = 1;
             } catch (NoSuchFieldError nosuchfielderror) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.ARMOR.ordinal()] = 2;
+                aint1[EnumEnchantmentType.ARMOR.ordinal()] = 2;
             } catch (NoSuchFieldError nosuchfielderror1) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.ARMOR_FEET.ordinal()] = 3;
+                aint1[EnumEnchantmentType.ARMOR_FEET.ordinal()] = 3;
             } catch (NoSuchFieldError nosuchfielderror2) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.ARMOR_HEAD.ordinal()] = 6;
+                aint1[EnumEnchantmentType.ARMOR_HEAD.ordinal()] = 6;
             } catch (NoSuchFieldError nosuchfielderror3) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.ARMOR_LEGS.ordinal()] = 4;
+                aint1[EnumEnchantmentType.ARMOR_LEGS.ordinal()] = 4;
             } catch (NoSuchFieldError nosuchfielderror4) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.ARMOR_TORSO.ordinal()] = 5;
+                aint1[EnumEnchantmentType.ARMOR_TORSO.ordinal()] = 5;
             } catch (NoSuchFieldError nosuchfielderror5) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.BOW.ordinal()] = 11;
+                aint1[EnumEnchantmentType.BOW.ordinal()] = 11;
             } catch (NoSuchFieldError nosuchfielderror6) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.BREAKABLE.ordinal()] = 10;
+                aint1[EnumEnchantmentType.BREAKABLE.ordinal()] = 10;
             } catch (NoSuchFieldError nosuchfielderror7) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.DIGGER.ordinal()] = 8;
+                aint1[EnumEnchantmentType.DIGGER.ordinal()] = 8;
             } catch (NoSuchFieldError nosuchfielderror8) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.FISHING_ROD.ordinal()] = 9;
+                aint1[EnumEnchantmentType.FISHING_ROD.ordinal()] = 9;
             } catch (NoSuchFieldError nosuchfielderror9) {
                 ;
             }
 
             try {
-                aint1[EnchantmentSlotType.WEAPON.ordinal()] = 7;
+                aint1[EnumEnchantmentType.WEAPON.ordinal()] = 7;
             } catch (NoSuchFieldError nosuchfielderror10) {
                 ;
             }
