@@ -7,12 +7,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.Container;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.IInventory;
-import net.minecraft.server.v1_8_R3.PacketPlayOutOpenWindow;
-import net.minecraft.server.v1_8_R3.Slot;
 import net.minecraft.util.ChatComponentText;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.HumanEntity;
@@ -82,8 +76,8 @@ public class CraftContainer extends Container {
                 IInventory top = ((CraftInventory) this.view.getTopInventory()).getInventory();
                 IInventory bottom = ((CraftInventory) this.view.getBottomInventory()).getInventory();
 
-                this.b.clear();
-                this.c.clear();
+                this.inventoryItemStacks.clear();
+                this.inventorySlots.clear();
                 if (typeChanged) {
                     this.setupSlots(top, bottom);
                 }
@@ -186,61 +180,61 @@ public class CraftContainer extends Container {
 
         for (row = 0; row < rows; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(top, col + row * 9, 8 + col * 18, 18 + row * 18));
+                this.addSlotToContainer(new Slot(top, col + row * 9, 8 + col * 18, 18 + row * 18));
             }
         }
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + i));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + i));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 161 + i));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 161 + i));
         }
 
     }
 
     private void setupWorkbench(IInventory top, IInventory bottom) {
-        this.a(new Slot(top, 0, 124, 35));
+        this.addSlotToContainer(new Slot(top, 0, 124, 35));
 
         int row;
         int col;
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 3; ++col) {
-                this.a(new Slot(top, 1 + col + row * 3, 30 + col * 18, 17 + row * 18));
+                this.addSlotToContainer(new Slot(top, 1 + col + row * 3, 30 + col * 18, 17 + row * 18));
             }
         }
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 142));
         }
 
     }
 
     private void setupFurnace(IInventory top, IInventory bottom) {
-        this.a(new Slot(top, 0, 56, 17));
-        this.a(new Slot(top, 1, 56, 53));
-        this.a(new Slot(top, 2, 116, 35));
+        this.addSlotToContainer(new Slot(top, 0, 56, 17));
+        this.addSlotToContainer(new Slot(top, 1, 56, 53));
+        this.addSlotToContainer(new Slot(top, 2, 116, 35));
 
         int col;
 
         for (int row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 142));
         }
 
     }
@@ -251,55 +245,55 @@ public class CraftContainer extends Container {
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 3; ++col) {
-                this.a(new Slot(top, col + row * 3, 61 + col * 18, 17 + row * 18));
+                this.addSlotToContainer(new Slot(top, col + row * 3, 61 + col * 18, 17 + row * 18));
             }
         }
 
         for (row = 0; row < 3; ++row) {
             for (col = 0; col < 9; ++col) {
-                this.a(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
             }
         }
 
         for (col = 0; col < 9; ++col) {
-            this.a(new Slot(bottom, col, 8 + col * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, col, 8 + col * 18, 142));
         }
 
     }
 
     private void setupEnchanting(IInventory top, IInventory bottom) {
-        this.a(new Slot(top, 0, 25, 47));
+        this.addSlotToContainer(new Slot(top, 0, 25, 47));
 
         int row;
 
         for (row = 0; row < 3; ++row) {
             for (int i1 = 0; i1 < 9; ++i1) {
-                this.a(new Slot(bottom, i1 + row * 9 + 9, 8 + i1 * 18, 84 + row * 18));
+                this.addSlotToContainer(new Slot(bottom, i1 + row * 9 + 9, 8 + i1 * 18, 84 + row * 18));
             }
         }
 
         for (row = 0; row < 9; ++row) {
-            this.a(new Slot(bottom, row, 8 + row * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, row, 8 + row * 18, 142));
         }
 
     }
 
     private void setupBrewing(IInventory top, IInventory bottom) {
-        this.a(new Slot(top, 0, 56, 46));
-        this.a(new Slot(top, 1, 79, 53));
-        this.a(new Slot(top, 2, 102, 46));
-        this.a(new Slot(top, 3, 79, 17));
+        this.addSlotToContainer(new Slot(top, 0, 56, 46));
+        this.addSlotToContainer(new Slot(top, 1, 79, 53));
+        this.addSlotToContainer(new Slot(top, 2, 102, 46));
+        this.addSlotToContainer(new Slot(top, 3, 79, 17));
 
         int i;
 
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.a(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+                this.addSlotToContainer(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
             }
         }
 
         for (i = 0; i < 9; ++i) {
-            this.a(new Slot(bottom, i, 8 + i * 18, 142));
+            this.addSlotToContainer(new Slot(bottom, i, 8 + i * 18, 142));
         }
 
     }
@@ -309,18 +303,18 @@ public class CraftContainer extends Container {
 
         int i;
 
-        for (i = 0; i < top.getSize(); ++i) {
-            this.a(new Slot(top, i, 44 + i * 18, 20));
+        for (i = 0; i < top.getSizeInventory(); ++i) {
+            this.addSlotToContainer(new Slot(top, i, 44 + i * 18, 20));
         }
 
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
-                this.a(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, i * 18 + b0));
+                this.addSlotToContainer(new Slot(bottom, j + i * 9 + 9, 8 + j * 18, i * 18 + b0));
             }
         }
 
         for (i = 0; i < 9; ++i) {
-            this.a(new Slot(bottom, i, 8 + i * 18, 58 + b0));
+            this.addSlotToContainer(new Slot(bottom, i, 8 + i * 18, 58 + b0));
         }
 
     }

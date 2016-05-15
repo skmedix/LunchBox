@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.server.v1_8_R3.GameProfileSerializer;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.TileEntitySkull;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -32,9 +32,9 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
     CraftMetaSkull(NBTTagCompound tag) {
         super(tag);
-        if (tag.hasKeyOfType(CraftMetaSkull.SKULL_OWNER.NBT, 10)) {
-            this.profile = GameProfileSerializer.deserialize(tag.getCompound(CraftMetaSkull.SKULL_OWNER.NBT));
-        } else if (tag.hasKeyOfType(CraftMetaSkull.SKULL_OWNER.NBT, 8) && !tag.getString(CraftMetaSkull.SKULL_OWNER.NBT).isEmpty()) {
+        if (tag.hasKey(CraftMetaSkull.SKULL_OWNER.NBT, 10)) {
+            this.profile = NBTUtil.readGameProfileFromNBT(tag.getCompoundTag(CraftMetaSkull.SKULL_OWNER.NBT));
+        } else if (tag.hasKey(CraftMetaSkull.SKULL_OWNER.NBT, 8) && !tag.getString(CraftMetaSkull.SKULL_OWNER.NBT).isEmpty()) {
             this.profile = new GameProfile((UUID) null, tag.getString(CraftMetaSkull.SKULL_OWNER.NBT));
         }
 
@@ -49,8 +49,8 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
     }
 
     void deserializeInternal(NBTTagCompound tag) {
-        if (tag.hasKeyOfType(CraftMetaSkull.SKULL_PROFILE.NBT, 10)) {
-            this.profile = GameProfileSerializer.deserialize(tag.getCompound(CraftMetaSkull.SKULL_PROFILE.NBT));
+        if (tag.hasKey(CraftMetaSkull.SKULL_PROFILE.NBT, 10)) {
+            this.profile = NBTUtil.readGameProfileFromNBT(tag.getCompoundTag(CraftMetaSkull.SKULL_PROFILE.NBT));
         }
 
     }
@@ -59,7 +59,7 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
         if (this.profile != null) {
             NBTTagCompound nbtData = new NBTTagCompound();
 
-            GameProfileSerializer.serialize(nbtData, this.profile);
+            NBTUtil.writeGameProfile(nbtData, this.profile);
             internalTags.put(CraftMetaSkull.SKULL_PROFILE.NBT, nbtData);
         }
 
@@ -67,20 +67,10 @@ class CraftMetaSkull extends CraftMetaItem implements SkullMeta {
 
     void applyToItem(final NBTTagCompound tag) {
         super.applyToItem(tag);
-        if (this.hasOwner()) {
+        if (hasOwner()) {
             NBTTagCompound owner = new NBTTagCompound();
-
-            GameProfileSerializer.serialize(owner, this.profile);
-            tag.set(CraftMetaSkull.SKULL_OWNER.NBT, owner);
-            TileEntitySkull.b(this.profile, new Predicate() {
-                public boolean apply(GameProfile input) {
-                    NBTTagCompound owner = new NBTTagCompound();
-
-                    GameProfileSerializer.serialize(owner, input);
-                    tag.set(CraftMetaSkull.SKULL_OWNER.NBT, owner);
-                    return false;
-                }
-            });
+            NBTUtil.writeGameProfile(owner, profile);
+            tag.setTag(SKULL_OWNER.NBT, owner);
         }
 
     }

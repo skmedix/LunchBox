@@ -2,10 +2,12 @@ package org.bukkit.craftbukkit.v1_8_R3.inventory;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.IInventory;
-import net.minecraft.server.v1_8_R3.ItemStack;
+
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.IChatComponent;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftChatMessage;
 import org.bukkit.inventory.Inventory;
@@ -14,10 +16,12 @@ import org.bukkit.inventory.InventoryHolder;
 public class InventoryWrapper implements IInventory {
 
     private final Inventory inventory;
+    private final IInventory iInventory;
     private final List viewers = new ArrayList();
 
     public InventoryWrapper(Inventory inventory) {
         this.inventory = inventory;
+        this.iInventory = (IInventory) inventory;
     }
 
     public int getSize() {
@@ -36,12 +40,12 @@ public class InventoryWrapper implements IInventory {
         } else {
             ItemStack result;
 
-            if (stack.count <= j) {
+            if (stack.stackSize <= j) {
                 this.setItem(i, (ItemStack) null);
                 result = stack;
             } else {
                 result = CraftItemStack.copyNMSStack(stack, j);
-                stack.count -= j;
+                stack.stackSize -= j;
             }
 
             this.update();
@@ -57,12 +61,12 @@ public class InventoryWrapper implements IInventory {
         } else {
             ItemStack result;
 
-            if (stack.count <= 1) {
+            if (stack.stackSize <= 1) {
                 this.setItem(i, (ItemStack) null);
                 result = stack;
             } else {
                 result = CraftItemStack.copyNMSStack(stack, 1);
-                --stack.count;
+                --stack.stackSize;
             }
 
             return result;
@@ -79,13 +83,13 @@ public class InventoryWrapper implements IInventory {
 
     public void update() {}
 
-    public boolean a(EntityHuman entityhuman) {
+    public boolean a(EntityPlayerMP entityhuman) {
         return true;
     }
 
-    public void startOpen(EntityHuman entityhuman) {}
+    public void startOpen(EntityPlayerMP entityhuman) {}
 
-    public void closeContainer(EntityHuman entityhuman) {}
+    public void closeContainer(EntityPlayerMP entityhuman) {}
 
     public boolean b(int i, ItemStack itemstack) {
         return true;
@@ -137,14 +141,94 @@ public class InventoryWrapper implements IInventory {
     }
 
     public String getName() {
-        return this.inventory.getName();
+        return this.iInventory.getName();
     }
 
     public boolean hasCustomName() {
         return this.getName() != null;
     }
 
-    public IChatBaseComponent getScoreboardDisplayName() {
+    @Override
+    public IChatComponent getDisplayName() {
+        return this.iInventory.getDisplayName();
+    }
+
+    public IChatComponent getScoreboardDisplayName() {
         return CraftChatMessage.fromString(this.getName())[0];
+    }
+
+    @Override
+    public int getSizeInventory() {
+        return this.iInventory.getSizeInventory();
+    }
+
+    @Override
+    public ItemStack getStackInSlot(int index) {
+        return this.iInventory.getStackInSlot(index);
+    }
+
+    @Override
+    public ItemStack decrStackSize(int index, int count) {
+        return this.iInventory.decrStackSize(index, count);
+    }
+
+    @Override
+    public ItemStack removeStackFromSlot(int index) {
+        return this.iInventory.removeStackFromSlot(index);
+    }
+
+    @Override
+    public void setInventorySlotContents(int index, ItemStack stack) {
+        this.inventory.setItem(index, CraftItemStack.asBukkitCopy(stack));
+    }
+
+    @Override
+    public int getInventoryStackLimit() {
+        return this.iInventory.getInventoryStackLimit();
+    }
+
+    @Override
+    public void markDirty() {
+        this.iInventory.markDirty();
+    }
+
+    @Override
+    public boolean isUseableByPlayer(EntityPlayer player) {
+        return iInventory.isUseableByPlayer(player);
+    }
+
+    @Override
+    public void openInventory(EntityPlayer player) {
+        this.iInventory.openInventory(player);
+    }
+
+    @Override
+    public void closeInventory(EntityPlayer player) {
+        this.iInventory.closeInventory(player);
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int index, ItemStack stack) {
+        return this.iInventory.isItemValidForSlot(index, stack);
+    }
+
+    @Override
+    public int getField(int id) {
+        return this.iInventory.getField(id);
+    }
+
+    @Override
+    public void setField(int id, int value) {
+        this.iInventory.setField(id, value);
+    }
+
+    @Override
+    public int getFieldCount() {
+        return iInventory.getFieldCount();
+    }
+
+    @Override
+    public void clear() {
+        this.iInventory.clear();
     }
 }

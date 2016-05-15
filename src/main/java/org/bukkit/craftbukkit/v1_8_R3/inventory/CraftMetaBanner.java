@@ -7,8 +7,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagList;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.banner.Pattern;
@@ -39,16 +40,16 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
     CraftMetaBanner(NBTTagCompound tag) {
         super(tag);
         if (tag.hasKey("BlockEntityTag")) {
-            NBTTagCompound entityTag = tag.getCompound("BlockEntityTag");
+            NBTTagCompound entityTag = tag.getCompoundTag("BlockEntityTag");
 
-            this.base = entityTag.hasKey(CraftMetaBanner.BASE.NBT) ? DyeColor.getByDyeData((byte) entityTag.getInt(CraftMetaBanner.BASE.NBT)) : null;
+            this.base = entityTag.hasKey(CraftMetaBanner.BASE.NBT) ? DyeColor.getByDyeData((byte) entityTag.getInteger(CraftMetaBanner.BASE.NBT)) : null;
             if (entityTag.hasKey(CraftMetaBanner.PATTERNS.NBT)) {
-                NBTTagList patterns = entityTag.getList(CraftMetaBanner.PATTERNS.NBT, 10);
+                NBTTagList patterns = entityTag.getTagList(CraftMetaBanner.PATTERNS.NBT, 10);
 
-                for (int i = 0; i < Math.min(patterns.size(), 20); ++i) {
-                    NBTTagCompound p = patterns.get(i);
+                for (int i = 0; i < Math.min(patterns.tagCount(), 20); ++i) {
+                    NBTTagCompound p = (NBTTagCompound) patterns.get(i);
 
-                    this.patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt(CraftMetaBanner.COLOR.NBT)), PatternType.getByIdentifier(p.getString(CraftMetaBanner.PATTERN.NBT))));
+                    this.patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInteger(CraftMetaBanner.COLOR.NBT)), PatternType.getByIdentifier(p.getString(CraftMetaBanner.PATTERN.NBT))));
                 }
             }
 
@@ -86,7 +87,7 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
         NBTTagCompound entityTag = new NBTTagCompound();
 
         if (this.base != null) {
-            entityTag.setInt(CraftMetaBanner.BASE.NBT, this.base.getDyeData());
+            entityTag.setInteger(CraftMetaBanner.BASE.NBT, this.base.getDyeData());
         }
 
         NBTTagList newPatterns = new NBTTagList();
@@ -96,13 +97,13 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
             Pattern p = (Pattern) iterator.next();
             NBTTagCompound compound = new NBTTagCompound();
 
-            compound.setInt(CraftMetaBanner.COLOR.NBT, p.getColor().getDyeData());
+            compound.setInteger(CraftMetaBanner.COLOR.NBT, p.getColor().getDyeData());
             compound.setString(CraftMetaBanner.PATTERN.NBT, p.getPattern().getIdentifier());
-            newPatterns.add(compound);
+            newPatterns.appendTag(compound);
         }
 
-        entityTag.set(CraftMetaBanner.PATTERNS.NBT, newPatterns);
-        tag.set("BlockEntityTag", entityTag);
+        entityTag.setTag(CraftMetaBanner.PATTERNS.NBT, newPatterns);
+        tag.setTag("BlockEntityTag", entityTag);
     }
 
     public DyeColor getBaseColor() {

@@ -3,10 +3,11 @@ package org.bukkit.craftbukkit.v1_8_R3.inventory;
 import com.google.common.collect.ImmutableMap;
 import java.util.Iterator;
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.NBTTagList;
-import net.minecraft.server.v1_8_R3.NBTTagString;
+
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.IChatComponent;
 import org.bukkit.Material;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
 import org.bukkit.inventory.meta.BookMeta;
@@ -29,14 +30,14 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
         }
 
         if (tag.hasKey(CraftMetaBookSigned.BOOK_PAGES.NBT)) {
-            NBTTagList pages = tag.getList(CraftMetaBookSigned.BOOK_PAGES.NBT, 8);
+            NBTTagList pages = tag.getTagList(CraftMetaBookSigned.BOOK_PAGES.NBT, 8);
 
-            for (int i = 0; i < pages.size(); ++i) {
-                String page = pages.getString(i);
+            for (int i = 0; i < pages.tagCount(); ++i) {
+                String page = pages.getStringTagAt(i);
 
                 if (resolved) {
                     try {
-                        this.pages.add(IChatBaseComponent.ChatSerializer.a(page));
+                        this.pages.add(IChatComponent.Serializer.jsonToComponent(page));
                         continue;
                     } catch (Exception exception) {
                         ;
@@ -72,19 +73,19 @@ class CraftMetaBookSigned extends CraftMetaBook implements BookMeta {
             Iterator iterator = this.pages.iterator();
 
             while (iterator.hasNext()) {
-                IChatBaseComponent page = (IChatBaseComponent) iterator.next();
+                IChatComponent page = (IChatComponent) iterator.next();
 
-                list.add(new NBTTagString(IChatBaseComponent.ChatSerializer.a(page)));
+                list.appendTag(new NBTTagString(IChatComponent.Serializer.componentToJson(page)));
             }
 
-            itemData.set(CraftMetaBookSigned.BOOK_PAGES.NBT, list);
+            itemData.setTag(CraftMetaBookSigned.BOOK_PAGES.NBT, list);
         }
 
         itemData.setBoolean(CraftMetaBookSigned.RESOLVED.NBT, true);
         if (this.generation != null) {
-            itemData.setInt(CraftMetaBookSigned.GENERATION.NBT, this.generation.intValue());
+            itemData.setInteger(CraftMetaBookSigned.GENERATION.NBT, this.generation.intValue());
         } else {
-            itemData.setInt(CraftMetaBookSigned.GENERATION.NBT, 0);
+            itemData.setInteger(CraftMetaBookSigned.GENERATION.NBT, 0);
         }
 
     }
