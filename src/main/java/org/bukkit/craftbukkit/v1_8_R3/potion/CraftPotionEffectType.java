@@ -1,22 +1,22 @@
 package org.bukkit.craftbukkit.v1_8_R3.potion;
 
-import net.minecraft.server.v1_8_R3.MobEffectList;
+import net.minecraft.potion.Potion;
 import org.bukkit.potion.PotionEffectType;
 
 public class CraftPotionEffectType extends PotionEffectType {
 
-    private final MobEffectList handle;
+    private final Potion handle;
 
-    public CraftPotionEffectType(MobEffectList handle) {
+    public CraftPotionEffectType(Potion handle) {
         super(handle.id);
         this.handle = handle;
     }
 
     public double getDurationModifier() {
-        return this.handle.getDurationModifier();
+        return this.handle.getEffectiveness();
     }
 
-    public MobEffectList getHandle() {
+    public Potion getHandle() {
         return this.handle;
     }
 

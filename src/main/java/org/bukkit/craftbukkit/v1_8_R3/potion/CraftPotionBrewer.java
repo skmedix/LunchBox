@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.MobEffect;
+
+import net.minecraft.potion.PotionHelper;
 import org.bukkit.potion.PotionBrewer;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -19,7 +20,7 @@ public class CraftPotionBrewer implements PotionBrewer {
         if (CraftPotionBrewer.cache.containsKey(Integer.valueOf(damage))) {
             return (Collection) CraftPotionBrewer.cache.get(Integer.valueOf(damage));
         } else {
-            List mcEffects = net.minecraft.server.v1_8_R3.PotionBrewer.getEffects(damage, false);
+            List mcEffects = PotionHelper.getPotionEffects(damage, false);
             ArrayList effects = new ArrayList();
 
             if (mcEffects == null) {
@@ -30,9 +31,9 @@ public class CraftPotionBrewer implements PotionBrewer {
                 while (iterator.hasNext()) {
                     Object raw = iterator.next();
 
-                    if (raw != null && raw instanceof MobEffect) {
-                        MobEffect mcEffect = (MobEffect) raw;
-                        PotionEffect effect = new PotionEffect(PotionEffectType.getById(mcEffect.getEffectId()), mcEffect.getDuration(), mcEffect.getAmplifier());
+                    if (raw != null && raw instanceof net.minecraft.potion.PotionEffect) {
+                        net.minecraft.potion.PotionEffect mcEffect = (net.minecraft.potion.PotionEffect) raw;
+                        PotionEffect effect = new PotionEffect(PotionEffectType.getById(mcEffect.getPotionID()), mcEffect.getDuration(), mcEffect.getAmplifier());
 
                         effects.add(effect);
                     }
