@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.minecraft.server.v1_8_R3.WorldMap;
 import net.minecraft.world.storage.MapData;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -29,7 +28,7 @@ public final class CraftMapView implements MapView {
     }
 
     public short getId() {
-        String text = this.worldMap.id;
+        String text = this.worldMap.mapName;
 
         if (text.startsWith("map_")) {
             try {
@@ -55,13 +54,13 @@ public final class CraftMapView implements MapView {
     }
 
     public World getWorld() {
-        byte dimension = this.worldMap.map;
+        byte dimension = (byte) this.worldMap.dimension;
         Iterator iterator = Bukkit.getServer().getWorlds().iterator();
 
         while (iterator.hasNext()) {
             World world = (World) iterator.next();
 
-            if (((CraftWorld) world).getHandle().dimension == dimension) {
+            if (((CraftWorld) world).getHandle().provider.getDimensionId() == dimension) {
                 return world;
             }
         }
@@ -70,23 +69,23 @@ public final class CraftMapView implements MapView {
     }
 
     public void setWorld(World world) {
-        this.worldMap.map = (byte) ((CraftWorld) world).getHandle().dimension;
+        worldMap.dimension = (byte) ((CraftWorld) world).getHandle().provider.getDimensionId();
     }
 
     public int getCenterX() {
-        return this.worldMap.centerX;
+        return this.worldMap.xCenter;
     }
 
     public int getCenterZ() {
-        return this.worldMap.centerZ;
+        return this.worldMap.zCenter;
     }
 
     public void setCenterX(int x) {
-        this.worldMap.centerX = x;
+        this.worldMap.xCenter = x;
     }
 
     public void setCenterZ(int z) {
-        this.worldMap.centerZ = z;
+        this.worldMap.zCenter = z;
     }
 
     public List getRenderers() {

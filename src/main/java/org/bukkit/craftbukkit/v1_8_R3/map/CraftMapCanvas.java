@@ -36,7 +36,7 @@ public class CraftMapCanvas implements MapCanvas {
         if (x >= 0 && y >= 0 && x < 128 && y < 128) {
             if (this.buffer[y * 128 + x] != color) {
                 this.buffer[y * 128 + x] = color;
-                this.mapView.worldMap.(x, y);
+                this.mapView.worldMap.updateMapData(x, y);
             }
 
         }

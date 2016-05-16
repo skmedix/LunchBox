@@ -2,16 +2,14 @@ package org.bukkit.craftbukkit.v1_8_R3.map;
 
 import java.util.Iterator;
 import java.util.UUID;
-import net.minecraft.server.v1_8_R3.MapIcon;
-import net.minecraft.server.v1_8_R3.WorldMap;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.storage.MapData;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapCursorCollection;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
-//todo: maybe remove all the map stuff and leave it to forge?
 public class CraftMapRenderer extends MapRenderer {
 
     private final MapData worldMap;
@@ -38,12 +36,13 @@ public class CraftMapRenderer extends MapRenderer {
 
         while (iterator.hasNext()) {
             UUID uuid = (UUID) iterator.next();
-            Player other = Bukkit.getPlayer(uuid);
+            //Player other = Bukkit.getPlayer(uuid);
+            EntityPlayer other = (EntityPlayer) MinecraftServer.getServer().getEntityFromUuid(uuid);
 
-            if (other == null || player.canSee(other)) {
-                MapData.MapInfo decoration = (MapData.MapInfo) this.worldMap.mapDecorations.get(uuid);
+            if (other == null || player.canSee((Player) other)) {
+                MapData.MapInfo decoration = this.worldMap.getMapInfo(other);
 
-                mapcursorcollection.addCursor(decoration.getX(), decoration.getY(), (byte) (decoration.getRotation() & 15), decoration.getType());
+                mapcursorcollection.addCursor((int) decoration.entityplayerObj.posX, (int) decoration.entityplayerObj.posZ, (byte) ((int) decoration.entityplayerObj.rotationYaw & 15));
             }
         }
 
