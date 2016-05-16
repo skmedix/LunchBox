@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.server.v1_8_R3.WorldMap;
+import net.minecraft.world.storage.MapData;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -20,9 +21,9 @@ public final class CraftMapView implements MapView {
     private final Map renderCache = new HashMap();
     private final List renderers = new ArrayList();
     private final Map canvases = new HashMap();
-    protected final WorldMap worldMap;
+    protected final MapData worldMap;
 
-    public CraftMapView(WorldMap worldMap) {
+    public CraftMapView(MapData worldMap) {
         this.worldMap = worldMap;
         this.addRenderer(new CraftMapRenderer(this, worldMap));
     }

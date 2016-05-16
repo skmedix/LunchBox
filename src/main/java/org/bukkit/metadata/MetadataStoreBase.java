@@ -8,14 +8,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.plugin.Plugin;
 
-public abstract class MetadataStoreBase {
+public abstract class MetadataStoreBase<T> {
 
     private Map metadataMap = new HashMap();
 
-    public synchronized void setMetadata(Object subject, String metadataKey, MetadataValue newMetadataValue) {
+    public synchronized void setMetadata(T subject, String metadataKey, MetadataValue newMetadataValue) {
         Validate.notNull(newMetadataValue, "Value cannot be null");
         Plugin owningPlugin = newMetadataValue.getOwningPlugin();
 
@@ -31,7 +31,7 @@ public abstract class MetadataStoreBase {
         ((Map) entry).put(owningPlugin, newMetadataValue);
     }
 
-    public synchronized List getMetadata(Object subject, String metadataKey) {
+    public synchronized List getMetadata(T subject, String metadataKey) {
         String key = this.disambiguate(subject, metadataKey);
 
         if (this.metadataMap.containsKey(key)) {
@@ -43,13 +43,13 @@ public abstract class MetadataStoreBase {
         }
     }
 
-    public synchronized boolean hasMetadata(Object subject, String metadataKey) {
+    public synchronized boolean hasMetadata(T subject, String metadataKey) {
         String key = this.disambiguate(subject, metadataKey);
 
         return this.metadataMap.containsKey(key);
     }
 
-    public synchronized void removeMetadata(Object subject, String metadataKey, Plugin owningPlugin) {
+    public synchronized void removeMetadata(T subject, String metadataKey, Plugin owningPlugin) {
         Validate.notNull(owningPlugin, "Plugin cannot be null");
         String key = this.disambiguate(subject, metadataKey);
         Map entry = (Map) this.metadataMap.get(key);
@@ -77,5 +77,5 @@ public abstract class MetadataStoreBase {
 
     }
 
-    protected abstract String disambiguate(Object object, String s);
+    protected abstract String disambiguate(T object, String s);
 }

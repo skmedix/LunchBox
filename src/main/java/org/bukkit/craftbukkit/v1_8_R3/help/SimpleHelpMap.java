@@ -29,6 +29,8 @@ import org.bukkit.help.HelpTopicComparator;
 import org.bukkit.help.HelpTopicFactory;
 import org.bukkit.help.IndexHelpTopic;
 
+import javax.annotation.Nullable;
+
 public class SimpleHelpMap implements HelpMap {
 
     private HelpTopic defaultTopic;
@@ -237,5 +239,7 @@ public class SimpleHelpMap implements HelpMap {
         IsCommandTopicPredicate(SimpleHelpMap.IsCommandTopicPredicate simplehelpmap_iscommandtopicpredicate) {
             this();
         }
+
+        public boolean apply(@Nullable Object input) { return false; }
     }
 }

@@ -9,7 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.kookykraftmc.lunchbox.LunchBox;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryCrafting;
@@ -48,6 +51,11 @@ import net.minecraft.server.v1_8_R3.Slot;
 import net.minecraft.server.v1_8_R3.Statistic;
 import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
 import org.bukkit.Material;
@@ -143,8 +151,8 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class CraftEventFactory {
 
-    public static final DamageSource MELTING = CraftDamageSource.copyOf(DamageSource.BURN);
-    public static final DamageSource POISON = CraftDamageSource.copyOf(DamageSource.MAGIC);
+    public static final DamageSource MELTING = CraftDamageSource.copyOf(DamageSource.inFire);
+    public static final DamageSource POISON = CraftDamageSource.copyOf(DamageSource.magic);
     public static Block blockDamage;
     public static Entity entityDamage;
     private static final Function ZERO = Functions.constant(Double.valueOf(-0.0D));
@@ -157,16 +165,16 @@ public class CraftEventFactory {
         WorldServer worldServer = world.getHandle();
         int spawnSize = Bukkit.getServer().getSpawnRadius();
 
-        if (world.getHandle().dimension != 0) {
+        if (world.getHandle().provider.getDimensionId() != 0) {
             return true;
         } else if (spawnSize <= 0) {
             return true;
-        } else if (((CraftServer) Bukkit.getServer()).getHandle().getOPs().isEmpty()) {
+        } else if (((CraftServer) Bukkit.getServer()).getHandle().getOppedPlayerNames().length == 0) {
             return true;
         } else if (player.isOp()) {
             return true;
         } else {
-            BlockPosition chunkcoordinates = worldServer.getSpawn();
+            BlockPos chunkcoordinates = worldServer.getSpawnPoint();
             int distanceFromSpawn = Math.max(Math.abs(x - chunkcoordinates.getX()), Math.abs(z - chunkcoordinates.getY()));
 
             return distanceFromSpawn > spawnSize;
@@ -177,8 +185,8 @@ public class CraftEventFactory {
         Bukkit.getServer().getPluginManager().callEvent(event);
         return event;
     }
-
-    public static BlockMultiPlaceEvent callBlockMultiPlaceEvent(World world, EntityHuman who, List blockStates, int clickedX, int clickedY, int clickedZ) {
+    //todo: come back to this event
+    public static BlockMultiPlaceEvent callBlockMultiPlaceEvent(World world, EntityPlayerMP who, List blockStates, int clickedX, int clickedY, int clickedZ) {
         CraftWorld craftWorld = world.getWorld();
         CraftServer craftServer = world.getServer();
         Player player = who == null ? null : (Player) who.getBukkitEntity();
@@ -198,10 +206,10 @@ public class CraftEventFactory {
         return blockmultiplaceevent;
     }
 
-    public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityHuman who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ) {
+    public static BlockPlaceEvent callBlockPlaceEvent(World world, EntityPlayerMP who, BlockState replacedBlockState, int clickedX, int clickedY, int clickedZ) {
         CraftWorld craftWorld = world.getWorld();
         CraftServer craftServer = world.getServer();
-        Player player = who == null ? null : (Player) who.getBukkitEntity();
+        Player player = who == null ? null : (Player) CraftEntity.getEntity(LunchBox.getServer(), who);
         Block blockClicked = craftWorld.getBlockAt(clickedX, clickedY, clickedZ);
         Block placedBlock = replacedBlockState.getBlock();
         boolean canBuild = canBuild(craftWorld, player, placedBlock.getX(), placedBlock.getZ());

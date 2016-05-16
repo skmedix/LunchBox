@@ -13,6 +13,12 @@ import net.minecraft.server.v1_8_R3.IProgressUpdate;
 import net.minecraft.server.v1_8_R3.World;
 import net.minecraft.server.v1_8_R3.WorldGenStronghold;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeCache;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.structure.MapGenStronghold;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.v1_8_R3.block.CraftBlock;
 import org.bukkit.generator.ChunkGenerator;
@@ -22,7 +28,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
     private final ChunkGenerator generator;
     private final WorldServer world;
     private final Random random;
-    private final WorldGenStronghold strongholdGen = new WorldGenStronghold();
+    private final MapGenStronghold strongholdGen = new MapGenStronghold();
 
     public CustomChunkGenerator(World world, long seed, ChunkGenerator generator) {
         this.world = (WorldServer) world;
@@ -38,8 +44,8 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
         this.random.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
         CustomChunkGenerator.CustomBiomeGrid biomegrid = new CustomChunkGenerator.CustomBiomeGrid((CustomChunkGenerator.CustomBiomeGrid) null);
 
-        biomegrid.biome = new BiomeBase[256];
-        this.world.getWorldChunkManager().getBiomeBlock(biomegrid.biome, x << 4, z << 4, 16, 16);
+        biomegrid.biome = new BiomeGenBase[256];
+        this.world.getWorldChunkManager().loadBlockGeneratorData(biomegrid.biome, x << 4, z << 4, 16, 16);
         CraftChunkData data = (CraftChunkData) this.generator.generateChunkData(this.world.getWorld(), this.random, x, z, biomegrid);
         Chunk chunk;
         ChunkSection[] i;
@@ -244,7 +250,7 @@ public class CustomChunkGenerator extends InternalChunkGenerator {
 
     private static class CustomBiomeGrid implements ChunkGenerator.BiomeGrid {
 
-        BiomeBase[] biome;
+        BiomeGenBase[] biome;
 
         private CustomBiomeGrid() {}
 

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.BiomeBase;
+
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.server.v1_8_R3.BiomeGenBase;
 import net.minecraft.server.v1_8_R3.BlockCocoa;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.BlockRedstoneWire;
@@ -12,10 +14,12 @@ import net.minecraft.server.v1_8_R3.Blocks;
 import net.minecraft.server.v1_8_R3.EnumDirection;
 import net.minecraft.server.v1_8_R3.EnumSkyBlock;
 import net.minecraft.server.v1_8_R3.GameProfileSerializer;
-import net.minecraft.server.v1_8_R3.IBlockData;
+import net.minecraft.server.v1_8_R3.IBlockState;
 import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.TileEntitySkull;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.biome.BiomeCache;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -40,82 +44,82 @@ public class CraftBlock implements Block {
     private final int x;
     private final int y;
     private final int z;
-    private static final Biome[] BIOME_MAPPING = new Biome[BiomeBase.getBiomes().length];
-    private static final BiomeBase[] BIOMEBASE_MAPPING = new BiomeBase[Biome.values().length];
+    private static final Biome[] BIOME_MAPPING = new Biome[BiomeGenBase.getBiomeGenArray().length];
+    private static final BiomeGenBase[] BiomeGenBase_MAPPING = new BiomeGenBase[Biome.values().length];
     private static int[] $SWITCH_TABLE$net$minecraft$server$EnumDirection;
     private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
     private static int[] $SWITCH_TABLE$org$bukkit$Material;
 
     static {
-        CraftBlock.BIOME_MAPPING[BiomeBase.OCEAN.id] = Biome.OCEAN;
-        CraftBlock.BIOME_MAPPING[BiomeBase.PLAINS.id] = Biome.PLAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.DESERT.id] = Biome.DESERT;
-        CraftBlock.BIOME_MAPPING[BiomeBase.EXTREME_HILLS.id] = Biome.EXTREME_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.FOREST.id] = Biome.FOREST;
-        CraftBlock.BIOME_MAPPING[BiomeBase.TAIGA.id] = Biome.TAIGA;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SWAMPLAND.id] = Biome.SWAMPLAND;
-        CraftBlock.BIOME_MAPPING[BiomeBase.RIVER.id] = Biome.RIVER;
-        CraftBlock.BIOME_MAPPING[BiomeBase.HELL.id] = Biome.HELL;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SKY.id] = Biome.SKY;
-        CraftBlock.BIOME_MAPPING[BiomeBase.FROZEN_OCEAN.id] = Biome.FROZEN_OCEAN;
-        CraftBlock.BIOME_MAPPING[BiomeBase.FROZEN_RIVER.id] = Biome.FROZEN_RIVER;
-        CraftBlock.BIOME_MAPPING[BiomeBase.ICE_PLAINS.id] = Biome.ICE_PLAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.ICE_MOUNTAINS.id] = Biome.ICE_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MUSHROOM_ISLAND.id] = Biome.MUSHROOM_ISLAND;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MUSHROOM_SHORE.id] = Biome.MUSHROOM_SHORE;
-        CraftBlock.BIOME_MAPPING[BiomeBase.BEACH.id] = Biome.BEACH;
-        CraftBlock.BIOME_MAPPING[BiomeBase.DESERT_HILLS.id] = Biome.DESERT_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.FOREST_HILLS.id] = Biome.FOREST_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.TAIGA_HILLS.id] = Biome.TAIGA_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SMALL_MOUNTAINS.id] = Biome.SMALL_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.JUNGLE.id] = Biome.JUNGLE;
-        CraftBlock.BIOME_MAPPING[BiomeBase.JUNGLE_HILLS.id] = Biome.JUNGLE_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.JUNGLE_EDGE.id] = Biome.JUNGLE_EDGE;
-        CraftBlock.BIOME_MAPPING[BiomeBase.DEEP_OCEAN.id] = Biome.DEEP_OCEAN;
-        CraftBlock.BIOME_MAPPING[BiomeBase.STONE_BEACH.id] = Biome.STONE_BEACH;
-        CraftBlock.BIOME_MAPPING[BiomeBase.COLD_BEACH.id] = Biome.COLD_BEACH;
-        CraftBlock.BIOME_MAPPING[BiomeBase.BIRCH_FOREST.id] = Biome.BIRCH_FOREST;
-        CraftBlock.BIOME_MAPPING[BiomeBase.BIRCH_FOREST_HILLS.id] = Biome.BIRCH_FOREST_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.ROOFED_FOREST.id] = Biome.ROOFED_FOREST;
-        CraftBlock.BIOME_MAPPING[BiomeBase.COLD_TAIGA.id] = Biome.COLD_TAIGA;
-        CraftBlock.BIOME_MAPPING[BiomeBase.COLD_TAIGA_HILLS.id] = Biome.COLD_TAIGA_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MEGA_TAIGA.id] = Biome.MEGA_TAIGA;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MEGA_TAIGA_HILLS.id] = Biome.MEGA_TAIGA_HILLS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.EXTREME_HILLS_PLUS.id] = Biome.EXTREME_HILLS_PLUS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SAVANNA.id] = Biome.SAVANNA;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SAVANNA_PLATEAU.id] = Biome.SAVANNA_PLATEAU;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MESA.id] = Biome.MESA;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MESA_PLATEAU_F.id] = Biome.MESA_PLATEAU_FOREST;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MESA_PLATEAU.id] = Biome.MESA_PLATEAU;
-        CraftBlock.BIOME_MAPPING[BiomeBase.PLAINS.id + 128] = Biome.SUNFLOWER_PLAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.DESERT.id + 128] = Biome.DESERT_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.FOREST.id + 128] = Biome.FLOWER_FOREST;
-        CraftBlock.BIOME_MAPPING[BiomeBase.TAIGA.id + 128] = Biome.TAIGA_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SWAMPLAND.id + 128] = Biome.SWAMPLAND_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.ICE_PLAINS.id + 128] = Biome.ICE_PLAINS_SPIKES;
-        CraftBlock.BIOME_MAPPING[BiomeBase.JUNGLE.id + 128] = Biome.JUNGLE_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.JUNGLE_EDGE.id + 128] = Biome.JUNGLE_EDGE_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.COLD_TAIGA.id + 128] = Biome.COLD_TAIGA_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SAVANNA.id + 128] = Biome.SAVANNA_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.SAVANNA_PLATEAU.id + 128] = Biome.SAVANNA_PLATEAU_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MESA.id + 128] = Biome.MESA_BRYCE;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MESA_PLATEAU_F.id + 128] = Biome.MESA_PLATEAU_FOREST_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MESA_PLATEAU.id + 128] = Biome.MESA_PLATEAU_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.BIRCH_FOREST.id + 128] = Biome.BIRCH_FOREST_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.BIRCH_FOREST_HILLS.id + 128] = Biome.BIRCH_FOREST_HILLS_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.ROOFED_FOREST.id + 128] = Biome.ROOFED_FOREST_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MEGA_TAIGA.id + 128] = Biome.MEGA_SPRUCE_TAIGA;
-        CraftBlock.BIOME_MAPPING[BiomeBase.EXTREME_HILLS.id + 128] = Biome.EXTREME_HILLS_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.EXTREME_HILLS_PLUS.id + 128] = Biome.EXTREME_HILLS_PLUS_MOUNTAINS;
-        CraftBlock.BIOME_MAPPING[BiomeBase.MEGA_TAIGA_HILLS.id + 128] = Biome.MEGA_SPRUCE_TAIGA_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.ocean.biomeID] = Biome.OCEAN;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.plains.biomeID] = Biome.PLAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.desert.biomeID] = Biome.DESERT;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.extremeHills.biomeID] = Biome.EXTREME_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.forest.biomeID] = Biome.FOREST;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.taiga.biomeID] = Biome.TAIGA;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.swampland.biomeID] = Biome.SWAMPLAND;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.river.biomeID] = Biome.RIVER;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.hell.biomeID] = Biome.HELL;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.sky.biomeID] = Biome.SKY;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.frozenOcean.biomeID] = Biome.FROZEN_OCEAN;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.frozenRiver.biomeID] = Biome.FROZEN_RIVER;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.icePlains.biomeID] = Biome.ICE_PLAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.iceMountains.biomeID] = Biome.ICE_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mushroomIsland.biomeID] = Biome.MUSHROOM_ISLAND;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mushroomIslandShore.biomeID] = Biome.MUSHROOM_SHORE;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.beach.biomeID] = Biome.BEACH;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.desertHills.biomeID] = Biome.DESERT_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.forestHills.biomeID] = Biome.FOREST_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.taigaHills.biomeID] = Biome.TAIGA_HILLS;
+        //CraftBlock.BIOME_MAPPING[BiomeGenBase.SMALL_MOUNTAINS.biomeID] = Biome.SMALL_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.jungle.biomeID] = Biome.JUNGLE;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.jungleHills.biomeID] = Biome.JUNGLE_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.jungleEdge.biomeID] = Biome.JUNGLE_EDGE;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.deepOcean.biomeID] = Biome.DEEP_OCEAN;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.stoneBeach.biomeID] = Biome.STONE_BEACH;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.coldBeach.biomeID] = Biome.COLD_BEACH;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.birchForest.biomeID] = Biome.BIRCH_FOREST;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.birchForestHills.biomeID] = Biome.BIRCH_FOREST_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.roofedForest.biomeID] = Biome.ROOFED_FOREST;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.coldTaiga.biomeID] = Biome.COLD_TAIGA;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.coldTaigaHills.biomeID] = Biome.COLD_TAIGA_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.megaTaiga.biomeID] = Biome.MEGA_TAIGA;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.megaTaigaHills.biomeID] = Biome.MEGA_TAIGA_HILLS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.extremeHillsPlus.biomeID] = Biome.EXTREME_HILLS_PLUS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.savanna.biomeID] = Biome.SAVANNA;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.savannaPlateau.biomeID] = Biome.SAVANNA_PLATEAU;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mesa.biomeID] = Biome.MESA;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mesaPlateau_F.biomeID] = Biome.MESA_PLATEAU_FOREST;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mesaPlateau.biomeID] = Biome.MESA_PLATEAU;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.plains.biomeID + 128] = Biome.SUNFLOWER_PLAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.desertHills.biomeID + 128] = Biome.DESERT_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.forest.biomeID + 128] = Biome.FLOWER_FOREST;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.taiga.biomeID + 128] = Biome.TAIGA_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.swampland.biomeID + 128] = Biome.SWAMPLAND_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.icePlains.biomeID + 128] = Biome.ICE_PLAINS_SPIKES;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.jungle.biomeID + 128] = Biome.JUNGLE_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.jungleEdge.biomeID + 128] = Biome.JUNGLE_EDGE_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.coldTaiga.biomeID + 128] = Biome.COLD_TAIGA_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.savanna.biomeID + 128] = Biome.SAVANNA_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.savannaPlateau.biomeID + 128] = Biome.SAVANNA_PLATEAU_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mesa.biomeID + 128] = Biome.MESA_BRYCE;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mesaPlateau_F.biomeID + 128] = Biome.MESA_PLATEAU_FOREST_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.mesaPlateau.biomeID + 128] = Biome.MESA_PLATEAU_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.birchForest.biomeID + 128] = Biome.BIRCH_FOREST_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.birchForestHills.biomeID + 128] = Biome.BIRCH_FOREST_HILLS_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.roofedForest.biomeID + 128] = Biome.ROOFED_FOREST_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.megaTaiga.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.extremeHills.biomeID + 128] = Biome.EXTREME_HILLS_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.extremeHillsPlus.biomeID + 128] = Biome.EXTREME_HILLS_PLUS_MOUNTAINS;
+        CraftBlock.BIOME_MAPPING[BiomeGenBase.megaTaiga.biomeID + 128] = Biome.MEGA_SPRUCE_TAIGA_HILLS;
 
         for (int i = 0; i < CraftBlock.BIOME_MAPPING.length; ++i) {
-            if (BiomeBase.getBiome(i) != null && CraftBlock.BIOME_MAPPING[i] == null) {
-                throw new IllegalArgumentException("Missing Biome mapping for BiomeBase[" + i + ", " + BiomeBase.getBiome(i) + "]");
+            if (BiomeGenBase.getBiome(i) != null && CraftBlock.BIOME_MAPPING[i] == null) {
+                throw new IllegalArgumentException("Missing Biome mapping for BiomeGenBase[" + i + ", " + BiomeGenBase.getBiome(i) + "]");
             }
 
             if (CraftBlock.BIOME_MAPPING[i] != null) {
-                CraftBlock.BIOMEBASE_MAPPING[CraftBlock.BIOME_MAPPING[i].ordinal()] = BiomeBase.getBiome(i);
+                CraftBlock.BiomeGenBase_MAPPING[CraftBlock.BIOME_MAPPING[i].ordinal()] = BiomeGenBase.getBiome(i);
             }
         }
 
@@ -128,11 +132,11 @@ public class CraftBlock implements Block {
         this.chunk = chunk;
     }
 
-    private net.minecraft.server.v1_8_R3.Block getNMSBlock() {
-        return CraftMagicNumbers.getBlock((Block) this);
+    private net.minecraft.block.Block getNMSBlock() {
+        return CraftMagicNumbers.getBlock(this);
     }
 
-    private static net.minecraft.server.v1_8_R3.Block getNMSBlock(int type) {
+    private static net.minecraft.block.Block getNMSBlock(int type) {
         return CraftMagicNumbers.getBlock(type);
     }
 
@@ -191,17 +195,15 @@ public class CraftBlock implements Block {
     }
 
     private void setData(byte data, int flag) {
-        net.minecraft.server.v1_8_R3.World world = this.chunk.getHandle().getWorld();
-        BlockPosition position = new BlockPosition(this.x, this.y, this.z);
-        IBlockData blockData = world.getType(position);
+        net.minecraft.world.World world = this.chunk.getHandle().getWorld();
+        BlockPos position = new BlockPos(this.x, this.y, this.z);
+        IBlockState blockData = world.getBlockState(position);
 
-        world.setTypeAndData(position, blockData.getBlock().fromLegacyData(data), flag);
+        world.setBlockState(position, (IBlockState) blockData.getBlock(), flag);
     }
 
     public byte getData() {
-        IBlockData blockData = this.chunk.getHandle().getBlockData(new BlockPosition(this.x, this.y, this.z));
-
-        return (byte) blockData.getBlock().toLegacyData(blockData);
+        return (byte) chunk.getHandle().getBlock(this.x & 0xF, this.y & 0xFF, this.z & 0xF).getMetaFromState((IBlockState) this.getState());
     }
 
     public void setType(Material type) {
@@ -209,30 +211,30 @@ public class CraftBlock implements Block {
     }
 
     public void setType(Material type, boolean applyPhysics) {
-        this.setTypeId(type.getId(), applyPhysics);
+        this.setTypebiomeID(type.(), applyPhysics);
     }
 
-    public boolean setTypeId(int type) {
-        return this.setTypeId(type, true);
+    public boolean setTypebiomeID(int type) {
+        return this.setTypebiomeID(type, true);
     }
 
-    public boolean setTypeId(int type, boolean applyPhysics) {
-        net.minecraft.server.v1_8_R3.Block block = getNMSBlock(type);
+    public boolean setTypebiomeID(int type, boolean applyPhysics) {
+        net.minecraft.block.Block block = getNMSBlock(type);
 
-        return this.setTypeIdAndData(type, (byte) block.toLegacyData(block.getBlockData()), applyPhysics);
+        return this.setTypebiomeIDAndData(type, (byte) block.getMetaFromState((IBlockState) block), applyPhysics);
     }
 
-    public boolean setTypeIdAndData(int type, byte data, boolean applyPhysics) {
-        IBlockData blockData = getNMSBlock(type).fromLegacyData(data);
-        BlockPosition position = new BlockPosition(this.x, this.y, this.z);
+    public boolean setTypebiomeIDAndData(int type, byte data, boolean applyPhysics) {
+        IBlockState blockData = getNMSBlock(type).getStateFromMeta(type);
+        BlockPos position = new BlockPos(this.x, this.y, this.z);
 
         if (applyPhysics) {
-            return this.chunk.getHandle().getWorld().setTypeAndData(position, blockData, 3);
+            return this.chunk.getHandle().getWorld().setBlockState(position, blockData, 3);
         } else {
-            boolean success = this.chunk.getHandle().getWorld().setTypeAndData(position, blockData, 2);
+            boolean success = this.chunk.getHandle().getWorld().setBlockState(position, blockData, 2);
 
             if (success) {
-                this.chunk.getHandle().getWorld().notify(position);
+                this.chunk.getHandle().getWorld().notifyLightSet(position);
             }
 
             return success;
@@ -240,13 +242,13 @@ public class CraftBlock implements Block {
     }
 
     public Material getType() {
-        return Material.getMaterial(this.getTypeId());
+        return Material.getMaterial(this.getTypebiomeID());
     }
 
     /** @deprecated */
     @Deprecated
-    public int getTypeId() {
-        return CraftMagicNumbers.getId(this.chunk.getHandle().getType(new BlockPosition(this.x, this.y, this.z)));
+    public int getTypebiomeID() {
+        return CraftMagicNumbers.getbiomeID(this.chunk.getHandle().getType(new BlockPosition(this.x, this.y, this.z)));
     }
 
     public byte getLightLevel() {
@@ -416,24 +418,24 @@ public class CraftBlock implements Block {
         return this.getWorld().getBiome(this.x, this.z);
     }
 
-    public void setBiome(Biome bio) {
+    public vobiomeID setBiome(Biome bio) {
         this.getWorld().setBiome(this.x, this.z, bio);
     }
 
-    public static Biome biomeBaseToBiome(BiomeGenBase base) {
-        return base == null ? null : CraftBlock.BIOME_MAPPING[base.biomeID];
+    public static Biome BiomeGenBaseToBiome(BiomeGenBase base) {
+        return base == null ? null : CraftBlock.BIOME_MAPPING[base.biomebiomeID];
     }
 
-    public static BiomeBase biomeToBiomeBase(Biome bio) {
-        return bio == null ? null : CraftBlock.BIOMEBASE_MAPPING[bio.ordinal()];
+    public static BiomeGenBase biomeToBiomeGenBase(Biome bio) {
+        return bio == null ? null : CraftBlock.BiomeGenBase_MAPPING[bio.ordinal()];
     }
 
     public double getTemperature() {
         return this.getWorld().getTemperature(this.x, this.z);
     }
 
-    public double getHumidity() {
-        return this.getWorld().getHumidity(this.x, this.z);
+    public double getHumbiomeIDity() {
+        return this.getWorld().getHumbiomeIDity(this.x, this.z);
     }
 
     public boolean isBlockPowered() {
@@ -532,17 +534,17 @@ public class CraftBlock implements Block {
         return this.getType() == Material.AIR;
     }
 
-    public boolean isLiquid() {
+    public boolean isLiqubiomeID() {
         return this.getType() == Material.WATER || this.getType() == Material.STATIONARY_WATER || this.getType() == Material.LAVA || this.getType() == Material.STATIONARY_LAVA;
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(this.getNMSBlock().getMaterial().getPushReaction());
+        return PistonMoveReaction.getBybiomeID(this.getNMSBlock().getMaterial().getPushReaction());
     }
 
     private boolean itemCausesDrops(ItemStack item) {
         net.minecraft.server.v1_8_R3.Block block = this.getNMSBlock();
-        Item itemType = item != null ? Item.getById(item.getTypeId()) : null;
+        Item itemType = item != null ? Item.getBybiomeID(item.getTypebiomeID()) : null;
 
         return block != null && (block.getMaterial().isAlwaysDestroyable() || itemType != null && itemType.canDestroySpecialBlock(block));
     }
@@ -557,12 +559,12 @@ public class CraftBlock implements Block {
             result = true;
         }
 
-        this.setTypeId(Material.AIR.getId());
+        this.setTypebiomeID(Material.AIR.getbiomeID());
         return result;
     }
 
     public boolean breakNaturally(ItemStack item) {
-        return this.itemCausesDrops(item) ? this.breakNaturally() : this.setTypeId(Material.AIR.getId());
+        return this.itemCausesDrops(item) ? this.breakNaturally() : this.setTypebiomeID(Material.AIR.getbiomeID());
     }
 
     public Collection getDrops() {
@@ -611,7 +613,7 @@ public class CraftBlock implements Block {
         return (Collection) (this.itemCausesDrops(item) ? this.getDrops() : Collections.emptyList());
     }
 
-    public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
+    public vobiomeID setMetadata(String metadataKey, MetadataValue newMetadataValue) {
         this.chunk.getCraftWorld().getBlockMetadata().setMetadata((Block) this, metadataKey, newMetadataValue);
     }
 
@@ -623,7 +625,7 @@ public class CraftBlock implements Block {
         return this.chunk.getCraftWorld().getBlockMetadata().hasMetadata((Block) this, metadataKey);
     }
 
-    public void removeMetadata(String metadataKey, Plugin owningPlugin) {
+    public vobiomeID removeMetadata(String metadataKey, Plugin owningPlugin) {
         this.chunk.getCraftWorld().getBlockMetadata().removeMetadata((Block) this, metadataKey, owningPlugin);
     }
 
@@ -1556,7 +1558,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.FERMENTED_SPIDER_EYE.ordinal()] = 319;
+                aint1[Material.FERMENTED_SPbiomeIDER_EYE.ordinal()] = 319;
             } catch (NoSuchFieldError nosuchfielderror124) {
                 ;
             }
@@ -2246,7 +2248,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.OBSIDIAN.ordinal()] = 50;
+                aint1[Material.OBSbiomeIDIAN.ordinal()] = 50;
             } catch (NoSuchFieldError nosuchfielderror239) {
                 ;
             }
@@ -2420,7 +2422,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.RABBIT_HIDE.ordinal()] = 358;
+                aint1[Material.RABBIT_HbiomeIDE.ordinal()] = 358;
             } catch (NoSuchFieldError nosuchfielderror268) {
                 ;
             }
@@ -2744,7 +2746,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.SPIDER_EYE.ordinal()] = 318;
+                aint1[Material.SPbiomeIDER_EYE.ordinal()] = 318;
             } catch (NoSuchFieldError nosuchfielderror322) {
                 ;
             }

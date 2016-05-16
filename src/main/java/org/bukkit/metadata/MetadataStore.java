@@ -3,15 +3,15 @@ package org.bukkit.metadata;
 import java.util.List;
 import org.bukkit.plugin.Plugin;
 
-public interface MetadataStore {
+public interface MetadataStore<T> {
 
-    void setMetadata(Object object, String s, MetadataValue metadatavalue);
+    void setMetadata(T object, String s, MetadataValue metadatavalue);
 
-    List getMetadata(Object object, String s);
+    List getMetadata(T object, String s);
 
-    boolean hasMetadata(Object object, String s);
+    boolean hasMetadata(T object, String s);
 
-    void removeMetadata(Object object, String s, Plugin plugin);
+    void removeMetadata(T object, String s, Plugin plugin);
 
     void invalidateAll(Plugin plugin);
 }

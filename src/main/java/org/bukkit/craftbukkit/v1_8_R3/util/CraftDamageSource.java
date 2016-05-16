@@ -1,18 +1,18 @@
 package org.bukkit.craftbukkit.v1_8_R3.util;
 
-import net.minecraft.server.v1_8_R3.DamageSource;
+import net.minecraft.util.DamageSource;
 
 public final class CraftDamageSource extends DamageSource {
 
     public static DamageSource copyOf(DamageSource original) {
-        CraftDamageSource newSource = new CraftDamageSource(original.translationIndex);
+        CraftDamageSource newSource = new CraftDamageSource(original.damageType);
 
-        if (original.ignoresArmor()) {
-            newSource.setIgnoreArmor();
+        if (original.isUnblockable()) {
+            newSource.setDamageBypassesArmor();
         }
 
-        if (original.isMagic()) {
-            newSource.setMagic();
+        if (original.isMagicDamage()) {
+            newSource.setMagicDamage();
         }
 
         if (original.isExplosion()) {
