@@ -1,8 +1,8 @@
 package org.bukkit.craftbukkit.v1_8_R3.scoreboard;
 
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.Scoreboard;
-import net.minecraft.server.v1_8_R3.ScoreboardScore;
+
+import net.minecraft.scoreboard.Scoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.Objective;
@@ -33,12 +33,12 @@ final class CraftScore implements Score {
     public int getScore() throws IllegalStateException {
         Scoreboard board = this.objective.checkState().board;
 
-        if (board.getPlayers().contains(this.entry)) {
-            Map scores = board.getPlayerObjectives(this.entry);
-            ScoreboardScore score = (ScoreboardScore) scores.get(this.objective.getHandle());
+        if (board.getObjectiveNames().contains(this.entry)) {
+            Map scores = board.getObjectivesForEntity(this.entry);
+            net.minecraft.scoreboard.Score score = (net.minecraft.scoreboard.Score) scores.get(this.objective.getHandle());
 
             if (score != null) {
-                return score.getScore();
+                return score.getScorePoints();
             }
         }
 
@@ -46,7 +46,7 @@ final class CraftScore implements Score {
     }
 
     public void setScore(int score) throws IllegalStateException {
-        this.objective.checkState().board.getPlayerScoreForObjective(this.entry, this.objective.getHandle()).setScore(score);
+        this.objective.checkState().board.getValueFromObjective(this.entry, this.objective.getHandle()).setScorePoints(score);
     }
 
     public CraftScoreboard getScoreboard() {
@@ -56,6 +56,6 @@ final class CraftScore implements Score {
     public boolean isScoreSet() throws IllegalStateException {
         Scoreboard board = this.objective.checkState().board;
 
-        return board.getPlayers().contains(this.entry) && board.getPlayerObjectives(this.entry).containsKey(this.objective.getHandle());
+        return board.getScoreObjectives().contains(this.entry) && board.getObjectivesForEntity(this.entry).containsKey(this.objective.getHandle());
     }
 }

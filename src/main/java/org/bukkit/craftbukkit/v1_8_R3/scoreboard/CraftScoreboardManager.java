@@ -7,17 +7,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.IScoreboardCriteria;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardObjective;
-import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardTeam;
-import net.minecraft.server.v1_8_R3.Scoreboard;
-import net.minecraft.server.v1_8_R3.ScoreboardObjective;
-import net.minecraft.server.v1_8_R3.ScoreboardScore;
-import net.minecraft.server.v1_8_R3.ScoreboardServer;
-import net.minecraft.server.v1_8_R3.ScoreboardTeam;
-import org.apache.commons.lang.Validate;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
+import net.minecraft.network.play.server.S3EPacketTeams;
+import net.minecraft.scoreboard.*;
+import net.minecraft.server.MinecraftServer;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.util.WeakCollection;
 import org.bukkit.entity.Player;
@@ -43,8 +39,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
 
     public CraftScoreboard getNewScoreboard() {
         AsyncCatcher.catchOp("scoreboard creation");
-        CraftScoreboard scoreboard = new CraftScoreboard(new ScoreboardServer(this.server));
-
+        CraftScoreboard scoreboard = new CraftScoreboard(new Scoreboard());
         this.scoreboards.add(scoreboard);
         return scoreboard;
     }
@@ -60,7 +55,7 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         CraftScoreboard scoreboard = (CraftScoreboard) bukkitScoreboard;
         Scoreboard oldboard = this.getPlayerBoard(player).getHandle();
         Scoreboard newboard = scoreboard.getHandle();
-        EntityPlayer entityplayer = player.getHandle();
+        EntityPlayerMP entityplayer = player.getMPPlayer();
 
         if (oldboard != newboard) {
             if (scoreboard == this.mainScoreboard) {
@@ -72,10 +67,10 @@ public final class CraftScoreboardManager implements ScoreboardManager {
             HashSet removed = new HashSet();
 
             for (int iterator = 0; iterator < 3; ++iterator) {
-                ScoreboardObjective scoreboardteam = oldboard.getObjectiveForSlot(iterator);
+                ScoreObjective scoreboardteam = oldboard.getObjectiveInDisplaySlot(iterator);
 
                 if (scoreboardteam != null && !removed.contains(scoreboardteam)) {
-                    entityplayer.playerConnection.sendPacket(new PacketPlayOutScoreboardObjective(scoreboardteam, 1));
+                    entityplayer.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(scoreboardteam, 1));
                     removed.add(scoreboardteam);
                 }
             }
@@ -83,12 +78,12 @@ public final class CraftScoreboardManager implements ScoreboardManager {
             Iterator iterator = oldboard.getTeams().iterator();
 
             while (iterator.hasNext()) {
-                ScoreboardTeam scoreboardteam = (ScoreboardTeam) iterator.next();
+                ScorePlayerTeam scoreboardteam = (ScorePlayerTeam) iterator.next();
 
-                entityplayer.playerConnection.sendPacket(new PacketPlayOutScoreboardTeam(scoreboardteam, 1));
+                entityplayer.playerNetServerHandler.sendPacket(new S3EPacketTeams(scoreboardteam, 1));
             }
-
-            this.server.getPlayerList().sendScoreboard((ScoreboardServer) newboard, player.getHandle());
+            //will need to use access transformers to invoke the sendScoreboard method. todo
+            this.server.getConfigurationManager().sendScoreboard((Scoreboard) newboard, player.getHandle());
         }
     }
 
@@ -96,31 +91,31 @@ public final class CraftScoreboardManager implements ScoreboardManager {
         this.playerBoards.remove(player);
     }
 
-    public Collection getScoreboardScores(IScoreboardCriteria criteria, String name, Collection collection) {
+    public Collection getScoreboardScores(IScoreObjectiveCriteria criteria, String name, Collection collection) {
         Iterator iterator = this.scoreboards.iterator();
 
         while (iterator.hasNext()) {
             CraftScoreboard scoreboard = (CraftScoreboard) iterator.next();
             Scoreboard board = scoreboard.board;
-            Iterator iterator1 = board.getObjectivesForCriteria(criteria).iterator();
+            Iterator iterator1 = board.getObjectivesFromCriteria(criteria).iterator();
 
             while (iterator1.hasNext()) {
-                ScoreboardObjective objective = (ScoreboardObjective) iterator1.next();
+                ScoreObjective objective = (ScoreObjective) iterator1.next();
 
-                collection.add(board.getPlayerScoreForObjective(name, objective));
+                collection.add(board.getValueFromObjective(name, objective));
             }
         }
 
         return collection;
     }
 
-    public void updateAllScoresForList(IScoreboardCriteria criteria, String name, List of) {
+    public void updateAllScoresForList(IScoreObjectiveCriteria criteria, String name, List of) {
         Iterator iterator = this.getScoreboardScores(criteria, name, new ArrayList()).iterator();
 
         while (iterator.hasNext()) {
-            ScoreboardScore score = (ScoreboardScore) iterator.next();
+            Score score = (Score) iterator.next();
 
-            score.updateForList(of);
+            score.func_96651_a(of);//not sure if this is correct todo
         }
 
     }

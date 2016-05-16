@@ -3,9 +3,9 @@ package org.bukkit.craftbukkit.v1_8_R3.scoreboard;
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Set;
-import net.minecraft.server.v1_8_R3.ScoreboardTeam;
-import net.minecraft.server.v1_8_R3.ScoreboardTeamBase;
-import org.apache.commons.lang.Validate;
+
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -13,59 +13,59 @@ import org.bukkit.scoreboard.Team;
 
 final class CraftTeam extends CraftScoreboardComponent implements Team {
 
-    private final ScoreboardTeam team;
+    private final ScorePlayerTeam team;
     private static int[] $SWITCH_TABLE$org$bukkit$scoreboard$NameTagVisibility;
-    private static int[] $SWITCH_TABLE$net$minecraft$server$ScoreboardTeamBase$EnumNameTagVisibility;
+    private static int[] $SWITCH_TABLE$net$minecraft$server$ScorePlayerTeam$EnumVisible;
 
-    CraftTeam(CraftScoreboard scoreboard, ScoreboardTeam team) {
+    CraftTeam(CraftScoreboard scoreboard, ScorePlayerTeam team) {
         super(scoreboard);
         this.team = team;
     }
 
     public String getName() throws IllegalStateException {
         this.checkState();
-        return this.team.getName();
+        return this.team.getTeamName();
     }
 
     public String getDisplayName() throws IllegalStateException {
         this.checkState();
-        return this.team.getDisplayName();
+        return this.team.getTeamName();
     }
 
     public void setDisplayName(String displayName) throws IllegalStateException {
         Validate.notNull(displayName, "Display name cannot be null");
         Validate.isTrue(displayName.length() <= 32, "Display name \'" + displayName + "\' is longer than the limit of 32 characters");
         this.checkState();
-        this.team.setDisplayName(displayName);
+        this.team.setTeamName(displayName);
     }
 
     public String getPrefix() throws IllegalStateException {
         this.checkState();
-        return this.team.getPrefix();
+        return this.team.getColorPrefix();
     }
 
     public void setPrefix(String prefix) throws IllegalStateException, IllegalArgumentException {
         Validate.notNull(prefix, "Prefix cannot be null");
         Validate.isTrue(prefix.length() <= 32, "Prefix \'" + prefix + "\' is longer than the limit of 32 characters");
         this.checkState();
-        this.team.setPrefix(prefix);
+        this.team.setNamePrefix(prefix);
     }
 
     public String getSuffix() throws IllegalStateException {
         this.checkState();
-        return this.team.getSuffix();
+        return this.team.getColorSuffix();
     }
 
     public void setSuffix(String suffix) throws IllegalStateException, IllegalArgumentException {
         Validate.notNull(suffix, "Suffix cannot be null");
         Validate.isTrue(suffix.length() <= 32, "Suffix \'" + suffix + "\' is longer than the limit of 32 characters");
         this.checkState();
-        this.team.setSuffix(suffix);
+        this.team.setNameSuffix(suffix);
     }
 
     public boolean allowFriendlyFire() throws IllegalStateException {
         this.checkState();
-        return this.team.allowFriendlyFire();
+        return this.team.getAllowFriendlyFire();
     }
 
     public void setAllowFriendlyFire(boolean enabled) throws IllegalStateException {
@@ -75,12 +75,12 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
 
     public boolean canSeeFriendlyInvisibles() throws IllegalStateException {
         this.checkState();
-        return this.team.canSeeFriendlyInvisibles();
+        return this.team.getSeeFriendlyInvisiblesEnabled();
     }
 
     public void setCanSeeFriendlyInvisibles(boolean enabled) throws IllegalStateException {
         this.checkState();
-        this.team.setCanSeeFriendlyInvisibles(enabled);
+        this.team.setSeeFriendlyInvisiblesEnabled(enabled);
     }
 
     public NameTagVisibility getNameTagVisibility() throws IllegalArgumentException {
@@ -96,7 +96,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public Set getPlayers() throws IllegalStateException {
         this.checkState();
         ImmutableSet.Builder players = ImmutableSet.builder();
-        Iterator iterator = this.team.getPlayerNameSet().iterator();
+        Iterator iterator = this.team.getMembershipCollection().iterator();
 
         while (iterator.hasNext()) {
             String playerName = (String) iterator.next();
@@ -110,7 +110,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public Set getEntries() throws IllegalStateException {
         this.checkState();
         ImmutableSet.Builder entries = ImmutableSet.builder();
-        Iterator iterator = this.team.getPlayerNameSet().iterator();
+        Iterator iterator = this.team.getMembershipCollection().iterator();
 
         while (iterator.hasNext()) {
             String playerName = (String) iterator.next();
@@ -123,7 +123,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
 
     public int getSize() throws IllegalStateException {
         this.checkState();
-        return this.team.getPlayerNameSet().size();
+        return this.team.getMembershipCollection().size();
     }
 
     public void addPlayer(OfflinePlayer player) throws IllegalStateException, IllegalArgumentException {
@@ -135,7 +135,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         Validate.notNull(entry, "Entry cannot be null");
         CraftScoreboard scoreboard = this.checkState();
 
-        scoreboard.board.addPlayerToTeam(entry, this.team.getName());
+        scoreboard.board.addPlayerToTeam(entry, this.team.getTeamName());
     }
 
     public boolean removePlayer(OfflinePlayer player) throws IllegalStateException, IllegalArgumentException {
@@ -147,7 +147,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         Validate.notNull(entry, "Entry cannot be null");
         CraftScoreboard scoreboard = this.checkState();
 
-        if (!this.team.getPlayerNameSet().contains(entry)) {
+        if (!this.team.getMembershipCollection().contains(entry)) {
             return false;
         } else {
             scoreboard.board.removePlayerFromTeam(entry, this.team);
@@ -163,7 +163,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     public boolean hasEntry(String entry) throws IllegalArgumentException, IllegalStateException {
         Validate.notNull("Entry cannot be null");
         this.checkState();
-        return this.team.getPlayerNameSet().contains(entry);
+        return this.team.getMembershipCollection().contains(entry);
     }
 
     public void unregister() throws IllegalStateException {
@@ -172,27 +172,27 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         scoreboard.board.removeTeam(this.team);
     }
 
-    public static ScoreboardTeamBase.EnumNameTagVisibility bukkitToNotch(NameTagVisibility visibility) {
+    public static ScorePlayerTeam.EnumVisible bukkitToNotch(NameTagVisibility visibility) {
         switch ($SWITCH_TABLE$org$bukkit$scoreboard$NameTagVisibility()[visibility.ordinal()]) {
         case 1:
-            return ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS;
+            return ScorePlayerTeam.EnumVisible.ALWAYS;
 
         case 2:
-            return ScoreboardTeamBase.EnumNameTagVisibility.NEVER;
+            return ScorePlayerTeam.EnumVisible.NEVER;
 
         case 3:
-            return ScoreboardTeamBase.EnumNameTagVisibility.HIDE_FOR_OTHER_TEAMS;
+            return ScorePlayerTeam.EnumVisible.HIDE_FOR_OTHER_TEAMS;
 
         case 4:
-            return ScoreboardTeamBase.EnumNameTagVisibility.HIDE_FOR_OWN_TEAM;
+            return ScorePlayerTeam.EnumVisible.HIDE_FOR_OWN_TEAM;
 
         default:
             throw new IllegalArgumentException("Unknown visibility level " + visibility);
         }
     }
 
-    public static NameTagVisibility notchToBukkit(ScoreboardTeamBase.EnumNameTagVisibility visibility) {
-        switch ($SWITCH_TABLE$net$minecraft$server$ScoreboardTeamBase$EnumNameTagVisibility()[visibility.ordinal()]) {
+    public static NameTagVisibility notchToBukkit(ScorePlayerTeam.EnumVisible visibility) {
+        switch ($SWITCH_TABLE$net$minecraft$server$ScorePlayerTeam$EnumVisible()[visibility.ordinal()]) {
         case 1:
             return NameTagVisibility.ALWAYS;
 
@@ -211,7 +211,7 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
     }
 
     CraftScoreboard checkState() throws IllegalStateException {
-        if (this.getScoreboard().board.getTeam(this.team.getName()) == null) {
+        if (this.getScoreboard().board.getTeam(this.team.getTeamName()) == null) {
             throw new IllegalStateException("Unregistered scoreboard component");
         } else {
             return this.getScoreboard();
@@ -274,39 +274,39 @@ final class CraftTeam extends CraftScoreboardComponent implements Team {
         }
     }
 
-    static int[] $SWITCH_TABLE$net$minecraft$server$ScoreboardTeamBase$EnumNameTagVisibility() {
-        int[] aint = CraftTeam.$SWITCH_TABLE$net$minecraft$server$ScoreboardTeamBase$EnumNameTagVisibility;
+    static int[] $SWITCH_TABLE$net$minecraft$server$ScorePlayerTeam$EnumVisible() {
+        int[] aint = CraftTeam.$SWITCH_TABLE$net$minecraft$server$ScorePlayerTeam$EnumVisible;
 
-        if (CraftTeam.$SWITCH_TABLE$net$minecraft$server$ScoreboardTeamBase$EnumNameTagVisibility != null) {
+        if (CraftTeam.$SWITCH_TABLE$net$minecraft$server$ScorePlayerTeam$EnumVisible != null) {
             return aint;
         } else {
-            int[] aint1 = new int[ScoreboardTeamBase.EnumNameTagVisibility.values().length];
+            int[] aint1 = new int[ScorePlayerTeam.EnumVisible.values().length];
 
             try {
-                aint1[ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS.ordinal()] = 1;
+                aint1[ScorePlayerTeam.EnumVisible.ALWAYS.ordinal()] = 1;
             } catch (NoSuchFieldError nosuchfielderror) {
                 ;
             }
 
             try {
-                aint1[ScoreboardTeamBase.EnumNameTagVisibility.HIDE_FOR_OTHER_TEAMS.ordinal()] = 3;
+                aint1[ScorePlayerTeam.EnumVisible.HIDE_FOR_OTHER_TEAMS.ordinal()] = 3;
             } catch (NoSuchFieldError nosuchfielderror1) {
                 ;
             }
 
             try {
-                aint1[ScoreboardTeamBase.EnumNameTagVisibility.HIDE_FOR_OWN_TEAM.ordinal()] = 4;
+                aint1[ScorePlayerTeam.EnumVisible.HIDE_FOR_OWN_TEAM.ordinal()] = 4;
             } catch (NoSuchFieldError nosuchfielderror2) {
                 ;
             }
 
             try {
-                aint1[ScoreboardTeamBase.EnumNameTagVisibility.NEVER.ordinal()] = 2;
+                aint1[ScorePlayerTeam.EnumVisible.NEVER.ordinal()] = 2;
             } catch (NoSuchFieldError nosuchfielderror3) {
                 ;
             }
 
-            CraftTeam.$SWITCH_TABLE$net$minecraft$server$ScoreboardTeamBase$EnumNameTagVisibility = aint1;
+            CraftTeam.$SWITCH_TABLE$net$minecraft$server$ScorePlayerTeam$EnumVisible = aint1;
             return aint1;
         }
     }

@@ -3,7 +3,6 @@ package org.bukkit.craftbukkit.v1_8_R3.scheduler;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import org.apache.commons.lang.UnhandledException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitWorker;
 
@@ -51,7 +50,8 @@ class CraftAsyncTask extends CraftTask {
             super.run();
         } catch (Throwable throwable) {
             thrown1 = throwable;
-            throw new UnhandledException(String.format("Plugin %s generated an exception while executing task %s", new Object[] { this.getOwner().getDescription().getFullName(), Integer.valueOf(this.getTaskId())}), throwable);
+            //todo not sure if this is correct or not
+            throw new RuntimeException(String.format("Plugin %s generated an exception while executing task %s", new Object[] { this.getOwner().getDescription().getFullName(), Integer.valueOf(this.getTaskId())}), throwable);
         } finally {
             LinkedList linkedlist = this.workers;
 

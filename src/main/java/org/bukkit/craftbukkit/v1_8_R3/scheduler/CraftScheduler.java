@@ -14,7 +14,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
-import org.apache.commons.lang.Validate;
+
+import org.apache.commons.lang3.Validate;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -37,7 +38,7 @@ public class CraftScheduler implements BukkitScheduler {
 
     public CraftScheduler() {
         this.tail = new AtomicReference(this.head);
-        this.pending = new PriorityQueue(10, new Comparator() {
+        this.pending = new PriorityQueue(10, new Comparator<CraftTask>() {
             public int compare(CraftTask o1, CraftTask o2) {
                 return (int) (o1.getNextRun() - o2.getNextRun());
             }

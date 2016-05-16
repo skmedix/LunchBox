@@ -3,10 +3,12 @@ package org.bukkit.craftbukkit.v1_8_R3.scoreboard;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+
+import java.util.Collection;
 import java.util.Iterator;
-import net.minecraft.server.v1_8_R3.ScoreboardObjective;
-import net.minecraft.server.v1_8_R3.ScoreboardTeam;
-import org.apache.commons.lang.Validate;
+
+import net.minecraft.scoreboard.ScorePlayerTeam;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -16,9 +18,9 @@ import org.bukkit.scoreboard.Team;
 
 public final class CraftScoreboard implements Scoreboard {
 
-    final net.minecraft.server.v1_8_R3.Scoreboard board;
+    final net.minecraft.scoreboard.Scoreboard board;
 
-    CraftScoreboard(net.minecraft.server.v1_8_R3.Scoreboard board) {
+    CraftScoreboard(net.minecraft.scoreboard.Scoreboard board) {
         this.board = board;
     }
 
@@ -28,14 +30,14 @@ public final class CraftScoreboard implements Scoreboard {
         Validate.isTrue(name.length() <= 16, "The name \'" + name + "\' is longer than the limit of 16 characters");
         Validate.isTrue(this.board.getObjective(name) == null, "An objective of name \'" + name + "\' already exists");
         CraftCriteria craftCriteria = CraftCriteria.getFromBukkit(criteria);
-        ScoreboardObjective objective = this.board.registerObjective(name, craftCriteria.criteria);
+        net.minecraft.scoreboard.ScoreObjective objective = this.board.addScoreObjective(name, craftCriteria.criteria);
 
         return new CraftObjective(this, objective);
     }
 
     public Objective getObjective(String name) throws IllegalArgumentException {
         Validate.notNull(name, "Name cannot be null");
-        ScoreboardObjective nms = this.board.getObjective(name);
+        net.minecraft.scoreboard.ScoreObjective nms = this.board.getObjective(name);
 
         return nms == null ? null : new CraftObjective(this, nms);
     }
@@ -43,10 +45,10 @@ public final class CraftScoreboard implements Scoreboard {
     public ImmutableSet getObjectivesByCriteria(String criteria) throws IllegalArgumentException {
         Validate.notNull(criteria, "Criteria cannot be null");
         ImmutableSet.Builder objectives = ImmutableSet.builder();
-        Iterator iterator = this.board.getObjectives().iterator();
+        Iterator iterator = this.board.getScoreObjectives().iterator();
 
         while (iterator.hasNext()) {
-            ScoreboardObjective netObjective = (ScoreboardObjective) iterator.next();
+            net.minecraft.scoreboard.ScoreObjective netObjective = (net.minecraft.scoreboard.ScoreObjective) iterator.next();
             CraftObjective objective = new CraftObjective(this, netObjective);
 
             if (objective.getCriteria().equals(criteria)) {
@@ -58,16 +60,12 @@ public final class CraftScoreboard implements Scoreboard {
     }
 
     public ImmutableSet getObjectives() {
-        return ImmutableSet.copyOf(Iterables.transform(this.board.getObjectives(), new Function() {
-            public Objective apply(ScoreboardObjective input) {
-                return new CraftObjective(CraftScoreboard.this, input);
-            }
-        }));
+        return ImmutableSet.copyOf((Collection<? extends Objective>) this.board.getScoreObjectives());
     }
 
     public Objective getObjective(DisplaySlot slot) throws IllegalArgumentException {
         Validate.notNull(slot, "Display slot cannot be null");
-        ScoreboardObjective objective = this.board.getObjectiveForSlot(CraftScoreboardTranslations.fromBukkitSlot(slot));
+        net.minecraft.scoreboard.ScoreObjective objective = this.board.getObjectiveInDisplaySlot(CraftScoreboardTranslations.fromBukkitSlot(slot));
 
         return objective == null ? null : new CraftObjective(this, objective);
     }
@@ -80,10 +78,10 @@ public final class CraftScoreboard implements Scoreboard {
     public ImmutableSet getScores(String entry) throws IllegalArgumentException {
         Validate.notNull(entry, "Entry cannot be null");
         ImmutableSet.Builder scores = ImmutableSet.builder();
-        Iterator iterator = this.board.getObjectives().iterator();
+        Iterator iterator = this.board.getScoreObjectives().iterator();
 
         while (iterator.hasNext()) {
-            ScoreboardObjective objective = (ScoreboardObjective) iterator.next();
+            net.minecraft.scoreboard.ScoreObjective objective = (net.minecraft.scoreboard.ScoreObjective) iterator.next();
 
             scores.add((Object) (new CraftScore(new CraftObjective(this, objective), entry)));
         }
@@ -98,43 +96,39 @@ public final class CraftScoreboard implements Scoreboard {
 
     public void resetScores(String entry) throws IllegalArgumentException {
         Validate.notNull(entry, "Entry cannot be null");
-        Iterator iterator = this.board.getObjectives().iterator();
+        Iterator iterator = this.board.getScoreObjectives().iterator();
 
         while (iterator.hasNext()) {
-            ScoreboardObjective objective = (ScoreboardObjective) iterator.next();
+            net.minecraft.scoreboard.ScoreObjective objective = (net.minecraft.scoreboard.ScoreObjective) iterator.next();
 
-            this.board.resetPlayerScores(entry, objective);
+            this.board.func_178820_a(entry, objective);
         }
 
     }
 
     public Team getPlayerTeam(OfflinePlayer player) throws IllegalArgumentException {
         Validate.notNull(player, "OfflinePlayer cannot be null");
-        ScoreboardTeam team = this.board.getPlayerTeam(player.getName());
+        ScorePlayerTeam team = this.board.getTeam(player.getName());
 
         return team == null ? null : new CraftTeam(this, team);
     }
 
     public Team getEntryTeam(String entry) throws IllegalArgumentException {
         Validate.notNull(entry, "Entry cannot be null");
-        ScoreboardTeam team = this.board.getPlayerTeam(entry);
+        ScorePlayerTeam team = this.board.getTeam(entry);
 
         return team == null ? null : new CraftTeam(this, team);
     }
 
     public Team getTeam(String teamName) throws IllegalArgumentException {
         Validate.notNull(teamName, "Team name cannot be null");
-        ScoreboardTeam team = this.board.getTeam(teamName);
+        ScorePlayerTeam team = this.board.getTeam(teamName);
 
         return team == null ? null : new CraftTeam(this, team);
     }
 
-    public ImmutableSet getTeams() {
-        return ImmutableSet.copyOf(Iterables.transform(this.board.getTeams(), new Function() {
-            public Team apply(ScoreboardTeam input) {
-                return new CraftTeam(CraftScoreboard.this, input);
-            }
-        }));
+    public ImmutableSet<ScorePlayerTeam> getTeams() {
+        return ImmutableSet.copyOf(this.board.getTeams());
     }
 
     public Team registerNewTeam(String name) throws IllegalArgumentException {
@@ -146,7 +140,7 @@ public final class CraftScoreboard implements Scoreboard {
 
     public ImmutableSet getPlayers() {
         ImmutableSet.Builder players = ImmutableSet.builder();
-        Iterator iterator = this.board.getPlayers().iterator();
+        Iterator iterator = this.board.getObjectiveNames().iterator();
 
         while (iterator.hasNext()) {
             Object playerName = iterator.next();
@@ -159,7 +153,7 @@ public final class CraftScoreboard implements Scoreboard {
 
     public ImmutableSet getEntries() {
         ImmutableSet.Builder entries = ImmutableSet.builder();
-        Iterator iterator = this.board.getPlayers().iterator();
+        Iterator iterator = this.board.getObjectiveNames().iterator();
 
         while (iterator.hasNext()) {
             Object entry = iterator.next();
@@ -172,10 +166,10 @@ public final class CraftScoreboard implements Scoreboard {
 
     public void clearSlot(DisplaySlot slot) throws IllegalArgumentException {
         Validate.notNull(slot, "Slot cannot be null");
-        this.board.setDisplaySlot(CraftScoreboardTranslations.fromBukkitSlot(slot), (ScoreboardObjective) null);
+        this.board.setObjectiveInDisplaySlot(CraftScoreboardTranslations.fromBukkitSlot(slot), (net.minecraft.scoreboard.ScoreObjective) null);
     }
 
-    public net.minecraft.server.v1_8_R3.Scoreboard getHandle() {
+    public net.minecraft.scoreboard.Scoreboard getHandle() {
         return this.board;
     }
 }
