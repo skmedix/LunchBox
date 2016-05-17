@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -57,7 +56,7 @@ public class EnchantCommand extends VanillaCommand {
                 } else {
                     String itemName = item.getType().toString().replaceAll("_", " ");
 
-                    itemName = WordUtils.capitalizeFully(itemName);
+                    itemName = org.apache.commons.lang3.text.WordUtils.capitalizeFully(itemName);
                     Enchantment enchantment = this.getEnchantment(args[1].toUpperCase());
 
                     if (enchantment == null) {
@@ -65,7 +64,7 @@ public class EnchantCommand extends VanillaCommand {
                     } else {
                         String enchantmentName = enchantment.getName().replaceAll("_", " ");
 
-                        enchantmentName = WordUtils.capitalizeFully(enchantmentName);
+                        enchantmentName = org.apache.commons.lang3.text.WordUtils.capitalizeFully(enchantmentName);
                         if (!force && !enchantment.canEnchantItem(item)) {
                             sender.sendMessage(String.format("%s cannot be applied to %s", new Object[] { enchantmentName, itemName}));
                         } else {
@@ -108,7 +107,7 @@ public class EnchantCommand extends VanillaCommand {
                                     Enchantment enchant = (Enchantment) entry1.getKey();
 
                                     if (!enchant.equals(enchantment) && enchant.conflictsWith(enchantment)) {
-                                        sender.sendMessage(String.format("Can\'t apply the enchantment %s on an item with the enchantment %s", new Object[] { enchantmentName, WordUtils.capitalizeFully(enchant.getName().replaceAll("_", " "))}));
+                                        sender.sendMessage(String.format("Can\'t apply the enchantment %s on an item with the enchantment %s", new Object[] { enchantmentName, org.apache.commons.lang3.text.WordUtils.capitalizeFully(enchant.getName().replaceAll("_", " "))}));
                                         conflicts1 = true;
                                         break;
                                     }

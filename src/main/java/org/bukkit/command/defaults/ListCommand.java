@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

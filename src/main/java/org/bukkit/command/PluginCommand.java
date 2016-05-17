@@ -1,7 +1,7 @@
 package org.bukkit.command;
 
 import java.util.List;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.plugin.Plugin;
 
 public final class PluginCommand extends Command implements PluginIdentifiableCommand {
