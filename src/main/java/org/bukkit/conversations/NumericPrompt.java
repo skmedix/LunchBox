@@ -1,6 +1,6 @@
 package org.bukkit.conversations;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public abstract class NumericPrompt extends ValidatingPrompt {
 

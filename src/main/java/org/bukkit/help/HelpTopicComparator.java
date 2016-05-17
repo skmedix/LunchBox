@@ -2,7 +2,7 @@ package org.bukkit.help;
 
 import java.util.Comparator;
 
-public class HelpTopicComparator implements Comparator {
+public class HelpTopicComparator implements Comparator<HelpTopic> {
 
     private static final HelpTopicComparator.TopicNameComparator tnc = new HelpTopicComparator.TopicNameComparator((HelpTopicComparator.TopicNameComparator) null);
     private static final HelpTopicComparator htc = new HelpTopicComparator();
@@ -19,7 +19,7 @@ public class HelpTopicComparator implements Comparator {
         return HelpTopicComparator.tnc.compare(lhs.getName(), rhs.getName());
     }
 
-    public static class TopicNameComparator implements Comparator {
+    public static class TopicNameComparator implements Comparator<String> {
 
         private TopicNameComparator() {}
 

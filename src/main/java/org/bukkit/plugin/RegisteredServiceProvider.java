@@ -1,8 +1,8 @@
 package org.bukkit.plugin;
 
-public class RegisteredServiceProvider implements Comparable {
+public class RegisteredServiceProvider<T> implements Comparable<RegisteredServiceProvider<?>> {
 
-    private Class service;
+    private Class<T> service;
     private Plugin plugin;
     private Object provider;
     private ServicePriority priority;
@@ -14,7 +14,7 @@ public class RegisteredServiceProvider implements Comparable {
         this.priority = priority;
     }
 
-    public Class getService() {
+    public Class<T> getService() {
         return this.service;
     }
 

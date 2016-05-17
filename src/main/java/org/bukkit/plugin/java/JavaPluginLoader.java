@@ -18,7 +18,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Server;
 import org.bukkit.Warning;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -274,7 +274,7 @@ public final class JavaPluginLoader implements PluginLoader {
             EventHandler eventhandler = (EventHandler) method.getAnnotation(EventHandler.class);
 
             if (eventhandler != null && !method.isBridge() && !method.isSynthetic()) {
-                Class oclass;
+                final Class oclass;
 
                 if (method.getParameterTypes().length == 1 && Event.class.isAssignableFrom(oclass = method.getParameterTypes()[0])) {
                     final Class oclass1 = oclass.asSubclass(Event.class);

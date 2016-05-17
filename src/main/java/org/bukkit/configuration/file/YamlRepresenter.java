@@ -6,7 +6,6 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.representer.Representer;
-import org.yaml.snakeyaml.representer.SafeRepresenter;
 
 public class YamlRepresenter extends Representer {
 
@@ -15,7 +14,7 @@ public class YamlRepresenter extends Representer {
         this.multiRepresenters.put(ConfigurationSerializable.class, new YamlRepresenter.RepresentConfigurationSerializable((YamlRepresenter.RepresentConfigurationSerializable) null));
     }
 
-    private class RepresentConfigurationSection extends SafeRepresenter.RepresentMap {
+    private class RepresentConfigurationSection extends Representer.RepresentMap {
 
         private RepresentConfigurationSection() {
             super();
@@ -30,7 +29,7 @@ public class YamlRepresenter extends Representer {
         }
     }
 
-    private class RepresentConfigurationSerializable extends SafeRepresenter.RepresentMap {
+    private class RepresentConfigurationSerializable extends Representer.RepresentMap {
 
         private RepresentConfigurationSerializable() {
             super();
