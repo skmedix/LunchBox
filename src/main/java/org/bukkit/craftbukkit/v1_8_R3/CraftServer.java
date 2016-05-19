@@ -42,64 +42,24 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 //import net.md_5.bungee.api.chat.BaseComponent; //LunchBox - remove
-import net.minecraft.client.resources.Locale;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommand;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
-import net.minecraft.item.ItemMapBase;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.FurnaceRecipes;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
-import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.dedicated.PropertyManager;
-import net.minecraft.server.integrated.IntegratedServerCommandManager;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.CommandAbstract;
-import net.minecraft.server.v1_8_R3.CommandDispatcher;
-import net.minecraft.server.v1_8_R3.CraftingManager;
-import net.minecraft.server.v1_8_R3.DedicatedPlayerList;
-import net.minecraft.server.v1_8_R3.DedicatedServer;
-import net.minecraft.server.v1_8_R3.Enchantment;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.EntityTracker;
-import net.minecraft.server.v1_8_R3.EnumDifficulty;
-import net.minecraft.server.v1_8_R3.ExceptionWorldConflict;
-import net.minecraft.server.v1_8_R3.ICommand;
-import net.minecraft.server.v1_8_R3.ICommandListener;
-import net.minecraft.server.v1_8_R3.IProgressUpdate;
-import net.minecraft.server.v1_8_R3.Items;
-import net.minecraft.server.v1_8_R3.JsonListEntry;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import net.minecraft.server.v1_8_R3.MobEffectList;
-import net.minecraft.server.v1_8_R3.PersistentCollection;
-import net.minecraft.server.v1_8_R3.PlayerList;
-import net.minecraft.server.v1_8_R3.PropertyManager;
-import net.minecraft.server.v1_8_R3.RecipesFurnace;
-import net.minecraft.server.v1_8_R3.RegionFile;
-import net.minecraft.server.v1_8_R3.RegionFileCache;
-import net.minecraft.server.v1_8_R3.ServerCommand;
-import net.minecraft.server.v1_8_R3.ServerNBTManager;
-import net.minecraft.server.v1_8_R3.WorldData;
-import net.minecraft.server.v1_8_R3.WorldLoaderServer;
-import net.minecraft.server.v1_8_R3.WorldManager;
-import net.minecraft.server.v1_8_R3.WorldMap;
-import net.minecraft.server.v1_8_R3.WorldNBTStorage;
-import net.minecraft.server.v1_8_R3.WorldServer;
-import net.minecraft.server.v1_8_R3.WorldSettings;
-import net.minecraft.server.v1_8_R3.WorldType;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.world.*;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.chunk.storage.RegionFile;
+import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraftforge.common.DimensionManager;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.*;
 import org.bukkit.World;
@@ -280,8 +240,9 @@ public final class CraftServer implements Server {
         };*/
         this.console = console;
         this.playerList = (DedicatedPlayerList) playerList;
-        this.playerView = Collections.unmodifiableList(Lists.transform(playerList.getPlayerList(), new Function() {
-            public CraftPlayer apply(Entity player) {
+        this.playerView = Collections.unmodifiableList(com.google.common.collect.Lists.transform(playerList.playerEntityList, new com.google.common.base.Function<EntityPlayerMP, CraftPlayer>() {
+            @Override
+            public CraftPlayer apply(EntityPlayerMP player) {
                 return (CraftPlayer) CraftEntity.getEntity(LunchBox.getServer(), player);
             }
         }));
@@ -507,7 +468,7 @@ public final class CraftServer implements Server {
     }
 
     @Deprecated
-    public Player[] getOnlinePlayers() {
+    public Player[] _getOnlinePlayers() {
         return (Player[]) this.getOnlinePlayers().toArray(CraftServer.EMPTY_PLAYER_ARRAY);
     }
 
@@ -677,6 +638,14 @@ public final class CraftServer implements Server {
 
     public int getTicksPerMonsterSpawns() {
         return this.configuration.getInt("ticks-per.monster-spawns");
+    }
+
+    public void setTicksPerAnimalSpawns(int ticksPerAnimalSpawns) {
+        this.configuration.set("ticks-per.animal-spawns", ticksPerAnimalSpawns);
+    }
+
+    public void setTicksPerMonsterSpawns(int ticksPerMonsterSpawns) {
+        this.configuration.set("ticks-per.monster-spawns", ticksPerMonsterSpawns);
     }
 
     public PluginManager getPluginManager() {
@@ -926,6 +895,7 @@ public final class CraftServer implements Server {
     }
 
     public World createWorld(WorldCreator creator) {
+        /* LunchBox - remove for now.
         Validate.notNull(creator, "Creator may not be null");
         String name = creator.name();
         ChunkGenerator generator = creator.generator();
@@ -1045,7 +1015,8 @@ public final class CraftServer implements Server {
                     break;
                 }
             }
-        }
+        }*/
+        return null;
     }
 
     public boolean unloadWorld(String name, boolean save) {
@@ -1057,12 +1028,13 @@ public final class CraftServer implements Server {
             return false;
         } else {
             WorldServer handle = ((CraftWorld) world).getHandle();
+            List worlds = Arrays.asList(this.console.worldServers);
 
-            if (!this.console.worlds.contains(handle)) {
+            if (!worlds.contains(handle)) {
                 return false;
-            } else if (handle.dimension <= 1) {
+            } else if (handle.provider.getDimensionId() <= 1) {
                 return false;
-            } else if (handle.players.size() > 0) {
+            } else if (handle.playerEntities.size() > 0) {
                 return false;
             } else {
                 WorldUnloadEvent e = new WorldUnloadEvent(handle.getWorld());
@@ -1073,20 +1045,20 @@ public final class CraftServer implements Server {
                 } else {
                     if (save) {
                         try {
-                            handle.save(true, (IProgressUpdate) null);
-                            handle.saveLevel();
-                        } catch (ExceptionWorldConflict exceptionworldconflict) {
-                            this.getLogger().log(Level.SEVERE, (String) null, exceptionworldconflict);
+                            handle.saveAllChunks(true, (IProgressUpdate) null);
+                            handle.saveChunkData();
+                        } catch (MinecraftException e1) {
+                            this.getLogger().log(Level.SEVERE, (String) null, e1);
                         }
                     }
 
                     this.worlds.remove(world.getName().toLowerCase());
-                    this.console.worlds.remove(this.console.worlds.indexOf(handle));
+                    //this.console.world.remove(this.console.worlds.indexOf(handle));
                     File parentFolder = world.getWorldFolder().getAbsoluteFile();
                     Class oclass = RegionFileCache.class;
 
                     synchronized (RegionFileCache.class) {
-                        Iterator i = RegionFileCache.a.entrySet().iterator();
+                        Iterator i = RegionFileCache.regionsByFilename.entrySet().iterator();//needs AT todo
 
                         while (i.hasNext()) {
                             Entry entry = (Entry) i.next();
@@ -1096,7 +1068,7 @@ public final class CraftServer implements Server {
                                     i.remove();
 
                                     try {
-                                        ((RegionFile) entry.getValue()).c();
+                                        ((RegionFile) entry.getValue()).close();
                                     } catch (IOException ioexception) {
                                         this.getLogger().log(Level.SEVERE, (String) null, ioexception);
                                     }

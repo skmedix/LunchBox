@@ -63,11 +63,11 @@ public final class Bukkit {
 
     /** @deprecated */
     @Deprecated
-    public static Player[] getOnlinePlayers() {
-        return Bukkit.server.getOnlinePlayers();
+    public static Player[] _getOnlinePlayers() {
+        return Bukkit.server._getOnlinePlayers();
     }
 
-    public static Collection getOnlinePlayers() {
+    public static Collection<? extends Player getOnlinePlayers() {
         return Bukkit.server.getOnlinePlayers();
     }
 
@@ -444,7 +444,9 @@ public final class Bukkit {
         return Bukkit.server.getUnsafe();
     }
 
+    /* LunchBox - remove for now.
     public static Server.Spigot spigot() {
         return Bukkit.server.spigot();
     }
+    */
 }

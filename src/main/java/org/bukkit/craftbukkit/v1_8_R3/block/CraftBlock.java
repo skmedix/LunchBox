@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.EnumFaceDirection;
 import net.minecraft.server.v1_8_R3.BiomeGenBase;
 import net.minecraft.server.v1_8_R3.BlockCocoa;
 import net.minecraft.server.v1_8_R3.BlockPosition;
@@ -19,6 +20,7 @@ import net.minecraft.server.v1_8_R3.Item;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.TileEntitySkull;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.biome.BiomeCache;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.bukkit.Chunk;
@@ -332,25 +334,25 @@ public class CraftBlock implements Block {
         }
     }
 
-    public static EnumDirection blockFaceToNotch(BlockFace face) {
+    public static EnumFacing blockFaceToNotch(BlockFace face) {
         switch ($SWITCH_TABLE$org$bukkit$block$BlockFace()[face.ordinal()]) {
         case 1:
-            return EnumDirection.NORTH;
+            return EnumFacing.NORTH;
 
         case 2:
-            return EnumDirection.EAST;
+            return EnumFacing.EAST;
 
         case 3:
-            return EnumDirection.SOUTH;
+            return EnumFacing.SOUTH;
 
         case 4:
-            return EnumDirection.WEST;
+            return EnumFacing.WEST;
 
         case 5:
-            return EnumDirection.UP;
+            return EnumFacing.UP;
 
         case 6:
-            return EnumDirection.DOWN;
+            return EnumFacing.DOWN;
 
         default:
             return null;

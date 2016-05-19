@@ -47,9 +47,9 @@ public interface Server extends PluginMessageRecipient {
 
     /** @deprecated */
     @Deprecated
-    Player[] getOnlinePlayers();
+    Player[] _getOnlinePlayers();
 
-    Collection getOnlinePlayers();
+    Collection<? extends Player> getOnlinePlayers();
 
     int getMaxPlayers();
 
