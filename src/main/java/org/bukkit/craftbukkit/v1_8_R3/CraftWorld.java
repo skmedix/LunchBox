@@ -1,29 +1,12 @@
 package org.bukkit.craftbukkit.v1_8_R3;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-
+import java.util.*;
 import com.kookykraftmc.lunchbox.LunchBox;
-import net.minecraft.block.BlockLog;
-import net.minecraft.block.BlockOldLog;
-import net.minecraft.block.BlockRedstoneDiode;
+import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.particle.EntityFirework;
-import net.minecraft.client.renderer.EnumFaceDirection;
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.entity.EntityLeashKnot;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityMinecartMobSpawner;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
@@ -31,123 +14,17 @@ import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.*;
 import net.minecraft.entity.monster.*;
 import net.minecraft.entity.passive.*;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.init.Blocks;
-import net.minecraft.server.v1_8_R3.AxisAlignedBB;
-import net.minecraft.server.v1_8_R3.BiomeBase;
-import net.minecraft.server.v1_8_R3.BlockDiodeAbstract;
-import net.minecraft.server.v1_8_R3.BlockLeaves;
-import net.minecraft.server.v1_8_R3.BlockLeaves1;
-import net.minecraft.server.v1_8_R3.BlockLog1;
-import net.minecraft.server.v1_8_R3.BlockPos;
-import net.minecraft.server.v1_8_R3.BlockWood;
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.ChunkProviderServer;
-import net.minecraft.server.v1_8_R3.EmptyChunk;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.EntityArrow;
-import net.minecraft.server.v1_8_R3.EntityBat;
-import net.minecraft.server.v1_8_R3.EntityBlaze;
-import net.minecraft.server.v1_8_R3.EntityBoat;
-import net.minecraft.server.v1_8_R3.EntityCaveSpider;
-import net.minecraft.server.v1_8_R3.EntityChicken;
-import net.minecraft.server.v1_8_R3.EntityCow;
-import net.minecraft.server.v1_8_R3.EntityCreeper;
-import net.minecraft.server.v1_8_R3.EntityEgg;
-import net.minecraft.server.v1_8_R3.EntityEnderCrystal;
-import net.minecraft.server.v1_8_R3.EntityEnderDragon;
-import net.minecraft.server.v1_8_R3.EntityEnderPearl;
-import net.minecraft.server.v1_8_R3.EntityEnderSignal;
-import net.minecraft.server.v1_8_R3.EntityEnderman;
-import net.minecraft.server.v1_8_R3.EntityEndermite;
-import net.minecraft.server.v1_8_R3.EntityExperienceOrb;
-import net.minecraft.server.v1_8_R3.EntityFallingBlock;
-import net.minecraft.server.v1_8_R3.EntityFireball;
-import net.minecraft.server.v1_8_R3.EntityFireworks;
-import net.minecraft.server.v1_8_R3.EntityGhast;
-import net.minecraft.server.v1_8_R3.EntityGiantZombie;
-import net.minecraft.server.v1_8_R3.EntityGuardian;
-import net.minecraft.server.v1_8_R3.EntityHanging;
-import net.minecraft.server.v1_8_R3.EntityHorse;
-import net.minecraft.server.v1_8_R3.EntityHuman;
-import net.minecraft.server.v1_8_R3.EntityInsentient;
-import net.minecraft.server.v1_8_R3.EntityIronGolem;
-import net.minecraft.server.v1_8_R3.EntityItem;
-import net.minecraft.server.v1_8_R3.EntityItemFrame;
-import net.minecraft.server.v1_8_R3.EntityLargeFireball;
-import net.minecraft.server.v1_8_R3.EntityLeash;
-import net.minecraft.server.v1_8_R3.EntityLightning;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityMagmaCube;
-import net.minecraft.server.v1_8_R3.EntityMinecartChest;
-import net.minecraft.server.v1_8_R3.EntityMinecartFurnace;
-import net.minecraft.server.v1_8_R3.EntityMinecartHopper;
-import net.minecraft.server.v1_8_R3.EntityMinecartMobSpawner;
-import net.minecraft.server.v1_8_R3.EntityMinecartRideable;
-import net.minecraft.server.v1_8_R3.EntityMinecartTNT;
-import net.minecraft.server.v1_8_R3.EntityMushroomCow;
-import net.minecraft.server.v1_8_R3.EntityOcelot;
-import net.minecraft.server.v1_8_R3.EntityPainting;
-import net.minecraft.server.v1_8_R3.EntityPig;
-import net.minecraft.server.v1_8_R3.EntityPigZombie;
-import net.minecraft.server.v1_8_R3.EntityPotion;
-import net.minecraft.server.v1_8_R3.EntityRabbit;
-import net.minecraft.server.v1_8_R3.EntitySheep;
-import net.minecraft.server.v1_8_R3.EntitySilverfish;
-import net.minecraft.server.v1_8_R3.EntitySkeleton;
-import net.minecraft.server.v1_8_R3.EntitySlime;
-import net.minecraft.server.v1_8_R3.EntitySmallFireball;
-import net.minecraft.server.v1_8_R3.EntitySnowball;
-import net.minecraft.server.v1_8_R3.EntitySnowman;
-import net.minecraft.server.v1_8_R3.EntitySpider;
-import net.minecraft.server.v1_8_R3.EntitySquid;
-import net.minecraft.server.v1_8_R3.EntityTNTPrimed;
-import net.minecraft.server.v1_8_R3.EntityThrownExpBottle;
-import net.minecraft.server.v1_8_R3.EntityVillager;
-import net.minecraft.server.v1_8_R3.EntityWitch;
-import net.minecraft.server.v1_8_R3.EntityWither;
-import net.minecraft.server.v1_8_R3.EntityWitherSkull;
-import net.minecraft.server.v1_8_R3.EntityWolf;
-import net.minecraft.server.v1_8_R3.EntityZombie;
-import net.minecraft.server.v1_8_R3.EnumDifficulty;
-import net.minecraft.server.v1_8_R3.EnumDirection;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.ExceptionWorldConflict;
-import net.minecraft.server.v1_8_R3.GroupDataEntity;
-import net.minecraft.server.v1_8_R3.IBlockData;
-import net.minecraft.server.v1_8_R3.IProgressUpdate;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutUpdateTime;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldEvent;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
-import net.minecraft.server.v1_8_R3.TileEntity;
-import net.minecraft.server.v1_8_R3.WorldGenAcaciaTree;
-import net.minecraft.server.v1_8_R3.WorldGenBigTree;
-import net.minecraft.server.v1_8_R3.WorldGenForest;
-import net.minecraft.server.v1_8_R3.WorldGenForestTree;
-import net.minecraft.server.v1_8_R3.WorldGenGroundBush;
-import net.minecraft.server.v1_8_R3.WorldGenHugeMushroom;
-import net.minecraft.server.v1_8_R3.WorldGenJungleTree;
-import net.minecraft.server.v1_8_R3.WorldGenMegaTree;
-import net.minecraft.server.v1_8_R3.WorldGenSwampTree;
-import net.minecraft.server.v1_8_R3.WorldGenTaiga1;
-import net.minecraft.server.v1_8_R3.WorldGenTaiga2;
-import net.minecraft.server.v1_8_R3.WorldGenTrees;
-import net.minecraft.server.v1_8_R3.WorldGenerator;
-import net.minecraft.server.v1_8_R3.WorldNBTStorage;
-import net.minecraft.server.v1_8_R3.WorldProvider;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.network.play.server.S03PacketTimeUpdate;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.world.WorldSavedData;
-import net.minecraft.world.WorldServer;
+import net.minecraft.util.*;
+import net.minecraft.world.*;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.feature.*;
-import net.minecraftforge.common.DimensionManager;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
@@ -690,28 +567,25 @@ public class CraftWorld implements World {
             break;
 
         case 6:
-            //TODO: get wood types.
-            iblockdata1 = Blocks.LOG.getBlockData().set(BlockLog1.VARIANT, BlockWood.EnumLogVariant.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().set(BlockLeaves1.VARIANT, BlockWood.EnumLogVariant.JUNGLE).set(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            iblockdata1 = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+            iblockdata2 = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenTrees(true, 4 + CraftWorld.rand.nextInt(7), iblockdata1, iblockdata2, false);
             break;
 
         case 7:
-            iblockdata1 = Blocks.LOG.getBlockData().set(BlockLog1.VARIANT, BlockWood.EnumLogVariant.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().set(BlockLeaves1.VARIANT, BlockWood.EnumLogVariant.JUNGLE).set(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            iblockdata1 = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+            iblockdata2 = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenTrees(true, 4 + CraftWorld.rand.nextInt(7), iblockdata1, iblockdata2, false);
             break;
 
         case 8:
-            iblockdata1 = Blocks.LOG.getBlockData().set(BlockLog1.VARIANT, BlockWood.EnumLogVariant.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().set(BlockLeaves1.VARIANT, BlockWood.EnumLogVariant.JUNGLE).set(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+            iblockdata1 = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+            iblockdata2 = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
             gen = new WorldGenTrees(true, 4 + CraftWorld.rand.nextInt(7), iblockdata1, iblockdata2, true);
             break;
 
         case 9:
-            iblockdata1 = Blocks.LOG.getBlockData().set(BlockLog1.VARIANT, BlockWood.EnumLogVariant.JUNGLE);
-            iblockdata2 = Blocks.LEAVES.getBlockData().set(BlockLeaves1.VARIANT, BlockWood.EnumLogVariant.OAK).set(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-            gen = new WorldGenGroundBush(iblockdata1, iblockdata2);
+            gen = new WorldGenDeadBush();
             break;
 
         case 10:
@@ -756,7 +630,7 @@ public class CraftWorld implements World {
             this.world.capturedBlockStates.clear();
             return false;
         } else {
-            Iterator iterator = this.world.capturedBlockStates.iterator();
+            Iterator iterator = this.world.capturedBlockSnapshots.iterator();
 
             while (iterator.hasNext()) {
                 BlockState blockstate = (BlockState) iterator.next();
@@ -772,7 +646,7 @@ public class CraftWorld implements World {
                 delegate.setTypeIdAndData(x, y, z, typeId, data);
                 net.minecraft.block.Block newBlock = this.world.getBlockState(position).getBlock();
 
-                this.world.markAndNotifyBlock(position, (net.minecraft.server.v1_8_R3.Chunk) null, oldBlock, newBlock, flag);
+                this.world.markAndNotifyBlock(position, (net.minecraft.world.chunk.Chunk) null, (IBlockState) oldBlock.getBlockState(), (IBlockState) newBlock.getBlockState(), flag);
             }
 
             //this.world.capturedBlockStates.clear();
@@ -795,7 +669,7 @@ public class CraftWorld implements World {
     }
 
     public UUID getUID() {
-        return this.world.getDataManager().getUUID();//todo: rework this.
+        return this.world.getSaveHandler().getUUID();//todo: rework this.
     }
 
     public String toString() {
@@ -835,7 +709,7 @@ public class CraftWorld implements World {
             CraftPlayer cp = (CraftPlayer) p;
 
             if (cp.getHandle() != null) {
-                cp.getHandle().playerConnection.sendPacket(new PacketPlayOutUpdateTime(cp.getHandle().world.getTime(), cp.getHandle().getPlayerTime(), cp.getHandle().world.getGameRules().getBoolean("doDaylightCycle")));
+                cp.getMPPlayer().playerNetServerHandler.sendPacket(new S03PacketTimeUpdate(cp.getHandle().worldObj.getWorldTime(), cp.getMPPlayer().worldObj.getWorldTime(), cp.getHandle().worldObj.getGameRules().getBoolean("doDaylightCycle")));
             }
         }
 
@@ -850,7 +724,7 @@ public class CraftWorld implements World {
     }
 
     public boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks) {
-        return !this.world.createExplosion((net.minecraft.server.v1_8_R3.Entity) null, x, y, z, power, setFire, breakBlocks).wasCanceled;
+        return !this.world.createExplosion((net.minecraft.entity.Entity) null, x, y, z, power, setFire).wasCanceled;
     }
 
     public boolean createExplosion(Location loc, float power) {
@@ -868,7 +742,7 @@ public class CraftWorld implements World {
     public void setEnvironment(World.Environment env) {
         if (this.environment != env) {
             this.environment = env;
-            this.world.worldProvider = WorldProvider.byDimension(this.environment.getId());
+            this.world.provider = WorldProvider.getProviderForDimension(this.environment.getId());//todo: world.provider is final, need to figure out how to set it.
         }
 
     }
@@ -906,42 +780,42 @@ public class CraftWorld implements World {
     }
 
     public Biome getBiome(int x, int z) {
-        return CraftBlock.biomeBaseToBiome(this.world.getBiome(new BlockPos(x, 0, z)));
+        return CraftBlock.BiomeGenBaseToBiome(this.world.getBiomeGenForCoords(new BlockPos(x, 0, z)));
     }
 
     public void setBiome(int x, int z, Biome bio) {
-        BiomeBase bb = CraftBlock.biomeToBiomeBase(bio);
+        BiomeGenBase bb = CraftBlock.biomeToBiomeGenBase(bio);
 
-        if (this.world.isLoaded(new BlockPos(x, 0, z))) {
-            net.minecraft.server.v1_8_R3.Chunk chunk = this.world.getChunkAtWorldCoords(new BlockPos(x, 0, z));
+        if (this.world.isBlockLoaded(new BlockPos(x, 0, z))) {
+            net.minecraft.world.chunk.Chunk chunk = this.world.getChunkFromBlockCoords(new BlockPos(x, 0, z));
 
             if (chunk != null) {
-                byte[] biomevals = chunk.getBiomeIndex();
+                byte[] biomevals = chunk.getBiomeArray();
 
-                biomevals[(z & 15) << 4 | x & 15] = (byte) bb.id;
+                biomevals[(z & 15) << 4 | x & 15] = (byte) bb.biomeID;
             }
         }
 
     }
 
     public double getTemperature(int x, int z) {
-        return (double) this.world.getBiome(new BlockPos(x, 0, z)).temperature;
+        return (double) this.world.getBiomeGenForCoords(new BlockPos(x, 0, z)).temperature;
     }
 
     public double getHumidity(int x, int z) {
-        return (double) this.world.getBiome(new BlockPos(x, 0, z)).humidity;
+        return (double) this.world.getBiomeGenForCoords(new BlockPos(x, 0, z)).rainfall;
     }
 
     public List getEntities() {
         ArrayList list = new ArrayList();
-        Iterator iterator = this.world.entityList.iterator();
+        Iterator iterator = this.world.loadedEntityList.iterator();
 
         while (iterator.hasNext()) {
             Object o = iterator.next();
 
-            if (o instanceof net.minecraft.server.v1_8_R3.Entity) {
-                net.minecraft.server.v1_8_R3.Entity mcEnt = (net.minecraft.server.v1_8_R3.Entity) o;
-                CraftEntity bukkitEntity = mcEnt.getBukkitEntity();
+            if (o instanceof net.minecraft.entity.Entity) {
+                net.minecraft.entity.Entity mcEnt = (net.minecraft.entity.Entity) o;
+                CraftEntity bukkitEntity = CraftEntity.getEntity(this.server, mcEnt);
 
                 if (bukkitEntity != null) {
                     list.add(bukkitEntity);
@@ -954,14 +828,14 @@ public class CraftWorld implements World {
 
     public List getLivingEntities() {
         ArrayList list = new ArrayList();
-        Iterator iterator = this.world.entityList.iterator();
+        Iterator iterator = this.world.loadedEntityList.iterator();
 
         while (iterator.hasNext()) {
             Object o = iterator.next();
 
-            if (o instanceof net.minecraft.server.v1_8_R3.Entity) {
-                net.minecraft.server.v1_8_R3.Entity mcEnt = (net.minecraft.server.v1_8_R3.Entity) o;
-                CraftEntity bukkitEntity = mcEnt.getBukkitEntity();
+            if (o instanceof net.minecraft.entity.Entity) {
+                net.minecraft.entity.Entity mcEnt = (net.minecraft.entity.Entity) o;
+                CraftEntity bukkitEntity = CraftEntity.getEntity(this.server, mcEnt);
 
                 if (bukkitEntity != null && bukkitEntity instanceof LivingEntity) {
                     list.add((LivingEntity) bukkitEntity);
@@ -980,13 +854,13 @@ public class CraftWorld implements World {
 
     public Collection getEntitiesByClass(Class clazz) {
         ArrayList list = new ArrayList();
-        Iterator iterator = this.world.entityList.iterator();
+        Iterator iterator = this.world.loadedEntityList.iterator();
 
         while (iterator.hasNext()) {
             Object entity = iterator.next();
 
-            if (entity instanceof net.minecraft.server.v1_8_R3.Entity) {
-                CraftEntity bukkitEntity = ((net.minecraft.server.v1_8_R3.Entity) entity).getBukkitEntity();
+            if (entity instanceof net.minecraft.entity.Entity) {
+                CraftEntity bukkitEntity = CraftEntity.getEntity(this.server, (net.minecraft.entity.Entity) entity);
 
                 if (bukkitEntity != null) {
                     Class bukkitClass = bukkitEntity.getClass();
@@ -1003,13 +877,13 @@ public class CraftWorld implements World {
 
     public Collection getEntitiesByClasses(Class... classes) {
         ArrayList list = new ArrayList();
-        Iterator iterator = this.world.entityList.iterator();
+        Iterator iterator = this.world.loadedEntityList.iterator();
 
         while (iterator.hasNext()) {
             Object entity = iterator.next();
 
-            if (entity instanceof net.minecraft.server.v1_8_R3.Entity) {
-                CraftEntity bukkitEntity = ((net.minecraft.server.v1_8_R3.Entity) entity).getBukkitEntity();
+            if (entity instanceof net.minecraft.entity.Entity) {
+                CraftEntity bukkitEntity = CraftEntity.getEntity(this.server, (net.minecraft.entity.Entity) entity);
 
                 if (bukkitEntity != null) {
                     Class bukkitClass = bukkitEntity.getClass();
@@ -1030,18 +904,18 @@ public class CraftWorld implements World {
 
         return list;
     }
-
+    /* LunchBox - todo later
     public Collection getNearbyEntities(Location location, double x, double y, double z) {
         if (location != null && location.getWorld().equals(this)) {
             AxisAlignedBB bb = new AxisAlignedBB(location.getX() - x, location.getY() - y, location.getZ() - z, location.getX() + x, location.getY() + y, location.getZ() + z);
-            List entityList = this.getHandle().a((net.minecraft.server.v1_8_R3.Entity) null, bb, (Predicate) null);
+            List entityList = this.getHandle().entity((net.minecraft.entity.Entity) null, bb, (Predicate) null);
             ArrayList bukkitEntityList = new ArrayList(entityList.size());
             Iterator iterator = entityList.iterator();
 
             while (iterator.hasNext()) {
                 Object entity = iterator.next();
 
-                bukkitEntityList.add(((net.minecraft.server.v1_8_R3.Entity) entity).getBukkitEntity());
+                bukkitEntityList.add(((net.minecraft.entity.Entity) entity).getBukkitEntity());
             }
 
             return bukkitEntityList;
@@ -1049,14 +923,15 @@ public class CraftWorld implements World {
             return Collections.emptyList();
         }
     }
+    */
 
     public List getPlayers() {
-        ArrayList list = new ArrayList(this.world.players.size());
-        Iterator iterator = this.world.players.iterator();
+        ArrayList list = new ArrayList(this.world.playerEntities.size());
+        Iterator iterator = this.world.playerEntities.iterator();
 
         while (iterator.hasNext()) {
-            EntityHuman human = (EntityHuman) iterator.next();
-            CraftHumanEntity bukkitEntity = human.getBukkitEntity();
+            EntityPlayerMP human = (EntityPlayerMP) iterator.next();
+            CraftHumanEntity bukkitEntity = (CraftHumanEntity) CraftEntity.getEntity(this.server, human);
 
             if (bukkitEntity != null && bukkitEntity instanceof Player) {
                 list.add((Player) bukkitEntity);
@@ -1074,27 +949,27 @@ public class CraftWorld implements World {
         this.server.checkSaveState();
 
         try {
-            boolean ex = this.world.savingDisabled;
+            boolean ex = this.world.disableLevelSaving;
 
-            this.world.savingDisabled = false;
-            this.world.save(forceSave, (IProgressUpdate) null);
-            this.world.savingDisabled = ex;
-        } catch (ExceptionWorldConflict exceptionworldconflict) {
-            exceptionworldconflict.printStackTrace();
+            this.world.disableLevelSaving = false;
+            this.world.saveAllChunks(forceSave, (IProgressUpdate) null);
+            this.world.disableLevelSaving = ex;
+        } catch (MinecraftException e) {
+            e.printStackTrace();
         }
 
     }
 
     public boolean isAutoSave() {
-        return !this.world.savingDisabled;
+        return !this.world.disableLevelSaving;
     }
 
     public void setAutoSave(boolean value) {
-        this.world.savingDisabled = !value;
+        this.world.disableLevelSaving = !value;
     }
 
     public void setDifficulty(Difficulty difficulty) {
-        this.getHandle().worldData.setDifficulty(EnumDifficulty.getById(difficulty.getValue()));
+        this.getHandle().getWorldInfo().setDifficulty(EnumDifficulty.getDifficultyEnum(difficulty.getValue()));
     }
 
     public Difficulty getDifficulty() {
@@ -1106,47 +981,47 @@ public class CraftWorld implements World {
     }
 
     public boolean hasStorm() {
-        return this.world.worldData.hasStorm();
+        return this.world.getWorldInfo().isRaining();
     }
 
     public void setStorm(boolean hasStorm) {
-        this.world.worldData.setStorm(hasStorm);
+        this.world.getWorldInfo().setRaining(hasStorm);
     }
 
     public int getWeatherDuration() {
-        return this.world.worldData.getWeatherDuration();
+        return this.world.getWorldInfo().getCleanWeatherTime();
     }
 
     public void setWeatherDuration(int duration) {
-        this.world.worldData.setWeatherDuration(duration);
+        this.world.getWorldInfo().setCleanWeatherTime(duration);
     }
 
     public boolean isThundering() {
-        return this.world.worldData.isThundering();
+        return this.world.getWorldInfo().isThundering();
     }
 
     public void setThundering(boolean thundering) {
-        this.world.worldData.setThundering(thundering);
+        this.world.getWorldInfo().setThundering(thundering);
     }
 
     public int getThunderDuration() {
-        return this.world.worldData.getThunderDuration();
+        return this.world.getWorldInfo().getThunderTime();
     }
 
     public void setThunderDuration(int duration) {
-        this.world.worldData.setThunderDuration(duration);
+        this.world.getWorldInfo().setThunderTime(duration);
     }
 
     public long getSeed() {
-        return this.world.worldData.getSeed();
+        return this.world.getWorldInfo().getSeed();
     }
 
     public boolean getPVP() {
-        return this.world.pvpMode;
+        return this.world.getMinecraftServer().isPVPEnabled();
     }
 
     public void setPVP(boolean pvp) {
-        this.world.pvpMode = pvp;
+        this.world.getMinecraftServer().setAllowPvp(pvp);
     }
 
     public void playEffect(Player player, Effect effect, int data) {
@@ -1196,11 +1071,11 @@ public class CraftWorld implements World {
         double x = (double) location.getBlockX() + 0.5D;
         double y = (double) location.getBlockY() + 0.5D;
         double z = (double) location.getBlockZ() + 0.5D;
-        EntityFallingBlock entity = new EntityFallingBlock(this.world, x, y, z, net.minecraft.server.v1_8_R3.Block.getById(material.getId()).fromLegacyData(data));
+        EntityFallingBlock entity = new EntityFallingBlock(this.world, x, y, z, net.minecraft.block.Block.getStateById(material.getId()));
 
-        entity.ticksLived = 1;
-        this.world.addEntity(entity, CreatureSpawnEvent.SpawnReason.CUSTOM);
-        return (FallingBlock) entity.getBukkitEntity();
+        entity.ticksExisted = 1;
+        this.world.spawnEntityInWorld(entity/*, CreatureSpawnEvent.SpawnReason.CUSTOM*/);
+        return (FallingBlock) CraftEntity.getEntity(this.server, entity);
     }
 
     public FallingBlock spawnFallingBlock(Location location, int blockId, byte blockData) throws IllegalArgumentException {
@@ -1547,7 +1422,7 @@ public class CraftWorld implements World {
     }
 
     public long getTicksPerAnimalSpawns() {
-        return this.world.;
+        return this.server.getTicksPerAnimalSpawns();
     }
 
     public void setTicksPerAnimalSpawns(int ticksPerAnimalSpawns) {
@@ -1616,12 +1491,12 @@ public class CraftWorld implements World {
             double y = loc.getY();
             double z = loc.getZ();
 
-            this.getHandle().makeSound(x, y, z, CraftSound.getSound(sound), volume, pitch);
+            this.getHandle().playSound(x, y, z, CraftSound.getSound(sound), volume, pitch, false);
         }
     }
 
     public String getGameRuleValue(String rule) {
-        return this.getHandle().getGameRules().get(rule);
+        return this.getHandle().getGameRules().getString(rule);
     }
 
     public boolean setGameRuleValue(String rule, String value) {
@@ -1629,7 +1504,7 @@ public class CraftWorld implements World {
             if (!this.isGameRule(rule)) {
                 return false;
             } else {
-                this.getHandle().getGameRules().set(rule, value);
+                this.getHandle().getGameRules().setOrCreateGameRule(rule, value);
                 return true;
             }
         } else {
@@ -1638,11 +1513,11 @@ public class CraftWorld implements World {
     }
 
     public String[] getGameRules() {
-        return this.getHandle().getGameRules().getGameRules();
+        return this.getHandle().getGameRules().getRules();
     }
 
     public boolean isGameRule(String rule) {
-        return this.getHandle().getGameRules().contains(rule);
+        return Arrays.asList(this.getHandle().getGameRules()).contains(rule);
     }
 
     public WorldBorder getWorldBorder() {
@@ -1665,22 +1540,24 @@ public class CraftWorld implements World {
             this.chunkGCTickCount = 0;
         }
 
-        ChunkProviderServer cps = this.world.chunkProviderServer;
-        Iterator iterator = cps.chunks.values().iterator();
+        ChunkProviderServer cps = this.world.theChunkProviderServer;
+        Iterator iterator = cps.loadedChunks.iterator();
 
         while (iterator.hasNext()) {
-            net.minecraft.server.v1_8_R3.Chunk chunk = (net.minecraft.server.v1_8_R3.Chunk) iterator.next();
+            net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) iterator.next();
 
-            if (!this.isChunkInUse(chunk.locX, chunk.locZ) && !cps.unloadQueue.contains(chunk.locX, chunk.locZ)) {
-                cps.queueUnload(chunk.locX, chunk.locZ);
+            if (!this.isChunkInUse(chunk.xPosition, chunk.zPosition) && !cps.unl.contains(chunk.locX, chunk.locZ)) {
+                cps.unloadQueuedChunks(chunk.locX, chunk.locZ);
             }
         }
 
     }
 
+    /* LunchBox - remove for now
     public World.Spigot spigot() {
         return this.spigot;
     }
+    */
 
     static int[] $SWITCH_TABLE$org$bukkit$TreeType() {
         int[] aint = CraftWorld.$SWITCH_TABLE$org$bukkit$TreeType;

@@ -1,6 +1,6 @@
 package org.bukkit.craftbukkit.v1_8_R3;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Sound;
 
 public class CraftSound {

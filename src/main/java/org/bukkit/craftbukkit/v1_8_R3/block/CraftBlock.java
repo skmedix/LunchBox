@@ -420,7 +420,7 @@ public class CraftBlock implements Block {
         return this.getWorld().getBiome(this.x, this.z);
     }
 
-    public vobiomeID setBiome(Biome bio) {
+    public void setBiome(Biome bio) {
         this.getWorld().setBiome(this.x, this.z, bio);
     }
 

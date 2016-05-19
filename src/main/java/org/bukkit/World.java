@@ -268,7 +268,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
 
     boolean isGameRule(String s);
 
-    World.Spigot spigot();
+    //World.Spigot spigot(); todo later
 
     WorldBorder getWorldBorder();
 
@@ -308,6 +308,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
         }
     }
 
+    /* Todo later
     public static class Spigot {
 
         public void playEffect(Location location, Effect effect) {
@@ -326,4 +327,5 @@ public interface World extends PluginMessageRecipient, Metadatable {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
+    */
 }
