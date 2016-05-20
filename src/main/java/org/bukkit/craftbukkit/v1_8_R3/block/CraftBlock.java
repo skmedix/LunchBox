@@ -5,23 +5,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.block.BlockCocoa;
+import net.minecraft.block.BlockRedstoneWire;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.EnumFaceDirection;
-import net.minecraft.server.v1_8_R3.BiomeGenBase;
-import net.minecraft.server.v1_8_R3.BlockCocoa;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.BlockRedstoneWire;
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.EnumDirection;
-import net.minecraft.server.v1_8_R3.EnumSkyBlock;
-import net.minecraft.server.v1_8_R3.GameProfileSerializer;
-import net.minecraft.server.v1_8_R3.IBlockState;
-import net.minecraft.server.v1_8_R3.Item;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.TileEntitySkull;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTUtil;
+import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.biome.BiomeCache;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -48,7 +42,7 @@ public class CraftBlock implements Block {
     private final int z;
     private static final Biome[] BIOME_MAPPING = new Biome[BiomeGenBase.getBiomeGenArray().length];
     private static final BiomeGenBase[] BiomeGenBase_MAPPING = new BiomeGenBase[Biome.values().length];
-    private static int[] $SWITCH_TABLE$net$minecraft$server$EnumDirection;
+    private static int[] $SWITCH_TABLE$net$minecraft$server$EnumFacing;
     private static int[] $SWITCH_TABLE$org$bukkit$block$BlockFace;
     private static int[] $SWITCH_TABLE$org$bukkit$Material;
 
@@ -213,7 +207,22 @@ public class CraftBlock implements Block {
     }
 
     public void setType(Material type, boolean applyPhysics) {
-        this.setTypebiomeID(type.(), applyPhysics);
+        this.setTypebiomeID(type.getId(), applyPhysics);
+    }
+
+    @Override
+    public boolean setTypeId(int i) {
+        return false;
+    }
+
+    @Override
+    public boolean setTypeId(int i, boolean flag) {
+        return false;
+    }
+
+    @Override
+    public boolean setTypeIdAndData(int i, byte b0, boolean flag) {
+        return false;
     }
 
     public boolean setTypebiomeID(int type) {
@@ -247,22 +256,26 @@ public class CraftBlock implements Block {
         return Material.getMaterial(this.getTypebiomeID());
     }
 
+    public int getTypeId() {
+        return this.getTypebiomeID();
+    }
+
     /** @deprecated */
     @Deprecated
     public int getTypebiomeID() {
-        return CraftMagicNumbers.getbiomeID(this.chunk.getHandle().getType(new BlockPosition(this.x, this.y, this.z)));
+        return CraftMagicNumbers.getId(this.chunk.getHandle().getBlock(new BlockPos(this.x, this.y, this.z)));
     }
 
     public byte getLightLevel() {
-        return (byte) this.chunk.getHandle().getWorld().getLightLevel(new BlockPosition(this.x, this.y, this.z));
+        return (byte) this.chunk.getHandle().getWorld().getLight(new BlockPos(this.x, this.y, this.z));
     }
 
     public byte getLightFromSky() {
-        return (byte) this.chunk.getHandle().getBrightness(EnumSkyBlock.SKY, new BlockPosition(this.x, this.y, this.z));
+        return (byte) this.chunk.getHandle().getLightFor(EnumSkyBlock.SKY, new BlockPos(this.x, this.y, this.z));
     }
 
     public byte getLightFromBlocks() {
-        return (byte) this.chunk.getHandle().getBrightness(EnumSkyBlock.BLOCK, new BlockPosition(this.x, this.y, this.z));
+        return (byte) this.chunk.getHandle().getLightFor(EnumSkyBlock.BLOCK.BLOCK, new BlockPos(this.x, this.y, this.z));
     }
 
     public Block getFace(BlockFace face) {
@@ -305,11 +318,11 @@ public class CraftBlock implements Block {
         return "CraftBlock{chunk=" + this.chunk + ",x=" + this.x + ",y=" + this.y + ",z=" + this.z + ",type=" + this.getType() + ",data=" + this.getData() + '}';
     }
 
-    public static BlockFace notchToBlockFace(EnumDirection notch) {
+    public static BlockFace notchToBlockFace(EnumFacing notch) {
         if (notch == null) {
             return BlockFace.SELF;
         } else {
-            switch ($SWITCH_TABLE$net$minecraft$server$EnumDirection()[notch.ordinal()]) {
+            switch ($SWITCH_TABLE$net$minecraft$server$EnumFacing()[notch.ordinal()]) {
             case 1:
                 return BlockFace.DOWN;
 
@@ -425,7 +438,7 @@ public class CraftBlock implements Block {
     }
 
     public static Biome BiomeGenBaseToBiome(BiomeGenBase base) {
-        return base == null ? null : CraftBlock.BIOME_MAPPING[base.biomebiomeID];
+        return base == null ? null : CraftBlock.BIOME_MAPPING[base.biomeID];
     }
 
     public static BiomeGenBase biomeToBiomeGenBase(Biome bio) {
@@ -436,16 +449,21 @@ public class CraftBlock implements Block {
         return this.getWorld().getTemperature(this.x, this.z);
     }
 
+    @Override
+    public double getHumidity() {
+        return 0;
+    }
+
     public double getHumbiomeIDity() {
-        return this.getWorld().getHumbiomeIDity(this.x, this.z);
+        return this.getWorld().getHumidity(this.x, this.z);
     }
 
     public boolean isBlockPowered() {
-        return this.chunk.getHandle().getWorld().getBlockPower(new BlockPosition(this.x, this.y, this.z)) > 0;
+        return this.chunk.getHandle().getWorld().isBlockPowered(new BlockPos(this.x, this.y, this.z));
     }
 
     public boolean isBlockIndirectlyPowered() {
-        return this.chunk.getHandle().getWorld().isBlockIndirectlyPowered(new BlockPosition(this.x, this.y, this.z));
+        return this.chunk.getHandle().getWorld().isBlockIndirectlyGettingPowered(new BlockPos(this.x, this.y, this.z)) > 0;
     }
 
     public boolean equals(Object o) {
@@ -465,11 +483,11 @@ public class CraftBlock implements Block {
     }
 
     public boolean isBlockFacePowered(BlockFace face) {
-        return this.chunk.getHandle().getWorld().isBlockFacePowered(new BlockPosition(this.x, this.y, this.z), blockFaceToNotch(face));
+        return this.chunk.getHandle().getWorld().isSidePowered(new BlockPos(this.x, this.y, this.z), blockFaceToNotch(face));
     }
 
     public boolean isBlockFaceIndirectlyPowered(BlockFace face) {
-        int power = this.chunk.getHandle().getWorld().getBlockFacePower(new BlockPosition(this.x, this.y, this.z), blockFaceToNotch(face));
+        int power = this.chunk.getHandle().getWorld().isBlockIndirectlyGettingPowered(new BlockPos(this.x, this.y, this.z));
         Block relative = this.getRelative(face);
 
         return relative.getType() == Material.REDSTONE_WIRE ? Math.max(power, relative.getData()) > 0 : power > 0;
@@ -477,31 +495,31 @@ public class CraftBlock implements Block {
 
     public int getBlockPower(BlockFace face) {
         int power = 0;
-        BlockRedstoneWire wire = Blocks.REDSTONE_WIRE;
-        net.minecraft.server.v1_8_R3.World world = this.chunk.getHandle().getWorld();
+        BlockRedstoneWire wire = Blocks.redstone_wire;
+        net.minecraft.world.World world = this.chunk.getHandle().getWorld();
 
-        if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isBlockFacePowered(new BlockPosition(this.x, this.y - 1, this.z), EnumDirection.DOWN)) {
-            power = wire.getPower(world, new BlockPosition(this.x, this.y - 1, this.z), power);
+        if ((face == BlockFace.DOWN || face == BlockFace.SELF) && world.isSidePowered(new BlockPos(this.x, this.y - 1, this.z), EnumFacing.DOWN)) {
+            power = wire.getWeakPower(world, new BlockPos(this.x, this.y - 1, this.z), (IBlockState) this.getState(), EnumFacing.DOWN);
         }
 
-        if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isBlockFacePowered(new BlockPosition(this.x, this.y + 1, this.z), EnumDirection.UP)) {
-            power = wire.getPower(world, new BlockPosition(this.x, this.y + 1, this.z), power);
+        if ((face == BlockFace.UP || face == BlockFace.SELF) && world.isSidePowered(new BlockPos(this.x, this.y + 1, this.z), EnumFacing.UP)) {
+            power = wire.getWeakPower(world, new BlockPos(this.x, this.y - 1, this.z), (IBlockState) this.getState(), EnumFacing.UP);
         }
 
-        if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isBlockFacePowered(new BlockPosition(this.x + 1, this.y, this.z), EnumDirection.EAST)) {
-            power = wire.getPower(world, new BlockPosition(this.x + 1, this.y, this.z), power);
+        if ((face == BlockFace.EAST || face == BlockFace.SELF) && world.isSidePowered(new BlockPos(this.x + 1, this.y, this.z), EnumFacing.EAST)) {
+            power = wire.getWeakPower(world, new BlockPos(this.x, this.y - 1, this.z), (IBlockState) this.getState(), EnumFacing.EAST);
         }
 
-        if ((face == BlockFace.WEST || face == BlockFace.SELF) && world.isBlockFacePowered(new BlockPosition(this.x - 1, this.y, this.z), EnumDirection.WEST)) {
-            power = wire.getPower(world, new BlockPosition(this.x - 1, this.y, this.z), power);
+        if ((face == BlockFace.WEST || face == BlockFace.SELF) && world.isSidePowered(new BlockPos(this.x - 1, this.y, this.z), EnumFacing.WEST)) {
+            power = wire.getWeakPower(world, new BlockPos(this.x, this.y - 1, this.z), (IBlockState) this.getState(), EnumFacing.WEST);
         }
 
-        if ((face == BlockFace.NORTH || face == BlockFace.SELF) && world.isBlockFacePowered(new BlockPosition(this.x, this.y, this.z - 1), EnumDirection.NORTH)) {
-            power = wire.getPower(world, new BlockPosition(this.x, this.y, this.z - 1), power);
+        if ((face == BlockFace.NORTH || face == BlockFace.SELF) && world.isSidePowered(new BlockPos(this.x, this.y, this.z - 1), EnumFacing.NORTH)) {
+            power = wire.getWeakPower(world, new BlockPos(this.x, this.y - 1, this.z), (IBlockState) this.getState(), EnumFacing.NORTH);
         }
 
-        if ((face == BlockFace.SOUTH || face == BlockFace.SELF) && world.isBlockFacePowered(new BlockPosition(this.x, this.y, this.z + 1), EnumDirection.SOUTH)) {
-            power = wire.getPower(world, new BlockPosition(this.x, this.y, this.z - 1), power);
+        if ((face == BlockFace.SOUTH || face == BlockFace.SELF) && world.isSidePowered(new BlockPos(this.x, this.y, this.z + 1), EnumFacing.SOUTH)) {
+            power = wire.getWeakPower(world, new BlockPos(this.x, this.y - 1, this.z), (IBlockState) this.getState(), EnumFacing.SOUTH);
         }
 
         int i;
@@ -536,73 +554,78 @@ public class CraftBlock implements Block {
         return this.getType() == Material.AIR;
     }
 
+    @Override
+    public boolean isLiquid() {
+        return false;
+    }
+
     public boolean isLiqubiomeID() {
         return this.getType() == Material.WATER || this.getType() == Material.STATIONARY_WATER || this.getType() == Material.LAVA || this.getType() == Material.STATIONARY_LAVA;
     }
 
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getBybiomeID(this.getNMSBlock().getMaterial().getPushReaction());
+        return PistonMoveReaction.getById(this.getNMSBlock().getMaterial().getMaterialMobility());
     }
 
     private boolean itemCausesDrops(ItemStack item) {
-        net.minecraft.server.v1_8_R3.Block block = this.getNMSBlock();
-        Item itemType = item != null ? Item.getBybiomeID(item.getTypebiomeID()) : null;
+        net.minecraft.block.Block block = this.getNMSBlock();
+        Item itemType = item != null ? Item.getItemById(item.getTypeId()) : null;
 
-        return block != null && (block.getMaterial().isAlwaysDestroyable() || itemType != null && itemType.canDestroySpecialBlock(block));
+        return block != null && (block.getMaterial().isToolNotRequired() || itemType != null && itemType.canHarvestBlock(block));
     }
 
     public boolean breakNaturally() {
-        net.minecraft.server.v1_8_R3.Block block = this.getNMSBlock();
+        net.minecraft.block.Block block = this.getNMSBlock();
         byte data = this.getData();
         boolean result = false;
 
-        if (block != null && block != Blocks.AIR) {
-            block.dropNaturally(this.chunk.getHandle().getWorld(), new BlockPosition(this.x, this.y, this.z), block.fromLegacyData(data), 1.0F, 0);
+        if (block != null && block != Blocks.air) {
+            block.dropBlockAsItemWithChance(this.chunk.getHandle().getWorld(), new BlockPos(this.x, this.y, this.z), block.getStateFromMeta(data), 1.0F, 0);
             result = true;
         }
 
-        this.setTypebiomeID(Material.AIR.getbiomeID());
+        this.setTypebiomeID(Material.AIR.getId());
         return result;
     }
 
     public boolean breakNaturally(ItemStack item) {
-        return this.itemCausesDrops(item) ? this.breakNaturally() : this.setTypebiomeID(Material.AIR.getbiomeID());
+        return this.itemCausesDrops(item) ? this.breakNaturally() : this.setTypebiomeID(Material.AIR.getId());
     }
 
-    public Collection getDrops() {
+    public Collection<net.minecraft.item.ItemStack> getDrops() {
         ArrayList drops = new ArrayList();
-        net.minecraft.server.v1_8_R3.Block block = this.getNMSBlock();
+        net.minecraft.block.Block block = this.getNMSBlock();
 
-        if (block != Blocks.AIR) {
+        if (block != Blocks.air) {
             byte data = this.getData();
-            int count = block.getDropCount(0, this.chunk.getHandle().getWorld().random);
+            int count = block.quantityDroppedWithBonus(0, this.chunk.getHandle().getWorld().rand);
 
             for (int i = 0; i < count; ++i) {
-                Item item = block.getDropType(block.fromLegacyData(data), this.chunk.getHandle().getWorld().random, 0);
+                Item item = block.getItemDropped(block.getStateFromMeta(data), this.chunk.getHandle().getWorld().rand, 0);
 
                 if (item != null) {
-                    if (Blocks.SKULL == block) {
-                        net.minecraft.server.v1_8_R3.ItemStack age = new net.minecraft.server.v1_8_R3.ItemStack(item, 1, block.getDropData(this.chunk.getHandle().getWorld(), new BlockPosition(this.x, this.y, this.z)));
-                        TileEntitySkull dropAmount = (TileEntitySkull) this.chunk.getHandle().getWorld().getTileEntity(new BlockPosition(this.x, this.y, this.z));
+                    if (Blocks.skull == block) {
+                        net.minecraft.item.ItemStack age = new net.minecraft.item.ItemStack(item, 1, block.getDamageValue(this.chunk.getHandle().getWorld(), new BlockPos(this.x, this.y, this.z)));
+                        TileEntitySkull dropAmount = (TileEntitySkull) this.chunk.getHandle().getWorld().getTileEntity(new BlockPos(this.x, this.y, this.z));
 
-                        if (dropAmount.getSkullType() == 3 && dropAmount.getGameProfile() != null) {
-                            age.setTag(new NBTTagCompound());
+                        if (dropAmount.getSkullType() == 3 && dropAmount.getPlayerProfile() != null) {
+                            age.setTagCompound(new NBTTagCompound());
                             NBTTagCompound j = new NBTTagCompound();
 
-                            GameProfileSerializer.serialize(j, dropAmount.getGameProfile());
-                            age.getTag().set("SkullOwner", j);
+                            NBTUtil.writeGameProfile(j, dropAmount.getPlayerProfile());
+                            age.getTagCompound().setTag("SkullOwner", j);
                         }
 
                         drops.add(CraftItemStack.asBukkitCopy(age));
-                    } else if (Blocks.COCOA == block) {
-                        int i = ((Integer) block.fromLegacyData(data).get(BlockCocoa.AGE)).intValue();
-                        int j = i >= 2 ? 3 : 1;
+                    } else if (Blocks.cocoa == block) {
+                        int ii = ((Integer) block.getStateFromMeta(data).getValue(BlockCocoa.AGE)).intValue();
+                        int j = ii >= 2 ? 3 : 1;
 
                         for (int k = 0; k < j; ++k) {
                             drops.add(new ItemStack(Material.INK_SACK, 1, (short) 3));
                         }
                     } else {
-                        drops.add(new ItemStack(CraftMagicNumbers.getMaterial(item), 1, (short) block.getDropData(block.fromLegacyData(data))));
+                        drops.add(new ItemStack(CraftMagicNumbers.getMaterial(item), 1, (short) block.damageDropped(block.getStateFromMeta(data))));
                     }
                 }
             }
@@ -615,7 +638,7 @@ public class CraftBlock implements Block {
         return (Collection) (this.itemCausesDrops(item) ? this.getDrops() : Collections.emptyList());
     }
 
-    public vobiomeID setMetadata(String metadataKey, MetadataValue newMetadataValue) {
+    public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
         this.chunk.getCraftWorld().getBlockMetadata().setMetadata((Block) this, metadataKey, newMetadataValue);
     }
 
@@ -627,55 +650,55 @@ public class CraftBlock implements Block {
         return this.chunk.getCraftWorld().getBlockMetadata().hasMetadata((Block) this, metadataKey);
     }
 
-    public vobiomeID removeMetadata(String metadataKey, Plugin owningPlugin) {
+    public void removeMetadata(String metadataKey, Plugin owningPlugin) {
         this.chunk.getCraftWorld().getBlockMetadata().removeMetadata((Block) this, metadataKey, owningPlugin);
     }
 
-    static int[] $SWITCH_TABLE$net$minecraft$server$EnumDirection() {
-        int[] aint = CraftBlock.$SWITCH_TABLE$net$minecraft$server$EnumDirection;
+    static int[] $SWITCH_TABLE$net$minecraft$server$EnumFacing() {
+        int[] aint = CraftBlock.$SWITCH_TABLE$net$minecraft$server$EnumFacing;
 
-        if (CraftBlock.$SWITCH_TABLE$net$minecraft$server$EnumDirection != null) {
+        if (CraftBlock.$SWITCH_TABLE$net$minecraft$server$EnumFacing != null) {
             return aint;
         } else {
-            int[] aint1 = new int[EnumDirection.values().length];
+            int[] aint1 = new int[EnumFacing.values().length];
 
             try {
-                aint1[EnumDirection.DOWN.ordinal()] = 1;
+                aint1[EnumFacing.DOWN.ordinal()] = 1;
             } catch (NoSuchFieldError nosuchfielderror) {
                 ;
             }
 
             try {
-                aint1[EnumDirection.EAST.ordinal()] = 6;
+                aint1[EnumFacing.EAST.ordinal()] = 6;
             } catch (NoSuchFieldError nosuchfielderror1) {
                 ;
             }
 
             try {
-                aint1[EnumDirection.NORTH.ordinal()] = 3;
+                aint1[EnumFacing.NORTH.ordinal()] = 3;
             } catch (NoSuchFieldError nosuchfielderror2) {
                 ;
             }
 
             try {
-                aint1[EnumDirection.SOUTH.ordinal()] = 4;
+                aint1[EnumFacing.SOUTH.ordinal()] = 4;
             } catch (NoSuchFieldError nosuchfielderror3) {
                 ;
             }
 
             try {
-                aint1[EnumDirection.UP.ordinal()] = 2;
+                aint1[EnumFacing.UP.ordinal()] = 2;
             } catch (NoSuchFieldError nosuchfielderror4) {
                 ;
             }
 
             try {
-                aint1[EnumDirection.WEST.ordinal()] = 5;
+                aint1[EnumFacing.WEST.ordinal()] = 5;
             } catch (NoSuchFieldError nosuchfielderror5) {
                 ;
             }
 
-            CraftBlock.$SWITCH_TABLE$net$minecraft$server$EnumDirection = aint1;
+            CraftBlock.$SWITCH_TABLE$net$minecraft$server$EnumFacing = aint1;
             return aint1;
         }
     }
@@ -1560,7 +1583,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.FERMENTED_SPbiomeIDER_EYE.ordinal()] = 319;
+                aint1[Material.FERMENTED_SPIDER_EYE.ordinal()] = 319;
             } catch (NoSuchFieldError nosuchfielderror124) {
                 ;
             }
@@ -2250,7 +2273,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.OBSbiomeIDIAN.ordinal()] = 50;
+                aint1[Material.OBSIDIAN.ordinal()] = 50;
             } catch (NoSuchFieldError nosuchfielderror239) {
                 ;
             }
@@ -2424,7 +2447,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.RABBIT_HbiomeIDE.ordinal()] = 358;
+                aint1[Material.RABBIT_HIDE.ordinal()] = 358;
             } catch (NoSuchFieldError nosuchfielderror268) {
                 ;
             }
@@ -2748,7 +2771,7 @@ public class CraftBlock implements Block {
             }
 
             try {
-                aint1[Material.SPbiomeIDER_EYE.ordinal()] = 318;
+                aint1[Material.SPIDER_EYE.ordinal()] = 318;
             } catch (NoSuchFieldError nosuchfielderror322) {
                 ;
             }

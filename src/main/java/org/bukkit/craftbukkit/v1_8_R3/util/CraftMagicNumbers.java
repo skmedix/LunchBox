@@ -74,7 +74,7 @@ public final class CraftMagicNumbers implements UnsafeValues {
     }
 
     public Material getMaterialFromInternalName(String name) {
-        return getMaterial((net.minecraft.item.Item) net.minecraft.item.Item.itemRegistry.getObject(name));
+        return getMaterial(net.minecraft.item.Item.getByNameOrId(name));
     }
 
     public List<String> tabCompleteInternalMaterialName(String token, List completions) {
