@@ -59,7 +59,9 @@ import net.minecraft.util.IProgressUpdate;
 import net.minecraft.world.*;
 import net.minecraft.world.chunk.storage.RegionFile;
 import net.minecraft.world.chunk.storage.RegionFileCache;
+import net.minecraft.world.storage.MapData;
 import net.minecraftforge.common.DimensionManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.*;
 import org.bukkit.World;
@@ -114,6 +116,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
+import org.bukkit.map.MapView;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
@@ -622,11 +625,9 @@ public final class CraftServer implements Server {
         return this.configuration.getString("settings.update-folder", "update");
     }
 
-    /* LunchBox - gonna remove this probably
     public File getUpdateFolderFile() {
-        return new File((File) this.console.options.valueOf("plugins"), this.configuration.getString("settings.update-folder", "update"));
+        return null;
     }
-    */
 
     public long getConnectionThrottle() {
         return SpigotConfig.bungee ? -1L : (long) this.configuration.getInt("settings.connection-throttle");
@@ -1037,7 +1038,7 @@ public final class CraftServer implements Server {
             } else if (handle.playerEntities.size() > 0) {
                 return false;
             } else {
-                WorldUnloadEvent e = new WorldUnloadEvent(handle.getWorld());
+                WorldUnloadEvent e = new WorldUnloadEvent(world);
 
                 this.pluginManager.callEvent(e);
                 if (e.isCancelled()) {
@@ -1107,6 +1108,11 @@ public final class CraftServer implements Server {
         return null;
     }
 
+    @Override
+    public MapView getMap(short short0) {
+        return null;
+    }
+
     public void addWorld(World world) {
         if (this.getWorld(world.getUID()) != null) {
             System.out.println("World " + world.getName() + " is a duplicate of another world and has been prevented from loading. Please delete the uid.dat file from " + world.getName() + "\'s world directory if you want to be able to load the duplicate world.");
@@ -1121,7 +1127,7 @@ public final class CraftServer implements Server {
 
     public ConsoleReader getReader() {
         if (System.console() == null) {
-            System.setProperty("jline.terminal", "jline.UnsupportedTerminal")
+            System.setProperty("jline.terminal", "jline.UnsupportedTerminal");
         }
         ConsoleReader reader = null;
         try {
@@ -1210,8 +1216,8 @@ public final class CraftServer implements Server {
     }
     //TODO: Rework resetRecipes() to use forge methods.
     public void resetRecipes() {
-        CraftingManager.getInstance() = (new CraftingManager()).getRecipeList();
-        FurnaceRecipes.instance().getSmeltingList() = FurnaceRecipes.getSmeltingList();
+        CraftingManager.getInstance().recipes = new CraftingManager().recipes;
+        FurnaceRecipes.instance().smeltingList = FurnaceRecipes.smeltingList;
         FurnaceRecipes.instance().getSmeltingList().clear();
     }
 
@@ -1320,8 +1326,8 @@ public final class CraftServer implements Server {
     public CraftMapView createMap(World world) {
         Validate.notNull(world, "World cannot be null");
         net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(Items.map, 1, -1);
-        WorldMap worldmap = Items.filled_map.getMapData(stack, (net.minecraft.world.World) world);
-        return worldmap;
+        MapData worldmap = Items.filled_map.getMapData(stack, (net.minecraft.world.World) world);
+        return new CraftMapView(worldmap);
     }
 
     public void shutdown() {
@@ -1461,13 +1467,13 @@ public final class CraftServer implements Server {
         while (iterator.hasNext()) {
             World world = (World) iterator.next();
 
-            ((CraftWorld) world).getHandle().world.setGameType(WorldSettings.EnumGamemode.getById(mode.getValue()));
+            ((CraftWorld) world).getHandle().getWorldInfo().setGameType(WorldSettings.GameType.getByID(mode.getValue()));
         }
 
     }
 
     public ConsoleCommandSender getConsoleSender() {
-        return this.console.console;
+        return (ConsoleCommandSender) this.console.getCommandSenderEntity();
     }
 
     public EntityMetadataStore getEntityMetadata() {
