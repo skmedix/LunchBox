@@ -67,7 +67,7 @@ public final class Bukkit {
         return Bukkit.server._getOnlinePlayers();
     }
 
-    public static Collection<? extends Player getOnlinePlayers() {
+    public static Collection<? extends Player> getOnlinePlayers() {
         return Bukkit.server.getOnlinePlayers();
     }
 

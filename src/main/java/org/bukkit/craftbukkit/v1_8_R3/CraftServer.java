@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1214,8 +1215,17 @@ public final class CraftServer implements Server {
         CraftingManager.getInstance().getRecipeList().clear();
         FurnaceRecipes.instance().getSmeltingList().clear();
     }
-    //TODO: Rework resetRecipes() to use forge methods.
+    //TODO: Rework resetRecipes() to use forge methods. Will need asm.
     public void resetRecipes() {
+        try {
+            Class cM = Class.forName("net.minecraft.item.crafting.CraftingManagerx");
+            Field f = cM.getField("recipes");
+            f.setAccessible(true);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
         CraftingManager.getInstance().recipes = new CraftingManager().recipes;
         FurnaceRecipes.instance().smeltingList = FurnaceRecipes.smeltingList;
         FurnaceRecipes.instance().getSmeltingList().clear();
