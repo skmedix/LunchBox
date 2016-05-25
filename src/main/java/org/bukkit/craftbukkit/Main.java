@@ -10,7 +10,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
+
+import net.minecraft.server.MinecraftServer;
+
 import org.bukkit.craftbukkit.libs.jline.UnsupportedTerminal;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionException;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionParser;
@@ -107,7 +109,7 @@ public class Main {
                     }
 
                     System.out.println("Loading libraries, please wait...");
-                    MinecraftServer.main(options);
+                    //MinecraftServer.main(options.nonOptionArguments()); remove for now todo.
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }

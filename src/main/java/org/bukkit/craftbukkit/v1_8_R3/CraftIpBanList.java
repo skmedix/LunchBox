@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import net.minecraft.server.management.IPBanEntry;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;

@@ -10,13 +10,12 @@ import java.util.Map;
 
 public class Loader implements IFMLLoadingPlugin {
     @Override
-    public String[] getASMTransformerClass() {
-        return new String[]{ Transformer.class.getName() };
-    }
+    public String[] getASMTransformerClass() { return null; }
+
 
     @Override
     public String getModContainerClass() {
-        return null;
+        return LBDummy.class.getName();
     }
 
     @Override
@@ -31,6 +30,6 @@ public class Loader implements IFMLLoadingPlugin {
 
     @Override
     public String getAccessTransformerClass() {
-        return null;
+        return AccessTransformerLB.class.getName();
     }
 }

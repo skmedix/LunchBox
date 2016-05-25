@@ -9,32 +9,37 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.mojang.authlib.GameProfileRepository;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.UserListBans;
+import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.v1_8_R3.GameProfileBanEntry;
 import net.minecraft.server.v1_8_R3.GameProfileBanList;
 import net.minecraft.server.v1_8_R3.JsonListEntry;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 
 public class CraftProfileBanList implements BanList {
 
-    private final net.minecraft.server.management.BanList list;
+    private final UserListBans list;
 
-    public CraftProfileBanList(BanList list) {
+    public CraftProfileBanList(UserListBans list) {
         this.list = list;
     }
 
     public BanEntry getBanEntry(String target) {
         Validate.notNull(target, "Target cannot be null");
-        GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(target);
+        GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(target);
 
         if (profile == null) {
             return null;
         } else {
-            GameProfileBanEntry entry = (GameProfileBanEntry) this.list.get(profile);
+            UserListBansEntry entry = this.list.getEntry(profile);
 
             return entry == null ? null : new CraftProfileBanEntry(profile, entry, this.list);
         }
@@ -42,17 +47,17 @@ public class CraftProfileBanList implements BanList {
 
     public BanEntry addBan(String target, String reason, Date expires, String source) {
         Validate.notNull(target, "Ban target cannot be null");
-        GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(target);
+        GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(target);
 
         if (profile == null) {
             return null;
         } else {
-            GameProfileBanEntry entry = new GameProfileBanEntry(profile, new Date(), StringUtils.isBlank(source) ? null : source, expires, StringUtils.isBlank(reason) ? null : reason);
+            UserListBansEntry entry = new UserListBansEntry(profile, new Date(), StringUtils.isBlank(source) ? null : source, expires, StringUtils.isBlank(reason) ? null : reason);
 
-            this.list.add(entry);
+            this.list.addEntry(entry);
 
             try {
-                this.list.save();
+                this.list.writeChanges();
             } catch (IOException ioexception) {
                 Bukkit.getLogger().log(Level.SEVERE, "Failed to save banned-players.json, {0}", ioexception.getMessage());
             }
@@ -61,12 +66,12 @@ public class CraftProfileBanList implements BanList {
         }
     }
 
-    public Set getBanEntries() {
+    public Set<BanEntry> getBanEntries() {
         ImmutableSet.Builder builder = ImmutableSet.builder();
-        Iterator iterator = this.list.getValues().iterator();
+        Iterator iterator = this.list.getValues().iterator();//getValues needs AT todo
 
         while (iterator.hasNext()) {
-            JsonListEntry entry = (JsonListEntry) iterator.next();
+            BanEntry entry = (BanEntry) iterator.next();
             GameProfile profile = (GameProfile) entry.getKey();
 
             builder.add((Object) (new CraftProfileBanEntry(profile, (GameProfileBanEntry) entry, this.list)));
@@ -77,15 +82,15 @@ public class CraftProfileBanList implements BanList {
 
     public boolean isBanned(String target) {
         Validate.notNull(target, "Target cannot be null");
-        GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(target);
+        GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(target);
 
         return profile == null ? false : this.list.isBanned(profile);
     }
 
     public void pardon(String target) {
         Validate.notNull(target, "Target cannot be null");
-        GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(target);
+        GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getGameProfileForUsername(target);
 
-        this.list.remove(profile);
+        this.list.removeEntry(profile);
     }
 }
