@@ -1215,20 +1215,12 @@ public final class CraftServer implements Server {
         CraftingManager.getInstance().getRecipeList().clear();
         FurnaceRecipes.instance().getSmeltingList().clear();
     }
-    //TODO: Rework resetRecipes() to use forge methods. Will need asm.
+
     public void resetRecipes() {
-        try {
-            Class cM = Class.forName("net.minecraft.item.crafting.CraftingManagerx");
-            Field f = cM.getField("recipes");
-            f.setAccessible(true);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        CraftingManager.getInstance().recipes = new CraftingManager().recipes;
-        FurnaceRecipes.instance().smeltingList = FurnaceRecipes.smeltingList;
-        FurnaceRecipes.instance().getSmeltingList().clear();
+        CraftingManager.getInstance().recipes = (new CraftingManager()).recipes;
+        //LunchBox - remove for now.
+        //FurnaceRecipes.instance().smeltingList.clear();
+        //FurnaceRecipes.instance().getSmeltingList().clear();
     }
 
     public Map getCommandAliases() {
@@ -1438,7 +1430,7 @@ public final class CraftServer implements Server {
         switch ($SWITCH_TABLE$org$bukkit$BanList$Type()[type.ordinal()]) {
         case 1:
         default:
-            return new CraftProfileBanList((BanList) this.playerList.getBannedPlayers());
+            return new CraftProfileBanList(this.playerList.getBannedPlayers());
 
         case 2:
             return new CraftIpBanList(this.playerList.getBannedIPs());
@@ -1677,7 +1669,7 @@ public final class CraftServer implements Server {
     }
     //TODO: checkSaveState()
     public void checkSaveState() {
-        if (this.playerCommandState || this.printSaveWarning || this.console.autosaveInterval <= 0) {
+        if (this.playerCommandState || this.printSaveWarning /*|| this.console.autosaveInterval <= 0*/) {
             return;
         }
         this.printSaveWarning = true;

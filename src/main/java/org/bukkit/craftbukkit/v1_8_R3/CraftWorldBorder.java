@@ -7,7 +7,7 @@ import org.bukkit.WorldBorder;
 public class CraftWorldBorder implements WorldBorder {
 
     private final World world;
-    private final net.minecraft.server.v1_8_R3.WorldBorder handle;
+    private final net.minecraft.world.border.WorldBorder handle;
 
     public CraftWorldBorder(CraftWorld world) {
         this.world = world;
@@ -35,9 +35,9 @@ public class CraftWorldBorder implements WorldBorder {
         newSize = Math.min(6.0E7D, Math.max(1.0D, newSize));
         time = Math.min(9223372036854775L, Math.max(0L, time));
         if (time > 0L) {
-            this.handle.transitionSizeBetween(this.handle.getSize(), newSize, time * 1000L);
+            this.handle.setTransition(this.handle.getSize(), newSize, time * 1000L);
         } else {
-            this.handle.setSize(newSize);
+            this.handle.setTransition(newSize);
         }
 
     }

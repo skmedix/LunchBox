@@ -12,6 +12,7 @@ import com.mojang.authlib.GameProfileRepository;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.v1_8_R3.GameProfileBanEntry;
 import net.minecraft.server.v1_8_R3.GameProfileBanList;
 import net.minecraft.server.v1_8_R3.JsonListEntry;
@@ -68,13 +69,10 @@ public class CraftProfileBanList implements BanList {
 
     public Set<BanEntry> getBanEntries() {
         ImmutableSet.Builder builder = ImmutableSet.builder();
-        Iterator iterator = this.list.getValues().iterator();//getValues needs AT todo
 
-        while (iterator.hasNext()) {
-            BanEntry entry = (BanEntry) iterator.next();
-            GameProfile profile = (GameProfile) entry.getKey();
-
-            builder.add((Object) (new CraftProfileBanEntry(profile, (GameProfileBanEntry) entry, this.list)));
+        for (UserListEntry entry : list.values.values()) {
+            GameProfile profile = (GameProfile) entry.getSource();
+            builder.add((Object) (new CraftProfileBanEntry(profile, (UserListBansEntry) entry, this.list)));
         }
 
         return builder.build();
