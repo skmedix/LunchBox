@@ -4,16 +4,9 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.EntityTypes;
-import net.minecraft.server.v1_8_R3.Item;
-import net.minecraft.server.v1_8_R3.MinecraftKey;
-import net.minecraft.server.v1_8_R3.StatisticList;
+import net.minecraft.entity.EntityList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
-import net.minecraft.stats.StatisticsFile;
 import org.bukkit.Achievement;
 import org.bukkit.Material;
 import org.bukkit.Statistic;
@@ -115,11 +108,14 @@ public class CraftStatistic {
             return null;
         }
     }
-    //TODO: Rework this
-    public static StatBase getEntityStatistic(Statistic stat, EntityType entity) {
-        EntityTypes.MonsterEggInfo monsteregginfo = (EntityTypes.MonsterEggInfo) EntityTypes.eggInfo.get(Integer.valueOf(entity.getTypeId()));
 
-        return monsteregginfo != null ? monsteregginfo.killEntityStatistic : null;
+    public static StatBase getEntityStatistic(Statistic stat, EntityType entity) {
+        EntityList.EntityEggInfo monsteregginfo = (EntityList.EntityEggInfo) EntityList.entityEggs.get(Integer.valueOf(entity.getTypeId()));
+
+        if (monsteregginfo != null) {
+            return monsteregginfo.field_151512_d;
+        }
+        return null;
     }
 
     public static EntityType getEntityTypeFromStatistic(StatBase statistic) {
@@ -129,24 +125,13 @@ public class CraftStatistic {
     }
 
     public static Material getMaterialFromStatistic(StatBase statistic) {
-        String statisticString = statistic.getStatName().toString();
-        String val = statisticString.substring(statisticString.lastIndexOf(".") + 1);
-        Item item = (Item) Item.itemRegistry.getObject(new MinecraftKey(val));//TODO: rework this.
-
-        if (item != null) {
-            return Material.getMaterial(Item.getIdFromItem(item));
-        } else {
-            Block block = (Block) Block.blockRegistry.getObject(new MinecraftKey(val));//TODO: Rework this.
-
-            if (block != null) {
-                return Material.getMaterial(Block.getIdFromBlock(block));
-            } else {
-                try {
-                    return Material.getMaterial(Integer.parseInt(val));
-                } catch (NumberFormatException numberformatexception) {
-                    return null;
-                }
-            }
+        String statisticString = statistic.statId;
+        int id;
+        try {
+            id = Integer.valueOf(statisticString.substring(statisticString.lastIndexOf(".") + 1));
+        } catch (NumberFormatException e) {
+            return null;
         }
+        return Material.getMaterial(id);
     }
 }

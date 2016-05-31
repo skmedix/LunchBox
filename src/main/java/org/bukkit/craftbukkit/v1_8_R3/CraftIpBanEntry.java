@@ -21,8 +21,8 @@ public final class CraftIpBanEntry implements BanEntry {
     public CraftIpBanEntry(String target, net.minecraft.server.management.IPBanEntry entry, BanList list) {
         this.list = list;
         this.target = target;
-        this.created = entry.getBanEndDate() != null ? new Date(entry.getBanEndDate().getTime()) : null;
-        this.source = entry.getBanReason();
+        this.created = entry.banStartDate != null ? new Date(entry.banStartDate.getTime()) : null;
+        this.source = entry.bannedBy;
         this.expiration = entry.getBanEndDate() != null ? new Date(entry.getBanEndDate().getTime()) : null;
         this.reason = entry.getBanReason();
     }

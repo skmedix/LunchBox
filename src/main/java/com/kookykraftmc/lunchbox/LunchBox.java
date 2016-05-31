@@ -3,6 +3,7 @@ package com.kookykraftmc.lunchbox;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
@@ -10,7 +11,9 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.plugin.PluginLoadOrder;
 
 import static java.util.logging.Level.INFO;
@@ -24,6 +27,7 @@ import java.util.logging.Logger;
 public class LunchBox {
     public Logger logger = Logger.getLogger("lunchbox");
     private static CraftServer server;
+    public World[] worlds;
 
     @Mod.EventHandler
     public void onPreInit(FMLPreInitializationEvent event) throws Exception {
@@ -39,6 +43,15 @@ public class LunchBox {
     public void onAboutStart(FMLServerAboutToStartEvent event) throws Exception {
         logger.log(INFO, "Startup enabling plugins...");
         server.enablePlugins(PluginLoadOrder.STARTUP);
+        /*
+        int w;
+        int g = 0;
+        w = MinecraftServer.getServer().worldServers.length;
+        WorldServer[] ws = MinecraftServer.getServer().worldServers;
+        while (w <= g) {
+            CraftWorld world = new CraftWorld(ws[w], new , CraftWorld.Environment.getEnvironment(ws[w].getWorldType().getWorldTypeID()))
+        }
+        */
     }
 
     @Mod.EventHandler

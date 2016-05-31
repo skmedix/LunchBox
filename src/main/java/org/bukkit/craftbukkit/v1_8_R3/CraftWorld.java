@@ -234,10 +234,10 @@ public class CraftWorld implements World {
     private long ticksPerAnimalSpawns;
     private long ticksPerMonsterSpaws;
 
-    public CraftWorld(WorldServer world, ChunkGenerator gen, World.Environment env) {
+    public CraftWorld(WorldServer world, ChunkGenerator gen, Environment env) {
         this.world = world;
         this.generator = gen;
-        this.environment = env;
+        environment = env;
         if (this.server.chunkGCPeriod > 0) {
             this.chunkGCTickCount = CraftWorld.rand.nextInt(this.server.chunkGCPeriod);
         }
@@ -1666,5 +1666,9 @@ public class CraftWorld implements World {
             CraftWorld.$SWITCH_TABLE$org$bukkit$TreeType = aint1;
             return aint1;
         }
+    }
+
+    public static CraftWorld worldServerAsCBWorld(WorldServer worldServer) {
+        return new CraftWorld(worldServer, (ChunkGenerator) worldServer.getChunkProvider(), Environment.getEnvironment(worldServer.getWorldType().getWorldTypeID()));
     }
 }

@@ -183,7 +183,7 @@ public class CraftChunk implements Chunk {
 
                         if (dat != null) {
                             biome[world] = (short) net.minecraft.block.Block.getIdFromBlock(dat.getBlock());
-                            i = dat.getBlock().toLegacyData(dat);//TODO: toLegacyData() does not exist, need to find new method
+                            i = dat.getBlock().getMetaFromState(dat);
                             int jj = world >> 1;
 
                             if ((world & 1) == 0) {

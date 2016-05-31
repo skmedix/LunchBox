@@ -1,6 +1,8 @@
 package org.bukkit.event.player;
 
 import java.net.InetAddress;
+import java.net.SocketAddress;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 

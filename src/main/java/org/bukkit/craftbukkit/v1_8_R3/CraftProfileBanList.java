@@ -4,21 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.authlib.GameProfile;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 
-import com.mojang.authlib.GameProfileRepository;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.management.UserListEntry;
-import net.minecraft.server.v1_8_R3.GameProfileBanEntry;
-import net.minecraft.server.v1_8_R3.GameProfileBanList;
-import net.minecraft.server.v1_8_R3.JsonListEntry;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.BanEntry;
@@ -71,7 +63,7 @@ public class CraftProfileBanList implements BanList {
         ImmutableSet.Builder builder = ImmutableSet.builder();
 
         for (UserListEntry entry : list.values.values()) {
-            GameProfile profile = (GameProfile) entry.getSource();
+            GameProfile profile = (GameProfile) entry.value;
             builder.add((Object) (new CraftProfileBanEntry(profile, (UserListBansEntry) entry, this.list)));
         }
 

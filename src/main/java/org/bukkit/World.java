@@ -277,7 +277,7 @@ public interface World extends PluginMessageRecipient, Metadatable {
         NORMAL(0), NETHER(-1), THE_END(1);
 
         private final int id;
-        private static final Map lookup = new HashMap();
+        private static final Map<Integer, Environment> lookup = new HashMap<Integer, Environment>();
 
         static {
             World.Environment[] aworld_environment;
@@ -307,7 +307,6 @@ public interface World extends PluginMessageRecipient, Metadatable {
             return (World.Environment) World.Environment.lookup.get(Integer.valueOf(id));
         }
     }
-
     /* Todo later
     public static class Spigot {
 
