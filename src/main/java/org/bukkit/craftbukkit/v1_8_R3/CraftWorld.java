@@ -1667,7 +1667,7 @@ public class CraftWorld implements World {
             return aint1;
         }
     }
-
+    //not sure if this is safe xD todo
     public static CraftWorld worldServerAsCBWorld(WorldServer worldServer) {
         return new CraftWorld(worldServer, (ChunkGenerator) worldServer.getChunkProvider(), Environment.getEnvironment(worldServer.getWorldType().getWorldTypeID()));
     }
