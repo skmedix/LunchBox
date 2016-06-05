@@ -5,6 +5,8 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
+
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionException;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionSet;
@@ -14,7 +16,7 @@ public class ShortConsoleLogFormatter extends Formatter {
     private final SimpleDateFormat date;
 
     public ShortConsoleLogFormatter(MinecraftServer server) {
-        OptionSet options = server.options;
+        OptionSet options = server.options;//todo
         SimpleDateFormat date = null;
 
         if (options.has("date-format")) {

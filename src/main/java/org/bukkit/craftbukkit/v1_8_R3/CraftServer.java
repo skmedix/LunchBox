@@ -56,6 +56,7 @@ import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 import net.minecraft.server.dedicated.PropertyManager;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.world.*;
 import net.minecraft.world.chunk.storage.RegionFile;
@@ -897,128 +898,59 @@ public final class CraftServer implements Server {
     }
 
     public World createWorld(WorldCreator creator) {
-        /* LunchBox - remove for now.
         Validate.notNull(creator, "Creator may not be null");
+
         String name = creator.name();
         ChunkGenerator generator = creator.generator();
-        File folder = new File(this.getWorldContainer(), name);
-        World world = this.getWorld(name);
+        File folder = new File(getWorldContainer(), name);
+        World world = getWorld(name);
+        net.minecraft.world.WorldType type = net.minecraft.world.WorldType.parseWorldType(creator.type().getName());
         boolean generateStructures = creator.generateStructures();
+
+        if ((folder.exists()) && (!folder.isDirectory())) {
+            throw new IllegalArgumentException("File exists with the name '" + name + "' and isn't a folder");
+        }
 
         if (world != null) {
             return world;
-        } else if (folder.exists() && !folder.isDirectory()) {
-            throw new IllegalArgumentException("File exists with the name \'" + name + "\' and isn\'t a folder");
-        } else {
-            if (generator == null) {
-                generator = this.getGenerator(name);
-            }
-            //TODO: Look for fix.
-            WorldLoaderServer converter = new WorldLoaderServer(this.getWorldContainer());
+        }
 
-            if (converter.isConvertable(name)) {
-                this.getLogger().info("Converting world \'" + name + "\'");
-                converter.convert(name, new IProgressUpdate() {
-                    private long b = System.currentTimeMillis();
+        boolean hardcore = false;
+        WorldSettings worldSettings = new WorldSettings(creator.seed(), net.minecraft.world.WorldSettings.GameType.getByID(getDefaultGameMode().getValue()), generateStructures, hardcore, type);
+        Integer dimId = DimensionManager.getNextFreeDimId();
+        net.minecraft.world.WorldServer worldserver = DimensionManager.getWorld(dimId);
 
-                    public void a(String s) {}
+        pluginManager.callEvent(new WorldInitEvent(CraftWorld.worldServerAsCBWorld(worldserver)));
+        LunchBox.craftWorldLoading = true;
+        System.out.print("Preparing start region for level " + (console.worldServers.length - 1) + " (Dimension: " + worldserver.provider.getDimensionId() + ", Seed: " + worldserver.getSeed() + ")"); // Cauldron - log dimension
 
-                    public void a(int i) {
-                        if (System.currentTimeMillis() - this.b >= 1000L) {
-                            this.b = System.currentTimeMillis();
-                            MinecraftServer.LOGGER.info("Converting... " + i + "%");
-                        }
+        if (DimensionManager.shouldLoadSpawn(worldserver.provider.getDimensionId())) {
+            short short1 = 196;
+            long i = System.currentTimeMillis();
+            for (int j = -short1; j <= short1; j += 16) {
+                for (int k = -short1; k <= short1; k += 16) {
+                    long l = System.currentTimeMillis();
 
+                    if (l < i) {
+                        i = l;
                     }
 
-                    public void c(String s) {}
-                });
-            }
+                    if (l > i + 1000L) {
+                        int i1 = (short1 * 2 + 1) * (short1 * 2 + 1);
+                        int j1 = (j + short1) * (short1 * 2 + 1) + k + 1;
 
-            int dimension = 10 + this.console.worldServers.length;
-            boolean used = false;
-
-            while (true) {
-                Iterator sdm = this.console.worldServers.iterator();
-
-                while (true) {
-                    if (sdm.hasNext()) {
-                        WorldServer hardcore = (WorldServer) sdm.next();
-
-                        used = hardcore.dimension == dimension;
-                        if (!used) {
-                            continue;
-                        }
-
-                        ++dimension;
+                        System.out.println("Preparing spawn area for " + worldserver.getWorldInfo().getWorldName() + ", " + (j1 * 100 / i1) + "%");
+                        i = l;
                     }
 
-                    if (!used) {
-                        boolean flag = false;
-                        ServerNBTManager servernbtmanager = new ServerNBTManager(this.getWorldContainer(), name, true);
-                        WorldData worlddata = servernbtmanager.getWorldData();
-
-                        if (worlddata == null) {
-                            WorldSettings internal = new WorldSettings(creator.seed(), WorldSettings.EnumGamemode.getById(this.getDefaultGameMode().getValue()), generateStructures, flag, type);
-
-                            internal.setGeneratorSettings(creator.generatorSettings());
-                            worlddata = new WorldData(internal, name);
-                        }
-
-                        worlddata.checkName(name);
-                        WorldServer worldserver = (WorldServer) (new WorldServer(this.console, servernbtmanager, worlddata, dimension, this.console.methodProfiler, creator.environment(), generator)).b();
-
-                        if (!this.worlds.containsKey(name.toLowerCase())) {
-                            return null;
-                        }
-
-                        worldserver.scoreboard = this.getScoreboardManager().getMainScoreboard().getHandle();
-                        worldserver.tracker = new EntityTracker(worldserver);
-                        worldserver.addIWorldAccess(new WorldManager(this.console, worldserver));
-                        worldserver.worldData.setDifficulty(EnumDifficulty.EASY);
-                        worldserver.setSpawnFlags(true, true);
-                        this.console.worlds.add(worldserver);
-                        if (generator != null) {
-                            worldserver.getWorld().getPopulators().addAll(generator.getDefaultPopulators(worldserver.getWorld()));
-                        }
-
-                        this.pluginManager.callEvent(new WorldInitEvent(worldserver.getWorld()));
-                        System.out.print("Preparing start region for level " + (this.console.worlds.size() - 1) + " (Seed: " + worldserver.getSeed() + ")");
-                        if (worldserver.getWorld().getKeepSpawnInMemory()) {
-                            short short1 = 196;
-                            long i = System.currentTimeMillis();
-
-                            for (int j = -short1; j <= short1; j += 16) {
-                                for (int k = -short1; k <= short1; k += 16) {
-                                    long l = System.currentTimeMillis();
-
-                                    if (l < i) {
-                                        i = l;
-                                    }
-
-                                    if (l > i + 1000L) {
-                                        int chunkcoordinates = (short1 * 2 + 1) * (short1 * 2 + 1);
-                                        int j1 = (j + short1) * (short1 * 2 + 1) + k + 1;
-
-                                        System.out.println("Preparing spawn area for " + name + ", " + j1 * 100 / chunkcoordinates + "%");
-                                        i = l;
-                                    }
-
-                                    BlockPosition blockposition = worldserver.getSpawn();
-
-                                    worldserver.chunkProviderServer.getChunkAt(blockposition.getX() + j >> 4, blockposition.getZ() + k >> 4);
-                                }
-                            }
-                        }
-
-                        this.pluginManager.callEvent(new WorldLoadEvent(worldserver.getWorld()));
-                        return worldserver.getWorld();
-                    }
-                    break;
+                    BlockPos chunkcoordinates = worldserver.getSpawnPoint();
+                    worldserver.theChunkProviderServer.loadChunk(chunkcoordinates.getX() + j >> 4, chunkcoordinates.getZ() + k >> 4);
                 }
             }
-        }*/
-        return null;
+        }
+        pluginManager.callEvent(new WorldLoadEvent(CraftWorld.worldServerAsCBWorld(worldserver)));
+        LunchBox.craftWorldLoading = false;
+        return CraftWorld.worldServerAsCBWorld(worldserver);
     }
 
     public boolean unloadWorld(String name, boolean save) {

@@ -3,9 +3,11 @@ package org.bukkit.craftbukkit.v1_8_R3.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.World;
+
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -16,8 +18,8 @@ public class StructureGrowDelegate implements BlockChangeDelegate {
     private final CraftWorld world;
     private final List blocks = new ArrayList();
 
-    public StructureGrowDelegate(World world) {
-        this.world = world.getWorld();
+    public StructureGrowDelegate(WorldServer world) {
+        this.world = (CraftWorld) (org.bukkit.World) world;
     }
 
     public boolean setRawTypeId(int x, int y, int z, int type) {
@@ -78,7 +80,7 @@ public class StructureGrowDelegate implements BlockChangeDelegate {
             state = (BlockState) iterator.next();
         } while (state.getX() != x || state.getY() != y || state.getZ() != z);
 
-        if (Block.getById(state.getTypeId()) == Blocks.AIR) {
+        if (Block.getBlockById(state.getTypeId()) == Blocks.air) {
             return true;
         } else {
             return false;

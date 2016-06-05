@@ -3,9 +3,10 @@ package org.bukkit.craftbukkit.v1_8_R3.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.Block;
-import net.minecraft.server.v1_8_R3.BlockPosition;
-import net.minecraft.server.v1_8_R3.IBlockData;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 
@@ -26,7 +27,7 @@ public class BlockStateListPopulator {
     public void setTypeAndData(int x, int y, int z, Block block, int data, int light) {
         BlockState state = this.world.getBlockAt(x, y, z).getState();
 
-        state.setTypeId(Block.getId(block));
+        state.setTypeId(Block.getIdFromBlock(block));
         state.setRawData((byte) data);
         this.list.add(state);
     }
@@ -42,14 +43,14 @@ public class BlockStateListPopulator {
         this.setType(x, y, z, block);
     }
 
-    public void setTypeUpdate(BlockPosition position, IBlockData data) {
-        this.setTypeAndData(position.getX(), position.getY(), position.getZ(), data.getBlock(), data.getBlock().toLegacyData(data), 0);
+    public void setTypeUpdate(BlockPos position, IBlockState data) {
+        this.setTypeAndData(position.getX(), position.getY(), position.getZ(), data.getBlock(), data.getBlock().getMetaFromState(data), 0);
     }
 
     public void setType(int x, int y, int z, Block block) {
         BlockState state = this.world.getBlockAt(x, y, z).getState();
 
-        state.setTypeId(Block.getId(block));
+        state.setTypeId(Block.getIdFromBlock(block));
         this.list.add(state);
     }
 

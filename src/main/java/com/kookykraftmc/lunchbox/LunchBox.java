@@ -25,6 +25,7 @@ import java.util.logging.Logger;
  */
 @Mod(name = "LunchBox", modid = "lunchbox", serverSideOnly = true, version = "0.0.1")
 public class LunchBox {
+    public static boolean craftWorldLoading = false;
     public Logger logger = Logger.getLogger("lunchbox");
     private static CraftServer server;
     public World[] worlds;

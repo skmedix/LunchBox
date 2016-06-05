@@ -12,7 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 public final class AsynchronousExecutor {
 
