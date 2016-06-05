@@ -1,9 +1,10 @@
 package org.bukkit.craftbukkit.v1_8_R3;
 
 import java.util.HashMap;
-import net.minecraft.server.v1_8_R3.Entity;
-import net.minecraft.server.v1_8_R3.TileEntity;
-import net.minecraft.server.v1_8_R3.World;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import org.bukkit.craftbukkit.v1_8_R3.scheduler.CraftTask;
 import org.bukkit.plugin.java.JavaPluginLoader;
 import org.bukkit.scheduler.BukkitTask;
@@ -123,7 +124,7 @@ public class SpigotTimings {
         public final CustomTimingsHandler syncChunkLoadPostTimer;
 
         public WorldTimingsHandler(World server) {
-            String name = server.worldData.getName() + " - ";
+            String name = server.getWorldInfo().getWorldName() + " - ";
 
             this.mobSpawn = new CustomTimingsHandler("** " + name + "mobSpawn");
             this.doChunkUnload = new CustomTimingsHandler("** " + name + "doChunkUnload");

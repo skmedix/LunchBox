@@ -307,7 +307,6 @@ public interface World extends PluginMessageRecipient, Metadatable {
             return (World.Environment) World.Environment.lookup.get(Integer.valueOf(id));
         }
     }
-    /* Todo later
     public static class Spigot {
 
         public void playEffect(Location location, Effect effect) {
@@ -326,5 +325,4 @@ public interface World extends PluginMessageRecipient, Metadatable {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }
-    */
 }

@@ -17,7 +17,10 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
+import net.minecraft.network.play.server.S28PacketEffect;
+import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.world.*;
@@ -154,7 +157,6 @@ public class CraftWorld implements World {
     private int chunkLoadCount = 0;
     private int chunkGCTickCount;
     private static final Random rand = new Random();
-    /* LunchBox - Remove all spigot stuff for now.
     private final World.Spigot spigot = new World.Spigot() {
         public void playEffect(Location location, Effect effect, int id, int data, float offsetX, float offsetY, float offsetZ, float speed, int particleCount, int radius) {
             Validate.notNull(location, "Location cannot be null");
@@ -165,7 +167,7 @@ public class CraftWorld implements World {
 
             if (effect.getType() != Effect.Type.PARTICLE) {
                 distance = effect.getId();
-                packet = new PacketPlayOutWorldEvent(distance, new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()), id, false);
+                packet = new S28PacketEffect(distance, new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ()), id, false);
             } else {
                 EnumParticleTypes enumparticle = null;
                 int[] player = null;
@@ -192,7 +194,7 @@ public class CraftWorld implements World {
                     player = new int[0];
                 }
 
-                packet = new PacketPlayOutWorldParticles(enumparticle, true, (float) location.getX(), (float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, particleCount, player);
+                packet = new S2APacketParticles(enumparticle, true, (float) location.getX(), (float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, particleCount, player);
             }
 
             radius *= radius;
@@ -201,10 +203,10 @@ public class CraftWorld implements World {
             while (iterator.hasNext()) {
                 Player player = (Player) iterator.next();
 
-                if (((CraftPlayer) player).getHandle().playerConnection != null && location.getWorld().equals(player.getWorld())) {
+                if (((CraftPlayer) player).getMPPlayer().playerNetServerHandler != null && location.getWorld().equals(player.getWorld())) {
                     distance = (int) player.getLocation().distanceSquared(location);
                     if (distance <= radius) {
-                        ((CraftPlayer) player).getHandle().playerConnection.sendPacket((Packet) packet);
+                        ((CraftPlayer) player).getMPPlayer().playerNetServerHandler.sendPacket((Packet) packet);
                     }
                 }
             }
@@ -216,20 +218,19 @@ public class CraftWorld implements World {
         }
 
         public LightningStrike strikeLightning(Location loc, boolean isSilent) {
-            EntityLightning lightning = new EntityLightning(CraftWorld.this.world, loc.getX(), loc.getY(), loc.getZ(), false, isSilent);
+            EntityLightningBolt lightning = new EntityLightningBolt(CraftWorld.this.world, loc.getX(), loc.getY(), loc.getZ()/*, false, isSilent*/);
 
-            CraftWorld.this.world.strikeLightning(lightning);
+            CraftWorld.this.world.addWeatherEffect(lightning);
             return new CraftLightningStrike(CraftWorld.this.server, lightning);
         }
 
         public LightningStrike strikeLightningEffect(Location loc, boolean isSilent) {
-            EntityLightning lightning = new EntityLightning(CraftWorld.this.world, loc.getX(), loc.getY(), loc.getZ(), true, isSilent);
+            EntityLightningBolt lightning = new EntityLightningBolt(CraftWorld.this.world, loc.getX(), loc.getY(), loc.getZ()/*, true, isSilent*/);
 
-            CraftWorld.this.world.strikeLightning(lightning);
+            CraftWorld.this.world.addWeatherEffect(lightning);
             return new CraftLightningStrike(CraftWorld.this.server, lightning);
         }
     };
-    */
     private static int[] $SWITCH_TABLE$org$bukkit$TreeType;
     private long ticksPerAnimalSpawns;
     private long ticksPerMonsterSpaws;
@@ -352,7 +353,7 @@ public class CraftWorld implements World {
         net.minecraft.world.chunk.Chunk chunk = null;
 
         if (world.theChunkProviderServer.serverChunkGenerator == null) {
-            chunk = world.theChunkProviderServer.defaultEmptyChunk;
+            chunk = new EmptyChunk(world, 0, 0);
         } else {
             chunk = world.theChunkProviderServer.serverChunkGenerator.provideChunk(x, z);
         }
@@ -411,23 +412,25 @@ public class CraftWorld implements World {
 
     private void chunkLoadPostProcess(net.minecraft.world.chunk.Chunk chunk, int cx, int cz) {
         if (chunk != null) {
-            this.world.theChunkProviderServer.loadedChunks.add(chunk);
-            //chunk.addEntities(); //LunchBox - remove for now.
+            world.theChunkProviderServer.loadedChunks.add((int) LongHash.toLong(cx, cz), chunk); // Passes to chunkt_TH
+            world.theChunkProviderServer.loadedChunks.add(chunk); // Cauldron - vanilla compatibility
+            chunk.onChunkLoad();
 
-            for (int x = -2; x < 3; ++x) {
-                for (int z = -2; z < 3; ++z) {
-                    if (x != 0 || z != 0) {
-                        net.minecraft.world.chunk.Chunk neighbor = this.world.theChunkProviderServer.provideChunk(chunk.xPosition + x, chunk.zPosition + z);
-                        if (neighbor != null) {
-                            //TODO: not sure if this is correct or not.
-                            neighbor.setChunkLoaded(true);
-                            chunk.setChunkLoaded(true);
-                        }
-                    }
-                }
+            if (!chunk.isTerrainPopulated && world.theChunkProviderServer.chunkExists(cx + 1, cz + 1) && world.theChunkProviderServer.chunkExists(cx, cz + 1) && world.theChunkProviderServer.chunkExists(cx + 1, cz)) {
+                world.theChunkProviderServer.populate(world.theChunkProviderServer, cx, cz);
             }
-            //TODO: rework this.
-            chunk.loadNearby(this.world.theChunkProviderServer, this.world.theChunkProviderServer, cx, cz);
+
+            if (world.theChunkProviderServer.chunkExists(cx - 1, cz) && !world.theChunkProviderServer.provideChunk(cx - 1, cz).isTerrainPopulated && world.theChunkProviderServer.chunkExists(cx - 1, cz + 1) && world.theChunkProviderServer.chunkExists(cx, cz + 1) && world.theChunkProviderServer.chunkExists(cx - 1, cz)) {
+                world.theChunkProviderServer.populate(world.theChunkProviderServer, cx - 1, cz);
+            }
+
+            if (world.theChunkProviderServer.chunkExists(cx, cz - 1) && !world.theChunkProviderServer.provideChunk(cx, cz - 1).isTerrainPopulated && world.theChunkProviderServer.chunkExists(cx + 1, cz - 1) && world.theChunkProviderServer.chunkExists(cx, cz - 1) && world.theChunkProviderServer.chunkExists(cx + 1, cz)) {
+                world.theChunkProviderServer.populate(world.theChunkProviderServer, cx, cz - 1);
+            }
+
+            if (world.theChunkProviderServer.chunkExists(cx - 1, cz - 1) && !world.theChunkProviderServer.provideChunk(cx - 1, cz - 1).isTerrainPopulated && world.theChunkProviderServer.chunkExists(cx - 1, cz - 1) && world.theChunkProviderServer.chunkExists(cx, cz - 1) && world.theChunkProviderServer.chunkExists(cx - 1, cz)) {
+                world.theChunkProviderServer.populate(world.theChunkProviderServer, cx - 1, cz - 1);
+            }
         }
 
     }
@@ -618,16 +621,13 @@ public class CraftWorld implements World {
 
         return ((WorldGenerator) gen).generate(this.world, CraftWorld.rand, new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()));
     }
-    //TODO: rework this.
+
     public boolean generateTree(Location loc, TreeType type, BlockChangeDelegate delegate) {
-        this.world.captureTreeGeneration = true;
-        this.world.captureBlockStates = true;
+
         boolean grownTree = this.generateTree(loc, type);
 
-        this.world.captureBlockStates = false;
-        this.world.captureTreeGeneration = false;
         if (!grownTree) {
-            this.world.capturedBlockStates.clear();
+            this.world.capturedBlockSnapshots.clear();
             return false;
         } else {
             Iterator iterator = this.world.capturedBlockSnapshots.iterator();
@@ -724,7 +724,7 @@ public class CraftWorld implements World {
     }
 
     public boolean createExplosion(double x, double y, double z, float power, boolean setFire, boolean breakBlocks) {
-        return !this.world.createExplosion((net.minecraft.entity.Entity) null, x, y, z, power, setFire).wasCanceled;
+        return !this.world.createExplosion((net.minecraft.entity.Entity) null, x, y, z, power, setFire).wasCanceled;//todo
     }
 
     public boolean createExplosion(Location loc, float power) {
@@ -742,7 +742,7 @@ public class CraftWorld implements World {
     public void setEnvironment(World.Environment env) {
         if (this.environment != env) {
             this.environment = env;
-            this.world.provider = WorldProvider.getProviderForDimension(this.environment.getId());//todo: world.provider is final, need to figure out how to set it.
+            this.world.provider = WorldProvider.getProviderForDimension(this.environment.getId());
         }
 
     }
@@ -1047,7 +1047,7 @@ public class CraftWorld implements World {
             MaterialData dataValue1 = (MaterialData) data;
 
             Validate.isTrue(dataValue1.getItemType().isBlock(), "Material must be block");
-            this.spigot().playEffect(loc, effect, dataValue1.getItemType().getId(), dataValue1.getData(), 0.0F, 0.0F, 0.0F, 1.0F, 1, radius);
+            this.spigot.playEffect(loc, effect, dataValue1.getItemType().getId(), dataValue1.getData(), 0.0F, 0.0F, 0.0F, 1.0F, 1, radius);
         } else {
             int dataValue = data == null ? 0 : CraftEffect.getDataValue(effect, data);
 
@@ -1057,7 +1057,7 @@ public class CraftWorld implements World {
     }
 
     public void playEffect(Location location, Effect effect, int data, int radius) {
-        this.spigot().playEffect(location, effect, data, 0, 0.0F, 0.0F, 0.0F, 1.0F, 1, radius);
+        this.spigot.playEffect(location, effect, data, 0, 0.0F, 0.0F, 0.0F, 1.0F, 1, radius);
     }
 
     public Entity spawn(Location location, Class clazz) throws IllegalArgumentException {
@@ -1529,7 +1529,7 @@ public class CraftWorld implements World {
     }
 
     public void processChunkGC() {
-        ++this.chunkGCTickCount;
+        /*++this.chunkGCTickCount;
         if (this.chunkLoadCount >= this.server.chunkGCLoadThresh && this.server.chunkGCLoadThresh > 0) {
             this.chunkLoadCount = 0;
         } else {
@@ -1546,18 +1546,16 @@ public class CraftWorld implements World {
         while (iterator.hasNext()) {
             net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) iterator.next();
 
-            if (!this.isChunkInUse(chunk.xPosition, chunk.zPosition) && !cps.unl.contains(chunk.locX, chunk.locZ)) {
-                cps.unloadQueuedChunks(chunk.locX, chunk.locZ);
+            if (!this.isChunkInUse(chunk.xPosition, chunk.zPosition) && !cps.loadedChunks.contains(chunk.xPosition, chunk.zPosition)) {
+                cps.unloadQueuedChunks();
             }
-        }
-
+        }*/
+        this.world.theChunkProviderServer.unloadQueuedChunks();//todo: hopefully this will work for now.
     }
 
-    /* LunchBox - remove for now
     public World.Spigot spigot() {
         return this.spigot;
     }
-    */
 
     static int[] $SWITCH_TABLE$org$bukkit$TreeType() {
         int[] aint = CraftWorld.$SWITCH_TABLE$org$bukkit$TreeType;
