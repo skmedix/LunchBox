@@ -16,9 +16,10 @@ public interface Damageable extends Entity {
 
     double getHealth();
 
-    /** @deprecated */
+    /* @deprecated
     @Deprecated
     int getHealth();
+    */
 
     void setHealth(double d0);
 
@@ -28,9 +29,10 @@ public interface Damageable extends Entity {
 
     double getMaxHealth();
 
-    /** @deprecated */
+    /* @deprecated
     @Deprecated
     int getMaxHealth();
+    */
 
     void setMaxHealth(double d0);
 

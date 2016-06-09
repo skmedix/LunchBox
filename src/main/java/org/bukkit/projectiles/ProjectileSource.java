@@ -5,7 +5,7 @@ import org.bukkit.util.Vector;
 
 public interface ProjectileSource {
 
-    Projectile launchProjectile(Class oclass);
+    public <T extends Projectile> T launchProjectile(Class<? extends T> projectile);
 
-    Projectile launchProjectile(Class oclass, Vector vector);
+    public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity);
 }

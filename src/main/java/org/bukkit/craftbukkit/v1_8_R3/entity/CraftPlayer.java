@@ -87,6 +87,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     private double health = 20.0D;
     private boolean scaledHealth = false;
     private double healthScale = 20.0D;
+    private boolean fauxSleeping = false;
     /* LunchBox - remove spigot for now todo
     private final Player.Spigot spigot = new Player.Spigot() {
         public InetSocketAddress getRawAddress() {
@@ -283,7 +284,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public String getPlayerListName() {
         return this.getMPPlayer().getTabListDisplayName() == null ? this.getName() : CraftChatMessage.fromComponent(this.getMPPlayer().getTabListDisplayName());
     }
-    //todo: come back to this.
+
     public void setPlayerListName(String name) {
         if (name == null) {
             name = this.getName();
@@ -296,7 +297,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             EntityPlayerMP player = (EntityPlayerMP) iterator.next();
 
             if (player.canEntityBeSeen(this.getMPPlayer())) {
-                player.playerNetServerHandler.sendPacket(new SPacket(S20PacketEntityProperties..UPDATE_DISPLAY_NAME, new EntityPlayer[] { this.getHandle()}));
+                player.playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME, (EntityPlayerMP[]) new EntityPlayer[] { this.getMPPlayer() }));
             }
         }
 
@@ -335,9 +336,9 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
             this.getMPPlayer().playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())));
         }
     }
-    //todo: come back to later
     public Location getCompassTarget() {
-        return this.getHandle().compassTarget;
+        S05PacketSpawnPosition packet = new S05PacketSpawnPosition();
+        return new Location(this.getWorld(), packet.getSpawnPos().getX(), packet.getSpawnPos().getY(), packet.getSpawnPos().getZ());
     }
 
     public void chat(String msg) {
@@ -495,7 +496,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                 MapCursor packet = (MapCursor) iterator.next();
 
                 if (packet.isVisible()) {
-                    icons.add(new MapIcon(packet.getRawType(), packet.getX(), packet.getY(), packet.getDirection()));
+                    icons.add(new MapCursor(packet.getX(), packet.getY(), packet.getDirection(), packet.getRawType(), true));
                 }
             }
 
@@ -534,8 +535,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                             entity.setWorld(((CraftWorld) to.getWorld()).getHandle());
                             entity.setLocationAndAngles(to.getX(), to.getY(), to.getZ(), to.getYaw(), to.getPitch());
                         } else {
-                            //todo
-                            this.server.getHandle().moveToWorld(entity, toWorld.dimension, true, to, true);
+                            this.server.getHandle().transferPlayerToDimension(entity, toWorld.provider.getDimensionId());
                         }
 
                         return true;
@@ -566,11 +566,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
     //todo: need to come back and rework loadData nad saveData.
     public void loadData() {
-        this.server.getHandle().readPlayerDataFromFile(this.getMPPlayer());
+        server.getHandle().playerNBTManagerObj.readPlayerData(this.getMPPlayer());;
     }
 
     public void saveData() {
-        this.server.getHandle().getPlayerData().save(this.getHandle());
+        this.server.getHandle().playerNBTManagerObj.writePlayerData(this.getMPPlayer());
     }
 
     /** @deprecated */
@@ -580,12 +580,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
     //todo
     public void setSleepingIgnored(boolean isSleeping) {
-        this.getHandle().fauxSleeping = isSleeping;
-        ((CraftWorld) this.getWorld()).getHandle().areAllPlayersAsleep();
+        this.fauxSleeping = isSleeping;
+        ((CraftWorld) this.getWorld()).getHandle().updateAllPlayersSleepingFlag();
     }
     //todo
     public boolean isSleepingIgnored() {
-        return this.getHandle().fauxSleeping;
+        return this.fauxSleeping;
     }
 
     public void awardAchievement(Achievement achievement) {
@@ -729,14 +729,18 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         Validate.notNull(nmsStatistic, "The supplied EntityType does not have a corresponding statistic");
         this.getMPPlayer().getStatFile().unlockAchievement(this.getMPPlayer(), nmsStatistic, newValue);
     }
-    //todo - redo the time and weather methods
+
     public void setPlayerTime(long time, boolean relative) {
-        this.getMPPlayer().time = time;
+        /*
+        this.getMPPlayer().timeOffset = time;
         this.getHandle().relativeTime = relative;
+        */
+        throw new NotImplementedException("Is not done yet.");
     }
 
     public long getPlayerTimeOffset() {
-        return this.getHandle().timeOffset;
+        //return this.getHandle().timeOffset;
+        throw new NotImplementedException("Is not done yet.");
     }
 
     public long getPlayerTime() {
@@ -744,23 +748,40 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public boolean isPlayerTimeRelative() {
-        return this.getHandle().relativeTime;
+        //return this.getHandle().relativeTime;
+        throw new NotImplementedException("Is not done yet.");
     }
 
     public void resetPlayerTime() {
         this.setPlayerTime(0L, true);
     }
 
-    public void setPlayerWeather(WeatherType type) {
-        this.getHandle().setPlayerWeather(type, true);
+    public WeatherType weather = null;
+
+    public void setPlayerWeather(WeatherType type, boolean plugin) {
+        if (!plugin && this.weather != null) {
+            return;
+        }
+        if (plugin) {
+            this.weather = type;
+        }
+        if (type == WeatherType.DOWNFALL) {
+            getMPPlayer().playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(2, 0));
+
+        }
+        else
+        {
+            getMPPlayer().playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(1, 0));
+        }
     }
 
     public WeatherType getPlayerWeather() {
-        return this.getHandle().getPlayerWeather();
+        return this.weather;
     }
 
     public void resetPlayerWeather() {
-        this.getHandle().resetPlayerWeather();
+        this.weather = null;
+        this.setPlayerWeather(this.getMPPlayer().worldObj.getWorldInfo().isRaining() ? WeatherType.DOWNFALL : WeatherType.CLEAR, false);
     }
 
     public boolean isBanned() {
@@ -813,7 +834,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     public GameMode getGameMode() {
-        return GameMode.getByValue(this.getHandle().playerInteractManager.getGameMode().getId());
+        return GameMode.getByValue(this.getMPPlayer().theItemInWorldManager.getGameType().getID());
     }
 
     public void giveExp(int exp) {
@@ -901,7 +922,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         }
 
     }
-    //todo: redo hidePlayer for Forge.
+
     public void hidePlayer(Player player) {
         Validate.notNull(player, "hidden player cannot be null");
         if (this.getMPPlayer().playerNetServerHandler != null) {
@@ -916,7 +937,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                         entry.removeFromTrackedPlayers(this.getMPPlayer());
                     }
 
-                    this.getMPPlayer().playerNetServerHandler.sendPacket(new S19PacketEntityStatus(S19PacketEntityStatus..REMOVE_PLAYER, new EntityPlayer[] { other})
+                    this.getMPPlayer().playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP[]) new EntityPlayer[] { other }));
                 }
             }
         }
@@ -930,8 +951,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                     this.hiddenPlayers.remove(player.getUniqueId());
                     EntityTracker tracker = ((WorldServer) this.entity.worldObj).getEntityTracker();
                     EntityPlayer other = ((CraftPlayer) player).getMPPlayer();
-                    //todo
-                    this.getMPPlayer().playerNetServerHandler.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new EntityPlayer[] { other}));
+                    this.getMPPlayer().playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP[]) new EntityPlayer[] { other }));
                     EntityTrackerEntry entry = (EntityTrackerEntry) tracker.getTrackingPlayers(other);
 
                     if (entry != null && !entry.trackingPlayers.contains(this.getHandle())) {
@@ -1014,7 +1034,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
                 handle.experience = data.getInteger("newExp");
                 handle.experienceTotal = data.getInteger("newTotalExp");
                 handle.experienceLevel = data.getInteger("newLevel");
-                handle.expToDrop = data.getInteger("expToDrop");
+                //handle.expToDrop = data.getInteger("expToDrop"); // TODO: 6/8/2016  
                 handle.captureDrops = data.getBoolean("keepLevel");
             }
         }
@@ -1032,7 +1052,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
         data.setInteger("newExp", (int) handle.experience);
         data.setInteger("newTotalExp", handle.experienceTotal);
         data.setInteger("newLevel", handle.experienceLevel);
-        data.setInteger("expToDrop", handle.expToDrop);
+        //data.setInteger("expToDrop", handle.expToDrop); // TODO: 6/8/2016  
         data.setBoolean("keepLevel", handle.captureDrops);
         data.setLong("firstPlayed", this.getFirstPlayed());
         data.setLong("lastPlayed", System.currentTimeMillis());
@@ -1228,12 +1248,12 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public void setMaxHealth(double amount) {
         super.setMaxHealth(amount);
         this.health = Math.min(this.health, this.health);
-        this.getHandle().triggerHealthUpdate();
+        this.getMPPlayer().setPlayerHealthUpdated();
     }
 
     public void resetMaxHealth() {
         super.resetMaxHealth();
-        this.getHandle().triggerHealthUpdate();
+        this.getMPPlayer().setPlayerHealthUpdated();
     }
 
     public CraftScoreboard getScoreboard() {
@@ -1277,7 +1297,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     public float getScaledHealth() {
         return (float) (this.isHealthScaled() ? this.getHealth() * this.getHealthScale() / this.getMaxHealth() : this.getHealth());
     }
-
+    @Override
     public double getHealth() {
         return this.health;
     }

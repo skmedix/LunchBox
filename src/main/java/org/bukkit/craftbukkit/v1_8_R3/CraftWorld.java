@@ -3,6 +3,8 @@ package org.bukkit.craftbukkit.v1_8_R3;
 import com.google.common.base.Preconditions;
 import java.io.File;
 import java.util.*;
+
+import com.google.common.base.Predicate;
 import com.kookykraftmc.lunchbox.LunchBox;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
@@ -396,7 +398,7 @@ public class CraftWorld implements World {
         if (generate) {
             return this.world.theChunkProviderServer.provideChunk(x, z) != null;
         } else {
-            //this.world.theChunkProviderServer.unloadQueue.remove(x, z);//TODO: removed this for now, need to find a method to replace it later.
+            this.world.theChunkProviderServer.droppedChunksSet.remove(x, z);//TODO: removed this for now, need to find a method to replace it later.
             net.minecraft.world.chunk.Chunk chunk = (net.minecraft.world.chunk.Chunk) this.world.theChunkProviderServer.loadedChunks.get((int) LongHash.toLong(x, z));
             /* LunchBox - remove timings for now.
             if (chunk == null) {
@@ -904,18 +906,17 @@ public class CraftWorld implements World {
 
         return list;
     }
-    /* LunchBox - todo later
     public Collection getNearbyEntities(Location location, double x, double y, double z) {
         if (location != null && location.getWorld().equals(this)) {
             AxisAlignedBB bb = new AxisAlignedBB(location.getX() - x, location.getY() - y, location.getZ() - z, location.getX() + x, location.getY() + y, location.getZ() + z);
-            List entityList = this.getHandle().entity((net.minecraft.entity.Entity) null, bb, (Predicate) null);
+            List entityList = this.getHandle().getEntitiesInAABBexcluding((net.minecraft.entity.Entity) null, bb, (Predicate) null);
             ArrayList bukkitEntityList = new ArrayList(entityList.size());
             Iterator iterator = entityList.iterator();
 
             while (iterator.hasNext()) {
                 Object entity = iterator.next();
 
-                bukkitEntityList.add(((net.minecraft.entity.Entity) entity).getBukkitEntity());
+                bukkitEntityList.add(CraftEntity.getEntity(LunchBox.getServer(), (net.minecraft.entity.Entity) entity));
             }
 
             return bukkitEntityList;
@@ -923,7 +924,6 @@ public class CraftWorld implements World {
             return Collections.emptyList();
         }
     }
-    */
 
     public List getPlayers() {
         ArrayList list = new ArrayList(this.world.playerEntities.size());

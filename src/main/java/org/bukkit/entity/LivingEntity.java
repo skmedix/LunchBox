@@ -61,11 +61,12 @@ public interface LivingEntity extends Entity, Damageable, ProjectileSource {
 
     void setMaximumNoDamageTicks(int i);
 
-    double getLastDamage();
+    //double getLastDamage();
 
-    /** @deprecated */
+    /* @deprecated
     @Deprecated
     int getLastDamage();
+    */
 
     void setLastDamage(double d0);
 
