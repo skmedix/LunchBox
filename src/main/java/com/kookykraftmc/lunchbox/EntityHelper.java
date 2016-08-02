@@ -1,7 +1,11 @@
 package com.kookykraftmc.lunchbox;
 
+import com.kookykraftmc.lunchbox.impl.LBServer;
+import com.kookykraftmc.lunchbox.impl.entity.LBEntity;
 import net.minecraft.entity.Entity;
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 

@@ -1,5 +1,6 @@
 package com.kookykraftmc.lunchbox;
 
+import com.kookykraftmc.lunchbox.impl.LBServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedPlayerList;
 
@@ -11,6 +12,7 @@ import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 
 
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -27,12 +29,12 @@ import java.util.logging.Logger;
 public class LunchBox {
     public static boolean craftWorldLoading = false;
     public Logger logger = Logger.getLogger("lunchbox");
-    private static CraftServer server;
+    private static LBServer server;
     public World[] worlds;
 
-    @Mod.EventHandler
+    @SubscribeEvent
     public void onPreInit(FMLPreInitializationEvent event) throws Exception {
-        this.server = new CraftServer(MinecraftServer.getServer(), (DedicatedPlayerList) MinecraftServer.getServer().getConfigurationManager().playerEntityList);
+        this.server = new LBServer(MinecraftServer.getServer(), (DedicatedPlayerList) MinecraftServer.getServer().getConfigurationManager().playerEntityList);
         //todo: will work on registering events later...
         //logger.log(INFO, "Registering events...");
 
@@ -40,7 +42,7 @@ public class LunchBox {
         server.loadPlugins();
     }
 
-    @Mod.EventHandler
+    @SubscribeEvent
     public void onAboutStart(FMLServerAboutToStartEvent event) throws Exception {
         logger.log(INFO, "Startup enabling plugins...");
         server.enablePlugins(PluginLoadOrder.STARTUP);
@@ -55,19 +57,19 @@ public class LunchBox {
         */
     }
 
-    @Mod.EventHandler
+    @SubscribeEvent
     public void onStarting(FMLServerStartingEvent event) throws Exception {
         logger.log(INFO, "Postworld enabling plugins...");
         server.enablePlugins(PluginLoadOrder.POSTWORLD);
     }
 
-    @Mod.EventHandler
+    @SubscribeEvent
     public void onStopping(FMLServerStoppingEvent event) throws Exception {
         logger.log(INFO, "Disabling plugins...");
         server.disablePlugins();
     }
 
-    public static CraftServer getServer() {
+    public static LBServer getServer() {
         return server;
     }
 }
