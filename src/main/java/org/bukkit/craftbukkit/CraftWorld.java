@@ -12,9 +12,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.server.*;
 
+import net.minecraft.world.WorldServer;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -279,8 +282,8 @@ public class CraftWorld implements World {
         Validate.notNull(item, "Cannot drop a Null item.");
         Validate.isTrue(item.getTypeId() != 0, "Cannot drop AIR.");
         EntityItem entity = new EntityItem(world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
-        entity.pickupDelay = 10;
-        world.addEntity(entity, SpawnReason.CUSTOM);
+        entity.setPickupDelay(10);
+        world.spawnEntityInWorld(entity);
         // TODO this is inconsistent with how Entity.getBukkitEntity() works.
         // However, this entity is not at the moment backed by a server entity class so it may be left.
         return new CraftItem(world.getServer(), entity);

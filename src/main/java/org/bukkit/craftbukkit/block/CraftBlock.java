@@ -7,6 +7,7 @@ import java.util.List;
 
 import net.minecraft.server.*;
 
+import net.minecraft.util.EnumFacing;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -221,7 +222,7 @@ public class CraftBlock implements Block {
         return "CraftBlock{" + "chunk=" + chunk + ",x=" + x + ",y=" + y + ",z=" + z + ",type=" + getType() + ",data=" + getData() + '}';
     }
 
-    public static BlockFace notchToBlockFace(EnumDirection notch) {
+    public static BlockFace notchToBlockFace(EnumFacing notch) {
         if (notch == null) return BlockFace.SELF;
         switch (notch) {
         case DOWN:
@@ -241,20 +242,20 @@ public class CraftBlock implements Block {
         }
     }
 
-    public static EnumDirection blockFaceToNotch(BlockFace face) {
+    public static EnumFacing blockFaceToNotch(BlockFace face) {
         switch (face) {
         case DOWN:
-            return EnumDirection.DOWN;
+            return EnumFacing.DOWN;
         case UP:
-            return EnumDirection.UP;
+            return EnumFacing.UP;
         case NORTH:
-            return EnumDirection.NORTH;
+            return EnumFacing.NORTH;
         case SOUTH:
-            return EnumDirection.SOUTH;
+            return EnumFacing.SOUTH;
         case WEST:
-            return EnumDirection.WEST;
+            return EnumFacing.WEST;
         case EAST:
-            return EnumDirection.EAST;
+            return EnumFacing.EAST;
         default:
             return null;
         }

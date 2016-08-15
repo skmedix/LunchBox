@@ -1,6 +1,9 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.server.BlockPosition;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -55,12 +58,12 @@ public class CraftBlockState implements BlockState {
         x = y = z = 0;
     }
 
-    public static CraftBlockState getBlockState(net.minecraft.server.World world, int x, int y, int z) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z));
+    public static CraftBlockState getBlockState(net.minecraft.world.World world, int x, int y, int z) {
+        return new CraftBlockState((Block) world.getBlockState(new BlockPos(x, y, z)).getBlock());
     }
 
-    public static CraftBlockState getBlockState(net.minecraft.server.World world, int x, int y, int z, int flag) {
-        return new CraftBlockState(world.getWorld().getBlockAt(x, y, z), flag);
+    public static CraftBlockState getBlockState(net.minecraft.world.World world, int x, int y, int z, int flag) {
+        return new CraftBlockState((Block) world.getBlockState(new BlockPos(x, y, z)).getBlock(), flag);
     }
 
     public World getWorld() {
@@ -160,19 +163,19 @@ public class CraftBlockState implements BlockState {
             }
         }
 
-        BlockPosition pos = new BlockPosition(x, y, z);
-        IBlockData newBlock = CraftMagicNumbers.getBlock(getType()).fromLegacyData(getRawData());
+        BlockPos pos = new BlockPos(x, y, z);
+        IBlockState newBlock = CraftMagicNumbers.getBlock(getType()).getStateFromMeta(getRawData());
         block.setTypeIdAndData(getTypeId(), getRawData(), applyPhysics);
-        world.getHandle().notify(
+        world.getHandle().notifyBlockUpdate(
                 pos,
-                CraftMagicNumbers.getBlock(block).fromLegacyData(block.getData()),
+                CraftMagicNumbers.getBlock(block).getStateFromMeta(block.getData()),
                 newBlock,
                 3
         );
 
         // Update levers etc
         if (applyPhysics && getData() instanceof Attachable) {
-            world.getHandle().applyPhysics(pos.shift(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());
+            world.getHandle().update(pos.subtract(CraftBlock.blockFaceToNotch(((Attachable) getData()).getAttachedFace())), newBlock.getBlock());//todo
         }
 
         return true;

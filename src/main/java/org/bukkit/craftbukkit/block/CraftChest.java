@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.BlockPosition;
 import net.minecraft.server.TileEntityChest;
 
+import net.minecraft.tileentity.TileEntityChest;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;

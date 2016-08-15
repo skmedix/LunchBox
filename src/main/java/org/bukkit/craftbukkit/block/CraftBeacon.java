@@ -5,6 +5,7 @@ import java.util.Collection;
 import net.minecraft.server.EntityHuman;
 import net.minecraft.server.MobEffectList;
 import net.minecraft.server.TileEntityBeacon;
+import net.minecraft.tileentity.TileEntityBeacon;
 import org.bukkit.Material;
 import org.bukkit.block.Beacon;
 import org.bukkit.block.Block;

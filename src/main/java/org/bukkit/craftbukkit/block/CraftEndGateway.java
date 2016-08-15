@@ -2,6 +2,7 @@ package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.BlockPosition;
 import net.minecraft.server.TileEntityEndGateway;
+import net.minecraft.tileentity.TileEntityEndGateway;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;

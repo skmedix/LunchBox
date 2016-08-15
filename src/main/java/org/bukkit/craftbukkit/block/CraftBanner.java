@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.server.NBTTagCompound;
 import net.minecraft.server.NBTTagList;
 import net.minecraft.server.TileEntityBanner;
+import net.minecraft.tileentity.TileEntityBanner;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.block.Banner;

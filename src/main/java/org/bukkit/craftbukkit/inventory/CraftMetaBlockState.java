@@ -3,6 +3,10 @@ package org.bukkit.craftbukkit.inventory;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
+
+import net.minecraft.block.BlockJukebox;
+import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.BlockJukeBox;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.NBTBase;
@@ -23,7 +27,9 @@ import net.minecraft.server.TileEntityMobSpawner;
 import net.minecraft.server.TileEntityNote;
 import net.minecraft.server.TileEntitySign;
 import net.minecraft.server.TileEntitySkull;
+import net.minecraft.tileentity.*;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.serialization.DelegateDeserialization;
@@ -73,8 +79,8 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         super(tag);
         this.material = material;
         
-        if (tag.hasKeyOfType(BLOCK_ENTITY_TAG.NBT, 10)) {
-            blockEntityTag = tag.getCompound(BLOCK_ENTITY_TAG.NBT);
+        if (tag.hasKey(BLOCK_ENTITY_TAG.NBT, 10)) {
+            blockEntityTag = tag.getCompoundTag(BLOCK_ENTITY_TAG.NBT);
         } else {
             blockEntityTag = null;
         }
@@ -96,14 +102,14 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         super.applyToItem(tag);
         
         if (blockEntityTag != null) {
-            tag.set(BLOCK_ENTITY_TAG.NBT, blockEntityTag);
+            tag.setTag(BLOCK_ENTITY_TAG.NBT, blockEntityTag);
         }
     }
 
     @Override
     void deserializeInternal(NBTTagCompound tag) {
-        if (tag.hasKeyOfType(BLOCK_ENTITY_TAG.NBT, 10)) {
-            blockEntityTag = tag.getCompound(BLOCK_ENTITY_TAG.NBT);
+        if (tag.hasKey(BLOCK_ENTITY_TAG.NBT, 10)) {
+            blockEntityTag = tag.getCompoundTag(BLOCK_ENTITY_TAG.NBT);
         }
     }
 
@@ -194,7 +200,7 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         if (blockEntityTag != null && material == Material.SHIELD) {
             blockEntityTag.setString("id", "Banner"); // Hack
         }
-        TileEntity te = (blockEntityTag == null) ? null : TileEntity.a(null, blockEntityTag);
+        TileEntity te = (blockEntityTag == null) ? null : TileEntity.func_190200_a(null, blockEntityTag);
 
         switch (material) {
         case SIGN:
@@ -248,9 +254,9 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
             return new CraftNoteBlock(material, (TileEntityNote) te);
         case JUKEBOX:
             if (te == null) {
-                te = new BlockJukeBox.TileEntityRecordPlayer();
+                te = new BlockJukebox.TileEntityJukebox();
             }
-            return new CraftJukebox(material, (BlockJukeBox.TileEntityRecordPlayer) te);
+            return new CraftJukebox(material, (BlockJukebox.TileEntityJukebox) te);
         case BREWING_STAND:
             if (te == null) {
                 te = new TileEntityBrewingStand();
@@ -265,9 +271,9 @@ public class CraftMetaBlockState extends CraftMetaItem implements BlockStateMeta
         case COMMAND_REPEATING:
         case COMMAND_CHAIN:
             if (te == null) {
-                te = new TileEntityCommand();
+                te = new TileEntityCommandBlock();
             }
-            return new CraftCommandBlock(material, (TileEntityCommand) te);
+            return new CraftCommandBlock(material, (TileEntityCommandBlock) te);
         case BEACON:
             if (te == null) {
                 te = new TileEntityBeacon();

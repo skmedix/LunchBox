@@ -1,6 +1,7 @@
 package org.bukkit.craftbukkit.block;
 
 import net.minecraft.server.TileEntityMobSpawner;
+import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.bukkit.Material;
 
 import org.bukkit.block.Block;

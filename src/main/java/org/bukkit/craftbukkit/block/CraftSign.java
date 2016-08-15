@@ -3,6 +3,7 @@ package org.bukkit.craftbukkit.block;
 import net.minecraft.server.ChatComponentText;
 import net.minecraft.server.IChatBaseComponent;
 import net.minecraft.server.TileEntitySign;
+import net.minecraft.tileentity.TileEntitySign;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;

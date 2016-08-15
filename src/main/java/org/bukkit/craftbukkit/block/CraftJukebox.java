@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.block;
 
+import net.minecraft.block.BlockJukebox;
 import net.minecraft.server.*;
 import net.minecraft.server.BlockJukeBox.TileEntityRecordPlayer;
 import org.bukkit.Effect;
@@ -20,7 +21,7 @@ public class CraftJukebox extends CraftBlockState implements Jukebox {
         jukebox = (TileEntityRecordPlayer) world.getTileEntityAt(getX(), getY(), getZ());
     }
 
-    public CraftJukebox(final Material material, TileEntityRecordPlayer te) {
+    public CraftJukebox(final Material material, BlockJukebox.TileEntityJukebox te) {
         super(material);
         world = null;
         jukebox = te;
