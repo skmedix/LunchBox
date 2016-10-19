@@ -5,6 +5,8 @@ import java.util.Arrays;
 
 import net.minecraft.server.*;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -14,7 +16,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.ChunkSnapshot;
 
 public class CraftChunk implements Chunk {
-    private WeakReference<net.minecraft.server.Chunk> weakChunk;
+    private WeakReference<net.minecraft.world.chunk.Chunk> weakChunk;
     private final WorldServer worldServer;
     private final int x;
     private final int z;
@@ -22,29 +24,29 @@ public class CraftChunk implements Chunk {
     private static final short[] emptyBlockIDs = new short[4096];
     private static final byte[] emptySkyLight = new byte[2048];
 
-    public CraftChunk(net.minecraft.server.Chunk chunk) {
-        this.weakChunk = new WeakReference<net.minecraft.server.Chunk>(chunk);
+    public CraftChunk(net.minecraft.world.chunk.Chunk chunk) {
+        this.weakChunk = new WeakReference<net.minecraft.world.chunk.Chunk>(chunk);
 
-        worldServer = (WorldServer) getHandle().world;
-        x = getHandle().locX;
-        z = getHandle().locZ;
+        worldServer = (WorldServer) getHandle().getWorld();
+        x = getHandle().xPosition;
+        z = getHandle().zPosition;
     }
 
     public World getWorld() {
-        return worldServer.getWorld();
+        return (World) worldServer;
     }
 
     public CraftWorld getCraftWorld() {
         return (CraftWorld) getWorld();
     }
 
-    public net.minecraft.server.Chunk getHandle() {
-        net.minecraft.server.Chunk c = weakChunk.get();
+    public net.minecraft.world.chunk.Chunk getHandle() {
+        net.minecraft.world.chunk.Chunk c = weakChunk.get();
 
         if (c == null) {
-            c = worldServer.getChunkAt(x, z);
+            c = worldServer.getChunkFromChunkCoords(x, z);
 
-            weakChunk = new WeakReference<net.minecraft.server.Chunk>(c);
+            weakChunk = new WeakReference<net.minecraft.world.chunk.Chunk>(c);
         }
 
         return c;
@@ -73,22 +75,22 @@ public class CraftChunk implements Chunk {
 
     public Entity[] getEntities() {
         int count = 0, index = 0;
-        net.minecraft.server.Chunk chunk = getHandle();
+        net.minecraft.world.chunk.Chunk chunk = getHandle();
 
         for (int i = 0; i < 16; i++) {
-            count += chunk.entitySlices[i].size();
+            count += chunk.entityLists[i].size();
         }
 
         Entity[] entities = new Entity[count];
 
         for (int i = 0; i < 16; i++) {
 
-            for (Object obj : chunk.entitySlices[i].toArray()) {
-                if (!(obj instanceof net.minecraft.server.Entity)) {
+            for (Object obj : chunk.entityLists[i].toArray()) {
+                if (!(obj instanceof net.minecraft.entity.Entity)) {
                     continue;
                 }
 
-                entities[index++] = ((net.minecraft.server.Entity) obj).getBukkitEntity();
+                entities[index++] = ((net.minecraft.entity.Entity) obj).getBukkitEntity(); //todo: rework this
             }
         }
 
@@ -97,17 +99,17 @@ public class CraftChunk implements Chunk {
 
     public BlockState[] getTileEntities() {
         int index = 0;
-        net.minecraft.server.Chunk chunk = getHandle();
+        net.minecraft.world.chunk.Chunk chunk = getHandle();
 
-        BlockState[] entities = new BlockState[chunk.tileEntities.size()];
+        BlockState[] entities = new BlockState[chunk.chunkTileEntityMap.size()];
 
-        for (Object obj : chunk.tileEntities.keySet().toArray()) {
-            if (!(obj instanceof BlockPosition)) {
+        for (Object obj : chunk.chunkTileEntityMap.keySet().toArray()) {
+            if (!(obj instanceof BlockPos)) {
                 continue;
             }
 
-            BlockPosition position = (BlockPosition) obj;
-            entities[index++] = worldServer.getWorld().getBlockAt(position.getX(), position.getY(), position.getZ()).getState();
+            BlockPos position = (BlockPos) obj;
+            entities[index++] = (BlockState) worldServer.getBlockState(position);
         }
 
         return entities;
@@ -142,7 +144,7 @@ public class CraftChunk implements Chunk {
     }
 
     public ChunkSnapshot getChunkSnapshot(boolean includeMaxBlockY, boolean includeBiome, boolean includeBiomeTempRain) {
-        net.minecraft.server.Chunk chunk = getHandle();
+        net.minecraft.world.chunk.Chunk chunk = getHandle();
 
         ChunkSection[] cs = chunk.getSections();
         short[][] sectionBlockIDs = new short[cs.length][];

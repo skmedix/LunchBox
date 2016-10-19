@@ -8,6 +8,7 @@ import java.util.List;
 import net.minecraft.server.*;
 
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,11 +39,11 @@ public class CraftBlock implements Block {
         this.chunk = chunk;
     }
 
-    private net.minecraft.server.Block getNMSBlock() {
+    private net.minecraft.block.Block getNMSBlock() {
         return CraftMagicNumbers.getBlock(this); // TODO: UPDATE THIS
     }
 
-    private static net.minecraft.server.Block getNMSBlock(int type) {
+    private static net.minecraft.block.Block getNMSBlock(int type) {
         return CraftMagicNumbers.getBlock(type);
     }
 
@@ -100,9 +101,9 @@ public class CraftBlock implements Block {
     }
 
     private void setData(final byte data, int flag) {
-        net.minecraft.server.World world = chunk.getHandle().getWorld();
-        BlockPosition position = new BlockPosition(x, y, z);
-        IBlockData blockData = world.getType(position);
+        net.minecraft.world.World world = chunk.getHandle().();
+        BlockPos position = new BlockPos(x, y, z);
+         blockData = world.(position);
         world.setTypeAndData(position, blockData.getBlock().fromLegacyData(data), flag);
     }
 
@@ -318,7 +319,7 @@ public class CraftBlock implements Block {
         getWorld().setBiome(x, z, bio);
     }
 
-    public static Biome biomeBaseToBiome(BiomeBase base) {
+    public static Biome biomeBaseToBiome( base) {
         if (base == null) {
             return null;
         }
