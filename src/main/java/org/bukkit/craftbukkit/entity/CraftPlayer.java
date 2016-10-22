@@ -24,8 +24,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.*;
 import net.minecraft.server.PacketPlayOutTitle.EnumTitleAction;
 
-import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.NotImplementedException;
 import org.bukkit.*;
 import org.bukkit.Achievement;
 import org.bukkit.BanList;

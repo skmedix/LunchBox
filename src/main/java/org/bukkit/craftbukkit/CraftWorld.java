@@ -16,7 +16,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.server.*;
 
 import net.minecraft.world.WorldServer;
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.BlockChangeDelegate;
 import org.bukkit.Bukkit;
