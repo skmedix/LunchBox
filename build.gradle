@@ -21,9 +21,9 @@ plugins {
 }
 */
 
-version = "1.0"
-group= "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "modid"
+version = "1.0-SNAPSHOT"
+group= "com.kookykraftmc.lunchbox" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "lunchbox"
 
 minecraft {
     version = "1.10.2-12.18.2.2099"
